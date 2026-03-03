@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GameHub — Discover & Rate Games</title>
+  <meta name="description" content="GameHub is your ultimate gaming destination. Discover, rate, and review the best games.">
+  <meta name="keywords" content="games, gaming, reviews, ratings, top games">
+  <meta property="og:title" content="GameHub — Discover & Rate Games">
+  <meta property="og:description" content="Discover and rate the best games on GameHub.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <div id="sidebar-overlay" class="overlay"></div>
+
+  <div class="app-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">GH</div>
+        <span class="logo-text">GameHub</span>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item" data-page="index.html">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span>
+          <span class="nav-label">Home</span>
+        </a>
+        <a href="search.html" class="nav-item" data-page="search.html">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+          <span class="nav-label">Browse Games</span>
+        </a>
+        <a href="bookmarks.html" class="nav-item" data-page="bookmarks.html">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span>
+          <span class="nav-label">Bookmarks</span>
+        </a>
+        <div class="nav-section-label" style="margin-top:8px">Categories</div>
+        <a href="search.html?genre=Action" class="nav-item">
+          <span class="nav-icon">⚔️</span>
+          <span class="nav-label">Action</span>
+        </a>
+        <a href="search.html?genre=RPG" class="nav-item">
+          <span class="nav-icon">🧙</span>
+          <span class="nav-label">RPG</span>
+        </a>
+        <a href="search.html?genre=Strategy" class="nav-item">
+          <span class="nav-icon">♟️</span>
+          <span class="nav-label">Strategy</span>
+        </a>
+        <a href="search.html?genre=Sports" class="nav-item">
+          <span class="nav-icon">⚽</span>
+          <span class="nav-label">Sports</span>
+        </a>
+        <a href="search.html?genre=Horror" class="nav-item">
+          <span class="nav-icon">👻</span>
+          <span class="nav-label">Horror</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="profile.html" class="nav-item" data-page="profile.html">
+          <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <span class="nav-label">Profile</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <div class="search-container">
+            <span class="search-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </span>
+            <input type="search" class="search-input" id="search-input" placeholder="Search games..." autocomplete="off">
+            <div class="search-results-dropdown" id="search-dropdown"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="theme-toggle" title="Toggle theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </button>
+          <a href="login.html" class="btn btn-primary btn-sm" id="auth-btn" style="display:flex;">Login</a>
+          <div class="user-menu" id="user-menu" style="display:none">
+            <div class="user-avatar" id="user-avatar" title="User menu"></div>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-username" id="dropdown-username"></div>
+                <div class="dropdown-email" id="dropdown-email"></div>
+              </div>
+              <a href="profile.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                My Profile
+              </a>
+              <a href="bookmarks.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                Bookmarks
+              </a>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item danger" onclick="Auth.logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                Logout
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Page Content -->
+      <main class="page-content">
+        <!-- Hero -->
+        <section class="hero" id="hero-section">
+          <div class="hero-bg">
+            <img id="hero-img" src="" alt="" loading="lazy">
+            <div class="hero-bg-overlay"></div>
+            <div class="hero-grid-overlay"></div>
+          </div>
+          <div class="hero-content">
+            <div class="hero-badge">🎮 Featured Game</div>
+            <h1 class="hero-title" id="hero-title">Loading<br><span>GameHub</span></h1>
+            <p class="hero-desc" id="hero-desc">Discover, rate, and discuss the best games with the GameHub community.</p>
+            <div class="hero-meta">
+              <span class="hero-meta-item" id="hero-genre">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Loading...
+              </span>
+              <span class="hero-meta-item" id="hero-rating-display">
+                <svg width="14" height="14" fill="#fbbf24" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                —
+              </span>
+            </div>
+            <div class="hero-actions">
+              <button class="btn btn-primary btn-lg" id="hero-detail-btn" onclick="window.location.href='game.html?id='">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+                View Details
+              </button>
+              <button class="btn btn-secondary btn-lg" onclick="window.location.href='search.html'">Browse All Games</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- New Releases -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot"></span> New Releases</h2>
+            <a href="search.html?sort=newest" class="see-all">View All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+          <div class="games-grid" id="new-releases-grid">
+            <!-- Skeleton -->
+          </div>
+        </section>
+
+        <!-- Top Rated -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot" style="background:#fbbf24;box-shadow:0 0 8px #fbbf24"></span> Top Rated</h2>
+            <span class="section-badge">⭐ Best of All Time</span>
+            <a href="search.html?sort=top" class="see-all">View All <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+          </div>
+          <div class="games-grid" id="top-rated-grid"></div>
+        </section>
+
+        <!-- Trending -->
+        <section class="section">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot" style="background:#ef4444;box-shadow:0 0 8px #ef4444"></span> Trending Now</h2>
+            <span class="section-badge">🔥 Hot This Month</span>
+          </div>
+          <div class="trending-row" id="trending-row"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/rating.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+   (async () => {
+
+  try {
+    // Init UI
+    UI.initToasts();
+    UI.initSidebar();
+    UI.initThemeToggle();
+    UI.setActiveNav();
+    await Auth.init();
+    UI.updateAuthUI();
+    UI.initUserMenu();
+    Search.initNavbarSearch('search-input', 'search-dropdown');
+
+    // Skeleton loader
+    document.getElementById('new-releases-grid').innerHTML = UI.skeletonCardsHTML(8);
+    document.getElementById('top-rated-grid').innerHTML = UI.skeletonCardsHTML(8);
+    document.getElementById('trending-row').innerHTML = UI.skeletonCardsHTML(6);
+
+    const user = Auth.getCurrentUser();
+
+    // Optimized bookmark loader (1 query instead of many)
+    const loadBookmarks = async (gameIds) => {
+      if (!user || !gameIds.length) return {};
+
+      const { data, error } = await supabaseClient
+        .from('bookmarks')
+        .select('game_id')
+        .in('game_id', gameIds)
+        .eq('user_id', user.id);
+
+      if (error) return {};
+
+      const result = {};
+      data.forEach(b => result[b.game_id] = true);
+      return result;
+    };
+
+    // =========================
+    // HERO SECTION
+    // =========================
+    const featured = await Games.fetchFeatured();
+
+    if (featured) {
+      const heroImg = document.getElementById('hero-img');
+      const heroTitle = document.getElementById('hero-title');
+      const heroDesc = document.getElementById('hero-desc');
+      const heroGenre = document.getElementById('hero-genre');
+      const heroRating = document.getElementById('hero-rating-display');
+      const heroBtn = document.getElementById('hero-detail-btn');
+
+      heroImg.src = featured.cover_url || '';
+      heroImg.alt = featured.title || 'Featured Game';
+
+      // Safe title formatting
+      heroTitle.textContent = featured.title || 'Game';
+
+      heroDesc.textContent = featured.description
+        ? featured.description.slice(0, 150) + '...'
+        : 'No description available.';
+
+      heroGenre.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        ${featured.genre || 'Game'}
+      `;
+
+      heroRating.innerHTML = `
+        ⭐ ${(featured.avg_rating || 0).toFixed(1)}
+        (${featured.rating_count || 0} ratings)
+      `;
+
+      heroBtn.onclick = () => {
+        window.location.href = `game.html?id=${featured.id}`;
+      };
+    }
+
+    // =========================
+    // NEW RELEASES
+    // =========================
+    const newGames = await Games.fetchNewReleases(8);
+    const newBookmarks = await loadBookmarks(newGames.map(g => g.id));
+
+    document.getElementById('new-releases-grid').innerHTML =
+      newGames.length
+        ? newGames.map(g =>
+            UI.gameCardHTML(g, {
+              badge: 'new',
+              bookmarked: newBookmarks[g.id]
+            })
+          ).join('')
+        : UI.emptyStateHTML('🎮', 'No games yet', 'Check back soon!');
+
+    // =========================
+    // TOP RATED
+    // =========================
+    const topGames = await Games.fetchTopRated(8);
+    const topBookmarks = await loadBookmarks(topGames.map(g => g.id));
+
+    document.getElementById('top-rated-grid').innerHTML =
+      topGames.length
+        ? topGames.map(g =>
+            UI.gameCardHTML(g, {
+              badge: 'top',
+              bookmarked: topBookmarks[g.id]
+            })
+          ).join('')
+        : UI.emptyStateHTML('⭐', 'No ratings yet', 'Be the first to rate!');
+
+    // =========================
+    // TRENDING
+    // =========================
+    const trending = await Games.fetchTrending(10);
+    const trendingBookmarks = await loadBookmarks(trending.map(g => g.id));
+
+    document.getElementById('trending-row').innerHTML =
+      trending.length
+        ? trending.map(g =>
+            `<div class="trending-card">
+              ${UI.gameCardHTML(g, {
+                badge: 'hot',
+                bookmarked: trendingBookmarks[g.id]
+              })}
+            </div>`
+          ).join('')
+        : UI.emptyStateHTML('🔥', 'Nothing trending yet', 'Start rating!');
+
+    UI.observeLazyImages();
+
+  } catch (err) {
+    console.error("Page Init Error:", err);
+    UI.toast("Something went wrong loading data.", "error");
+  }
+
+})();
+</script>
+</body>
+</html>

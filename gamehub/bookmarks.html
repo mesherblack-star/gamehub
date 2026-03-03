@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks — GameHub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <div id="sidebar-overlay" class="overlay"></div>
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">GH</div><span class="logo-text">GameHub</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item" data-page="index.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Home</span></a>
+        <a href="search.html" class="nav-item" data-page="search.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span><span class="nav-label">Browse Games</span></a>
+        <a href="bookmarks.html" class="nav-item active" data-page="bookmarks.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><span class="nav-label">Bookmarks</span></a>
+      </nav>
+    </aside>
+    <div class="main-content" id="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <h2 style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700">My Bookmarks</h2>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="theme-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+          <a href="login.html" class="btn btn-primary btn-sm" id="auth-btn">Login</a>
+          <div class="user-menu" id="user-menu" style="display:none">
+            <div class="user-avatar" id="user-avatar"></div>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="dropdown-header"><div class="dropdown-username" id="dropdown-username"></div><div class="dropdown-email" id="dropdown-email"></div></div>
+              <a href="profile.html" class="dropdown-item">My Profile</a>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item danger" onclick="Auth.logout()">Logout</div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main class="page-content">
+        <div class="games-grid" id="bookmarks-grid">
+          <div style="grid-column:1/-1;display:flex;justify-content:center;padding:40px"><div class="loader"></div></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/rating.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    (async () => {
+      UI.initToasts();
+      UI.initSidebar();
+      UI.initThemeToggle();
+      await Auth.init();
+      UI.updateAuthUI();
+      UI.initUserMenu();
+
+      const user = Auth.getCurrentUser();
+      const grid = document.getElementById('bookmarks-grid');
+
+      if (!user) {
+        grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('🔖', 'Sign in to view bookmarks', '<a href="login.html" class="btn btn-primary" style="margin-top:12px">Login</a>')}</div>`;
+        return;
+      }
+
+      try {
+        const games = await Games.fetchUserBookmarks(user.id);
+        if (!games.length) {
+          grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('🔖', 'No bookmarks yet', 'Browse games and click the bookmark icon to save them here')}</div>`;
+        } else {
+          grid.innerHTML = games.map(g => UI.gameCardHTML(g, { bookmarked: true })).join('');
+          UI.observeLazyImages();
+        }
+      } catch(e) {
+        grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('⚠️', 'Failed to load bookmarks', e.message)}</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>

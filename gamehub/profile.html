@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — GameHub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <div id="sidebar-overlay" class="overlay"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">GH</div><span class="logo-text">GameHub</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item" data-page="index.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Home</span></a>
+        <a href="search.html" class="nav-item" data-page="search.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span><span class="nav-label">Browse Games</span></a>
+        <a href="bookmarks.html" class="nav-item" data-page="bookmarks.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><span class="nav-label">Bookmarks</span></a>
+      </nav>
+      <div class="sidebar-footer"><a href="profile.html" class="nav-item active" data-page="profile.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label">Profile</span></a></div>
+    </aside>
+
+    <div class="main-content" id="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <h2 style="font-family:'Rajdhani',sans-serif;font-size:1.2rem;font-weight:700">My Profile</h2>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="theme-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+          <div class="dropdown-item danger btn btn-sm" onclick="Auth.logout()" style="cursor:pointer">Logout</div>
+        </div>
+      </header>
+
+      <main class="page-content" id="profile-content">
+        <div style="display:flex;align-items:center;justify-content:center;min-height:400px"><div class="loader"></div></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/rating.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    (async () => {
+      UI.initToasts();
+      UI.initSidebar();
+      UI.initThemeToggle();
+      const user = await Auth.requireAuth('login.html');
+      if (!user) return;
+      const profile = Auth.getCurrentProfile();
+
+      // Fetch stats
+      const { data: ratingsData } = await supabaseClient.from(TABLES.RATINGS).select('id').eq('user_id', user.id);
+      const { data: commentsData } = await supabaseClient.from(TABLES.COMMENTS).select('id').eq('user_id', user.id);
+      const { data: bookmarksData } = await supabaseClient.from(TABLES.BOOKMARKS).select('id').eq('user_id', user.id);
+
+      const avatarDisplay = profile?.avatar_url
+        ? `<img src="${profile.avatar_url}" alt="${profile?.username || 'User'}">`
+        : (profile?.username || user.email || 'U')[0].toUpperCase();
+
+      document.getElementById('profile-content').innerHTML = `
+        <!-- Profile Header -->
+        <div class="profile-header">
+          <div class="profile-avatar-wrapper">
+            <div class="profile-avatar" id="profile-avatar-display">${avatarDisplay}</div>
+            <label for="avatar-upload" class="avatar-edit-btn" title="Change avatar" style="cursor:pointer">✏️</label>
+            <input type="file" id="avatar-upload" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)">
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">${profile?.username || user.email?.split('@')[0] || 'User'}</div>
+            <div class="profile-email">${user.email}</div>
+            <div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:16px">Member since ${new Date(user.created_at || Date.now()).toLocaleDateString('en-US',{year:'numeric',month:'long'})}</div>
+            <div class="profile-stats">
+              <div class="stat-item"><div class="stat-number">${ratingsData?.length || 0}</div><div class="stat-label">Ratings</div></div>
+              <div class="stat-item"><div class="stat-number">${commentsData?.length || 0}</div><div class="stat-label">Comments</div></div>
+              <div class="stat-item"><div class="stat-number">${bookmarksData?.length || 0}</div><div class="stat-label">Bookmarks</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Profile -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px" class="profile-grid">
+          <div class="rating-section">
+            <h3 class="section-heading">✏️ Edit Profile</h3>
+            <div class="form-group">
+              <label class="form-label">Username</label>
+              <input type="text" class="form-input" id="edit-username" value="${profile?.username || ''}" placeholder="Your username" maxlength="32">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Bio</label>
+              <textarea class="form-input form-textarea" id="edit-bio" placeholder="Tell us about yourself..." rows="3">${profile?.bio || ''}</textarea>
+            </div>
+            <button class="btn btn-primary" onclick="saveProfile()">Save Changes</button>
+          </div>
+
+          <div class="rating-section">
+            <h3 class="section-heading">🔒 Change Password</h3>
+            <div class="form-group">
+              <label class="form-label">New Password</label>
+              <input type="password" class="form-input" id="new-password" placeholder="Min. 6 characters">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Confirm New Password</label>
+              <input type="password" class="form-input" id="confirm-new-password" placeholder="Repeat new password">
+            </div>
+            <button class="btn btn-outline" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+
+        <!-- Bookmarked Games -->
+        <div class="section" style="margin-top:32px">
+          <div class="section-header">
+            <h2 class="section-title"><span class="dot"></span> Bookmarked Games</h2>
+          </div>
+          <div class="games-grid" id="bookmarked-games">
+            <div class="loader" style="margin:auto"></div>
+          </div>
+        </div>
+      `;
+
+      // Load bookmarks
+      try {
+        const bookmarkedGames = await Games.fetchUserBookmarks(user.id);
+        const grid = document.getElementById('bookmarked-games');
+        if (!bookmarkedGames.length) {
+          grid.innerHTML = UI.emptyStateHTML('🔖', 'No bookmarks yet', 'Browse games and bookmark your favorites!');
+        } else {
+          grid.innerHTML = bookmarkedGames.map(g => UI.gameCardHTML(g, { bookmarked: true })).join('');
+          UI.observeLazyImages();
+        }
+      } catch(e) {
+        document.getElementById('bookmarked-games').innerHTML = UI.emptyStateHTML('⚠️', 'Failed to load', e.message);
+      }
+
+      // Responsive grid
+      const style = document.createElement('style');
+      style.textContent = '@media(max-width:768px){.profile-grid{grid-template-columns:1fr!important}}';
+      document.head.appendChild(style);
+    })();
+
+    async function saveProfile() {
+      const username = document.getElementById('edit-username').value.trim();
+      const bio = document.getElementById('edit-bio').value.trim();
+      if (!username) { UI.toast('Username cannot be empty', 'warning'); return; }
+      try {
+        await Auth.updateProfile({ username, bio });
+        UI.toast('Profile updated!', 'success');
+      } catch(e) {
+        UI.toast('Failed to update: ' + e.message, 'error');
+      }
+    }
+
+    async function changePassword() {
+      const np = document.getElementById('new-password').value;
+      const cp = document.getElementById('confirm-new-password').value;
+      if (!np || np.length < 6) { UI.toast('Password must be at least 6 characters', 'warning'); return; }
+      if (np !== cp) { UI.toast('Passwords do not match', 'error'); return; }
+      try {
+        await Auth.updatePassword(np);
+        UI.toast('Password updated!', 'success');
+        document.getElementById('new-password').value = '';
+        document.getElementById('confirm-new-password').value = '';
+      } catch(e) {
+        UI.toast('Failed to update password: ' + e.message, 'error');
+      }
+    }
+
+    async function handleAvatarUpload(input) {
+      const file = input.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { UI.toast('Image must be under 2MB', 'warning'); return; }
+      UI.toast('Uploading avatar...', 'info');
+      try {
+        const url = await Auth.updateAvatar(file);
+        const display = document.getElementById('profile-avatar-display');
+        display.innerHTML = `<img src="${url}?t=${Date.now()}" alt="Avatar">`;
+        UI.toast('Avatar updated!', 'success');
+      } catch(e) {
+        UI.toast('Failed to upload avatar: ' + e.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>

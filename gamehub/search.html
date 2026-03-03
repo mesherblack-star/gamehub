@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Games — GameHub</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="toast-container" class="toast-container"></div>
+  <div id="sidebar-overlay" class="overlay"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><div class="logo-icon">GH</div><span class="logo-text">GameHub</span></div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="index.html" class="nav-item" data-page="index.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span><span class="nav-label">Home</span></a>
+        <a href="search.html" class="nav-item" data-page="search.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span><span class="nav-label">Browse Games</span></a>
+        <a href="bookmarks.html" class="nav-item" data-page="bookmarks.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></span><span class="nav-label">Bookmarks</span></a>
+      </nav>
+      <div class="sidebar-footer"><a href="profile.html" class="nav-item" data-page="profile.html"><span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="nav-label">Profile</span></a></div>
+    </aside>
+
+    <div class="main-content" id="main-content">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle" id="sidebar-toggle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+          <div class="search-container">
+            <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+            <input type="search" class="search-input" id="search-input" placeholder="Search games..." autocomplete="off">
+            <div class="search-results-dropdown" id="search-dropdown"></div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" id="theme-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></button>
+          <a href="login.html" class="btn btn-primary btn-sm" id="auth-btn">Login</a>
+          <div class="user-menu" id="user-menu" style="display:none">
+            <div class="user-avatar" id="user-avatar"></div>
+            <div class="user-dropdown" id="user-dropdown">
+              <div class="dropdown-header"><div class="dropdown-username" id="dropdown-username"></div><div class="dropdown-email" id="dropdown-email"></div></div>
+              <a href="profile.html" class="dropdown-item">My Profile</a>
+              <div class="dropdown-divider"></div>
+              <div class="dropdown-item danger" onclick="Auth.logout()">Logout</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main class="page-content">
+        <div class="section-header" style="margin-bottom:24px">
+          <h1 style="font-family:'Rajdhani',sans-serif;font-size:1.8rem;font-weight:700">Browse Games</h1>
+          <span id="results-count" class="text-muted" style="font-size:0.875rem"></span>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-bar" id="filter-bar">
+          <select class="filter-select" data-filter="genre" id="genre-select">
+            <option value="">All Genres</option>
+          </select>
+          <select class="filter-select" data-filter="rating" id="rating-select">
+            <option value="">Any Rating</option>
+            <option value="4.5">4.5+ ⭐</option>
+            <option value="4">4+ ⭐</option>
+            <option value="3">3+ ⭐</option>
+          </select>
+          <select class="filter-select" data-filter="year" id="year-select">
+            <option value="">All Years</option>
+          </select>
+          <select class="filter-select" id="sort-select">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="title">Title A-Z</option>
+          </select>
+          <button class="filter-chip" id="clear-filters" onclick="clearFilters()">✕ Clear</button>
+        </div>
+
+        <!-- Search Input -->
+        <div style="margin-bottom:20px">
+          <div class="search-container" style="max-width:100%">
+            <span class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+            <input type="search" class="search-input" id="browse-search" placeholder="Filter by game title..." autocomplete="off" style="max-width:400px">
+          </div>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="games-grid large" id="browse-grid"></div>
+        <div id="browse-pagination"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/rating.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/comments.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    let currentPage = 1;
+    let currentSearch = '';
+    let currentFilters = { genre: '', minRating: '', year: '' };
+    let currentSort = 'newest';
+
+    (async () => {
+      UI.initToasts();
+      UI.initSidebar();
+      UI.initThemeToggle();
+      UI.setActiveNav();
+      await Auth.init();
+      UI.updateAuthUI();
+      UI.initUserMenu();
+      Search.initNavbarSearch('search-input', 'search-dropdown');
+
+      // Populate genres
+      await Search.populateGenreSelect(document.getElementById('genre-select'));
+
+      // Populate years
+      const yearSelect = document.getElementById('year-select');
+      const currentYear = new Date().getFullYear();
+      for (let y = currentYear; y >= 2000; y--) {
+        yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+      }
+
+      // Apply URL params
+      const params = new URLSearchParams(window.location.search);
+      const urlGenre = params.get('genre');
+      const urlSort = params.get('sort');
+      if (urlGenre) { document.getElementById('genre-select').value = urlGenre; currentFilters.genre = urlGenre; }
+      if (urlSort) { document.getElementById('sort-select').value = urlSort; currentSort = urlSort; }
+
+      // Filter listeners
+      document.getElementById('genre-select').addEventListener('change', e => { currentFilters.genre = e.target.value; currentPage = 1; loadGames(); });
+      document.getElementById('rating-select').addEventListener('change', e => { currentFilters.minRating = e.target.value; currentPage = 1; loadGames(); });
+      document.getElementById('year-select').addEventListener('change', e => { currentFilters.year = e.target.value; currentPage = 1; loadGames(); });
+      document.getElementById('sort-select').addEventListener('change', e => { currentSort = e.target.value; currentPage = 1; loadGames(); });
+
+      // Browse search
+      const browseSearch = document.getElementById('browse-search');
+      const doSearch = Search.debounce(async (q) => {
+        currentSearch = q;
+        currentPage = 1;
+        loadGames();
+      }, 400);
+      browseSearch.addEventListener('input', e => doSearch(e.target.value));
+
+      UI.onPageChange((page) => { currentPage = page; loadGames(); });
+
+      await loadGames();
+    })();
+
+    async function loadGames() {
+      const grid = document.getElementById('browse-grid');
+      const pagEl = document.getElementById('browse-pagination');
+      const countEl = document.getElementById('results-count');
+      grid.innerHTML = UI.skeletonCardsHTML(12);
+
+      try {
+        let data, count, totalPages;
+        const sortMap = { newest: { by: 'release_date', asc: false }, oldest: { by: 'release_date', asc: true }, title: { by: 'title', asc: true } };
+        const sort = sortMap[currentSort] || sortMap.newest;
+
+        if (currentSearch) {
+          const results = await Games.searchGames(currentSearch, { ...currentFilters });
+          data = results;
+          count = results.length;
+          totalPages = 1;
+        } else {
+          const result = await Games.fetchGames({ ...currentFilters, page: currentPage, orderBy: sort.by, ascending: sort.asc });
+          data = result.data;
+          count = result.count;
+          totalPages = result.totalPages;
+        }
+
+        countEl.textContent = `${count || 0} game${count !== 1 ? 's' : ''} found`;
+
+        if (!data?.length) {
+          grid.innerHTML = UI.emptyStateHTML('🎮', 'No games found', 'Try adjusting your filters');
+          pagEl.innerHTML = '';
+          return;
+        }
+
+        const user = Auth.getCurrentUser();
+        const bookmarks = {};
+        if (user) {
+          await Promise.all(data.map(async g => {
+            bookmarks[g.id] = await Games.isBookmarked(user.id, g.id).catch(() => false);
+          }));
+        }
+
+        grid.innerHTML = data.map(g => UI.gameCardHTML(g, { bookmarked: bookmarks[g.id] })).join('');
+        pagEl.innerHTML = UI.paginationHTML(currentPage, totalPages);
+        UI.observeLazyImages();
+      } catch(e) {
+        grid.innerHTML = UI.emptyStateHTML('⚠️', 'Error loading games', e.message);
+        UI.toast('Failed to load games: ' + e.message, 'error');
+      }
+    }
+
+    function clearFilters() {
+      currentFilters = { genre: '', minRating: '', year: '' };
+      currentSearch = '';
+      currentSort = 'newest';
+      document.getElementById('genre-select').value = '';
+      document.getElementById('rating-select').value = '';
+      document.getElementById('year-select').value = '';
+      document.getElementById('sort-select').value = 'newest';
+      document.getElementById('browse-search').value = '';
+      currentPage = 1;
+      loadGames();
+    }
+  </script>
+</body>
+</html>
