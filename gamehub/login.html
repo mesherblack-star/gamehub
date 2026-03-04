@@ -40,7 +40,7 @@
   <script>
     UI.initToasts();
     UI.initThemeToggle();
-    Auth.redirectIfLoggedIn('/index.html');
+    Auth.redirectIfLoggedIn('index.html');
 
     document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleLogin(); });
 
@@ -58,7 +58,7 @@
         UI.toast('Welcome back!', 'success');
         const redirect = sessionStorage.getItem('redirectAfterLogin');
         sessionStorage.removeItem('redirectAfterLogin');
-        setTimeout(() => window.location.href = redirect || '/index.html', 800);
+        setTimeout(() => window.location.href = redirect || 'index.html', 800);
       } catch(e) {
         console.error('Login form error', e);
         UI.toast(e.message || e || 'Login failed', 'error');
