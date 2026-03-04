@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Last Runner - Easy</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===== GAME WORLD ===== */
+.game {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#game-viewport {
+    position: relative;
+    overflow: hidden; 
+    background: center bottom / contain no-repeat;
+    width: 100%;
+    height: 100%;
+}
+
+/* ===== UI SYSTEM ===== */
+#ui-layer {
+    position: absolute;
+    top: 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 100;
+    pointer-events: none;
+}
+
+#health-container {
+    display: flex;
+    gap: 10px;
+}
+
+.heart {
+    width: 45px;
+    height: 45px;
+    image-rendering: pixelated;
+    background: url("assets/heart.png") no-repeat center / contain;
+}
+
+/* CONTAINER KANAN (KOIN & TIMER) */
+.right-ui-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+#score-container {
+    background: rgba(0, 0, 0, 0.6);
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #ffd700;
+    font-size: 28px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+#timer-container {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 5px 15px;
+    border-radius: 10px;
+    border: 2px solid #ff4444;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.coin-icon {
+    width: 35px;
+    height: 35px;
+    background: url("assets/coin.png") no-repeat center / contain;
+    image-rendering: pixelated;
+}
+
+/* ===== BOSS UI ===== */
+#boss-ui {
+    position: absolute;
+    top: 140px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    max-width: 80%;
+    height: 30px;
+    background: #222;
+    border: 4px solid #fff;
+    display: none;
+    z-index: 100;
+    box-shadow: 0 0 15px rgba(255,0,0,0.5);
+}
+#boss-hp-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff0000, #880000);
+    transition: width 0.2s ease;
+}
+#boss-name {
+    position: absolute;
+    top: -25px;
+    left: 0;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px #000;
+}
+
+/* ===== BOSS WARNING (UPDATED SIZE & POSITION) ===== */
+#boss-warning {
+    position: absolute;
+    top: 100px; /* Di bawah Boss UI bar */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ff0000;
+    font-size: 32px; /* Ukuran diperkecil */
+    font-weight: 900;
+    text-shadow: 2px 2px 0px #000, 0 0 10px rgba(255,0,0,0.5);
+    z-index: 200;
+    display: none;
+    white-space: nowrap;
+    pointer-events: none;
+    animation: warningBlink 0.4s infinite alternate;
+}
+
+@keyframes warningBlink {
+    from { opacity: 1; transform: translateX(-50%) scale(1); }
+    to { opacity: 0.7; transform: translateX(-50%) scale(1.05); }
+}
+
+/* ===== AMBIENCE ===== */
+.cloud-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.cloud {
+    position: absolute;
+    width: 260px;
+    image-rendering: pixelated;
+    pointer-events: none;
+    animation: 
+        cloudMove 30s linear infinite, 
+        windSway 4s ease-in-out infinite;
+}
+
+.cloud-low  { top: 40px; animation-duration: 26s; }
+.cloud-mid  { top: 80px; animation-duration: 32s; }
+.cloud-high { top: 120px; animation-duration: 38s; }
+
+.wind {
+    position: absolute;
+    width: 40px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    animation: windMove linear infinite;
+}
+
+/* ===== PLAYER, ENEMY, BOSS ===== */
+.player, .enemy, .boss {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    transform-origin: center bottom;
+    z-index: 10;
+}
+
+.player {
+    width: 64px;
+    height: 64px;
+    transform: translateY(calc(var(--y-anim, 0px) + 2px)) scaleX(var(--dir, 1));
+}
+
+.enemy {
+    width: 120px;
+    height: 120px;
+    z-index: 9;
+    transform: translateY(var(--y-anim, 0px));
+    transition: opacity 0.3s ease;
+}
+
+.boss {
+    width: 250px;
+    height: 200px;
+    z-index: 11;
+    transform: translateY(var(--y-boss, 0px)) scaleX(var(--dir, 1)) scaleY(var(--s-boss, 1));
+}
+
+.walk { 
+    animation: walkAnim 0.2s infinite alternate; 
+}
+
+.boss-walk {
+    animation: bossBounce 0.4s infinite alternate ease-in-out;
+}
+
+/* ===== OBJECTS ===== */
+.stone {
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    background: url("assets/stone.png") no-repeat center / contain;
+    image-rendering: pixelated;
+    z-index: 4;
+}
+
+.platform {
+    position: absolute;
+    width: 180px; 
+    height: 35px; 
+    background: url("assets/platform.png") no-repeat center / 100% 100%;
+    image-rendering: pixelated;
+    z-index: 4;
+}
+
+.flag {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    background: url("assets/flag.png") no-repeat center / contain;
+    image-rendering: pixelated;
+    z-index: 4;
+}
+
+.coin {
+    position: absolute;
+    width: 60px; 
+    height: 60px;
+    background: url("assets/coin.png") no-repeat center / contain;
+    image-rendering: pixelated;
+    z-index: 4;
+    animation: coinSway 1.2s ease-in-out infinite alternate;
+}
+
+/* ===== SLASH EFFECT ===== */
+.slash {
+    position: absolute;
+    width: 96px;
+    height: 96px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 15;
+    animation: slashAnim 0.2s linear forwards;
+}
+
+/* ===== MODAL ===== */
+#gameModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.95);
+    color: white;
+    padding: 40px;
+    border: 4px solid #fff;
+    border-radius: 15px;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    min-width: 320px;
+}
+
+#gameModal h1 { font-size: 32px; margin-bottom: 10px; }
+#gameModal p { font-size: 18px; margin-bottom: 5px; }
+#finalScore { font-size: 24px; color: #ffd700; margin-top: 10px; font-weight: bold; }
+
+.modal-buttons {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 25px;
+}
+
+#gameModal button {
+    width: 100%; 
+    max-width: 250px;
+    padding: 12px 25px;
+    cursor: pointer;
+    background: #fff;
+    border: none;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: transform 0.2s, background 0.2s;
+    font-size: 13px;
+}
+
+#gameModal .btn-primary {
+    background: #ffffff;
+    color: black;
+}
+
+#gameModal .btn-menu {
+    background: #ff4444;
+    color: white;
+}
+
+#gameModal button:hover {
+    transform: scale(1.05);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes cloudMove { from { left: 100%; } to { left: -260px; } }
+@keyframes windSway { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes windMove { from { left: 100%; } to { left: -60px; } }
+@keyframes walkAnim { from { --y-anim: 0px; } to { --y-anim: -4px; } }
+@keyframes coinSway { from { transform: translateY(0) scale(1); } to { transform: translateY(-15px) scale(1.1); } }
+@keyframes slashAnim {
+    from { opacity: 1; transform: translateX(0) scaleX(var(--dir)) scale(0.8); }
+    to { opacity: 0; transform: translateX(calc(60px * var(--dir))) scaleX(var(--dir)) scale(1.2); }
+}
+
+@keyframes bossBounce {
+    from { --y-boss: 0px; --s-boss: 1; }
+    to { --y-boss: -15px; --s-boss: 0.9; }
+}
+
+@keyframes hurtEffect {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+.is-hurt { animation: hurtEffect 0.2s 3; }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+    <div id="game-viewport">
+        <div id="boss-warning">BOSS SEGERA DATANG!!!</div>
+
+        <div id="ui-layer">
+            <div id="health-container"></div>
+            
+            <div class="right-ui-stack">
+                <div id="score-container">
+                    <div class="coin-icon"></div>
+                    <span id="coin-count">0</span>
+                </div>
+                <div id="timer-container">
+                    TIME: <span id="time-left">01:30</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="boss-ui">
+            <div id="boss-name">THE SLIME</div>
+            <div id="boss-hp-fill"></div>
+        </div>
+
+        <div class="cloud-layer" id="cloudLayer">
+            <img src="assets/awan.png" class="cloud cloud-low">
+            <img src="assets/awan.png" class="cloud cloud-mid">
+            <img src="assets/awan.png" class="cloud cloud-high">
+            <div class="wind" style="top:150px; animation-duration:3s;"></div>
+            <div class="wind" style="top:180px; animation-duration:2.5s;"></div>
+            <div class="wind" style="top:210px; animation-duration:4s;"></div>
+        </div>
+        
+        <div class="player" id="player"></div>
+    </div>
+</div>
+
+<div id="gameModal">
+    <h1 id="modalTitle">LEVEL COMPLETE</h1>
+    <p id="modalDesc">Kamu berhasil melewati level easy!</p>
+    <p id="finalScore"></p>
+    <div class="modal-buttons">
+        <button id="btnPrimary" class="btn-primary" onclick="location.reload()">Main Lagi</button>
+        <button class="btn-menu" onclick="window.location.href='level.html'">Kembali ke Level</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener("dragstart", e => e.preventDefault());
+
+/* ===== AUDIO SYSTEM ===== */
+const bgm = new Audio("assets/bgm.mp3");
+bgm.loop = true;
+bgm.volume = 0.4;
+
+const coinSound = new Audio("assets/coinsound.mp3");
+const walkingSound = new Audio("assets/walking.mp3");
+const jumpSound = new Audio("assets/jump.mp3");
+const slashSound = new Audio("assets/slash.mp3");
+const victorySound = new Audio("assets/victory.mp3");
+const damageSound = new Audio("assets/damage.mp3");
+const loseSound = new Audio("assets/lose.mp3");
+
+walkingSound.loop = true;
+walkingSound.volume = 0.5;
+
+function startBGM() {
+    bgm.play().catch(e => {
+        document.addEventListener('mousedown', () => bgm.play(), { once: true });
+        document.addEventListener('keydown', () => bgm.play(), { once: true });
+    });
+}
+
+function playCoinSound() { coinSound.currentTime = 0; coinSound.play().catch(e => {}); }
+function playJumpSound() { jumpSound.currentTime = 0; jumpSound.play().catch(e => {}); }
+function playSlashSound() { slashSound.currentTime = 0; slashSound.play().catch(e => {}); }
+function playDamageSound() { damageSound.currentTime = 0; damageSound.play().catch(e => {}); }
+function playVictorySound() { bgm.pause(); victorySound.currentTime = 0; victorySound.play().catch(e => {}); }
+function playLoseSound() { bgm.pause(); loseSound.currentTime = 0; loseSound.play().catch(e => {}); }
+
+function handleWalkingSound(isWalking) {
+    if (isWalking) {
+        if (walkingSound.paused) walkingSound.play().catch(e => {});
+    } else {
+        walkingSound.pause();
+    }
+}
+
+/* ===== CORE DOM ===== */
+const viewport = document.getElementById("game-viewport");
+const uiLayer = document.getElementById("ui-layer");
+const player = document.getElementById("player");
+const cloudLayer = document.getElementById("cloudLayer");
+const gameModal = document.getElementById("gameModal");
+const btnPrimary = document.getElementById("btnPrimary");
+const healthContainer = document.getElementById("health-container");
+const coinCountEl = document.getElementById("coin-count");
+const bossUi = document.getElementById("boss-ui");
+const bossHpFill = document.getElementById("boss-hp-fill");
+const timeLeftEl = document.getElementById("time-left");
+const bossWarningEl = document.getElementById("boss-warning");
+
+/* ===== DATA STAGE ===== */
+const stages = [
+    { src: "assets/easy.png", width: 0, height: 0 },
+    { src: "assets/easy 2.png", width: 0, height: 0 },
+    { src: "assets/easy 3.png", width: 0, height: 0 },
+    { src: "assets/easy 4.png", width: 0, height: 0 },
+    { src: "assets/easy 5.png", width: 0, height: 0 },
+    { src: "assets/easy 6.png", width: 0, height: 0 },
+    { src: "assets/easy 7.png", width: 0, height: 0 }, 
+    { src: "assets/easy 8.png", width: 0, height: 0 }
+];
+
+const stoneData = {
+    0: [], 1: [{x:180, y:115}, {x:500, y:115}],
+    2: [{x:250, y:115}, {x:480, y:115}, {x:680, y:115}],
+    3: [{x:150, y:115}, {x:400, y:115}, {x:650, y:115}],
+    4: [{ x: 100, y: 115 }, { x: 260, y: 115 }, { x: 600, y: 115 }, { x: 664, y: 115 }],
+    5: [{ x: 80, y: 115 }, { x: 140, y: 115 }, { x: 680, y: 115 }],
+    6: []
+};
+
+const platformData = {
+    0: [], 1: [], 2: [], 3: [],
+    4: [ { x: 300, y: 220 }, { x: 550, y: 310 } ],
+    5: [ { x: 260, y: 220 }, { x: 400, y: 220 }, { x: 630, y: 310 } ],
+    6: []
+};
+
+const coinData = {
+    0: [{id: "s0c1", x: 300, y: 150}, {id: "s0c2", x: 500, y: 150}],
+    1: [{id: "s1c1", x: 180, y: 200}, {id: "s1c2", x: 500, y: 200}],
+    2: [{id: "s2c1", x: 250, y: 200}, {id: "s2c2", x: 480, y: 200}, {id: "s2c3", x: 680, y: 200}],
+    3: [{id: "s3c1", x: 400, y: 250}],
+    4: [{id: "s4c1", x: 350, y: 300}, {id: "s4c2", x: 600, y: 400}],
+    5: [{id: "s5c1", x: 300, y: 300}, {id: "s5c2", x: 450, y: 300}]
+};
+
+const flagData = { 7: { x: 860, y: 122 } };
+
+let stonesArr = [], platformsArr = [], enemies = [], coinsArr = [], activeFlag = null;
+let currentStage = 0;
+let gameFinished = false;
+let lives = 5, score = 0, isInvulnerable = false;
+let collectedCoins = new Set(); 
+
+/* ===== TIME SYSTEM ===== */
+let totalSeconds = 120; 
+let timerInterval = null;
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        if (gameFinished) { clearInterval(timerInterval); return; }
+        totalSeconds--;
+        updateTimerUI();
+        if (totalSeconds <= 0) { clearInterval(timerInterval); timeOver(); }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    timeLeftEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function timeOver() {
+    if (gameFinished) return;
+    gameFinished = true;
+    if (enemySpawnTimer) clearInterval(enemySpawnTimer);
+    handleWalkingSound(false);
+    playLoseSound();
+    document.getElementById("modalTitle").innerText = "WAKTU HABIS!";
+    document.getElementById("modalDesc").innerText = "Yah, kamu kehabisan waktu!";
+    document.getElementById("finalScore").innerText = "Skor Akhir: " + score;
+    btnPrimary.innerText = "Main Lagi";
+    btnPrimary.onclick = () => location.reload();
+    gameModal.style.display = "block";
+}
+
+/* ===== BOSS STATE ===== */
+let activeBoss = null;
+let bossDead = false; 
+const BOSS_MAX_HP = 20;
+
+/* ===== CONFIG & CONTROLS ===== */
+const groundY = 115;
+const gravity = 0.8;
+const jumpPower = 15; 
+const speed = 5;
+const enemySpeedNormal = 2.5; 
+const enemyJumpPower = 15;  
+const playerWidth = 64, playerHeight = 64, platW = 180; 
+
+let x = 100, y = groundY, velocityY = 0, isJumping = false, direction = 1, onPlatform = false;
+const keys = {};
+
+// Keyboard Listeners
+document.addEventListener("keydown", e => keys[e.key.toLowerCase()] = true);
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+
+// GAMEPAD STATE
+let gpJumpPressed = false;
+let gpSlashPressed = false;
+
+const IDLE = "assets/chara 1.png", WALK = "assets/chara 2.png", SLASH_IMG = "assets/slash.png", ENEMY_IMG = "assets/enemy.png";
+player.style.backgroundImage = `url('${IDLE}')`;
+
+function getRenderedBackground() {
+    const gw = window.innerWidth, gh = window.innerHeight;
+    const img = stages[currentStage];
+    if (!img.width) return { width: gw, height: gh };
+    const r = img.width / img.height, sr = gw / gh;
+    const rw = r > sr ? gw : gh * r;
+    return { width: rw, height: gh };
+}
+
+function syncViewport() {
+    const bg = getRenderedBackground();
+    viewport.style.width = bg.width + "px";
+    viewport.style.height = bg.height + "px";
+    uiLayer.style.left = "20px";
+    uiLayer.style.width = (bg.width - 40) + "px";
+    if(cloudLayer) cloudLayer.style.width = bg.width + "px";
+}
+
+function updateHealthUI() {
+    healthContainer.innerHTML = '';
+    for(let i = 0; i < lives; i++) {
+        const h = document.createElement("div"); h.className = "heart";
+        healthContainer.appendChild(h);
+    }
+}
+
+function takeDamage() {
+    if (isInvulnerable || gameFinished) return;
+    lives--; updateHealthUI();
+    playDamageSound();
+    if (lives <= 0) gameOver();
+    else {
+        isInvulnerable = true; player.classList.add("is-hurt");
+        setTimeout(() => { isInvulnerable = false; player.classList.remove("is-hurt"); }, 1000);
+    }
+}
+
+let enemySpawnTimer = null;
+function spawnEnemy() {
+    if (gameFinished || currentStage >= 6) return; 
+    const bg = getRenderedBackground();
+    const enemyEl = document.createElement("div");
+    enemyEl.className = "enemy walk";
+    enemyEl.style.backgroundImage = `url('${ENEMY_IMG}')`;
+    let enemyX = bg.width + 120;
+    enemyEl.style.left = enemyX + "px";
+    enemyEl.style.bottom = groundY + "px";
+    viewport.appendChild(enemyEl);
+    enemies.push({ element: enemyEl, x: enemyX, y: groundY, vY: 0, isJumping: false });
+}
+
+function startEnemySpawning() {
+    if (enemySpawnTimer) clearInterval(enemySpawnTimer);
+    if (currentStage >= 6) return; 
+    spawnEnemy(); 
+    enemySpawnTimer = setInterval(spawnEnemy, 3000); 
+}
+
+function spawnBoss() {
+    if (bossDead) return; 
+    const bg = getRenderedBackground();
+    const bEl = document.createElement("div");
+    bEl.className = "boss boss-walk"; 
+    bEl.style.backgroundImage = `url('assets/bosseasy.png')`;
+    viewport.appendChild(bEl);
+    activeBoss = {
+        element: bEl, hp: BOSS_MAX_HP, x: bg.width - 300, y: groundY,
+        vY: 0, dir: -1, jumpTimer: 0, isJumping: false, hitboxW: 160, hitboxH: 140
+    };
+    bossUi.style.display = "block";
+    bossHpFill.style.width = "100%";
+}
+
+function dropCoin(dropX, dropY) {
+    const c = document.createElement("div");
+    c.className = "coin";
+    c.style.left = dropX + "px";
+    c.style.bottom = (dropY + 40) + "px";
+    viewport.appendChild(c);
+    coinsArr.push(c);
+}
+
+function spawnObjects() {
+    stonesArr.forEach(s => s.remove()); stonesArr = [];
+    platformsArr.forEach(p => p.remove()); platformsArr = [];
+    coinsArr.forEach(c => c.remove()); coinsArr = [];
+    enemies.forEach(en => en.element.remove()); enemies = [];
+    if (activeBoss) { activeBoss.element.remove(); activeBoss = null; }
+    if (activeFlag) { activeFlag.remove(); activeFlag = null; }
+    bossUi.style.display = "none";
+    
+    // Logic Warning Boss di Stage 6 (easy 6.png)
+    if (currentStage === 5) {
+        bossWarningEl.style.display = "block";
+        setTimeout(() => { bossWarningEl.style.display = "none"; }, 3000);
+    } else {
+        bossWarningEl.style.display = "none";
+    }
+
+    syncViewport();
+    (stoneData[currentStage] || []).forEach(p => {
+        const s = document.createElement("div"); s.className = "stone";
+        s.style.left = p.x + "px"; s.style.bottom = p.y + "px";
+        viewport.appendChild(s); stonesArr.push(s);
+    });
+    (platformData[currentStage] || []).forEach(p => {
+        const s = document.createElement("div"); s.className = "platform";
+        s.style.left = p.x + "px"; s.style.bottom = p.y + "px";
+        viewport.appendChild(s); platformsArr.push(s);
+    });
+    (coinData[currentStage] || []).forEach(p => {
+        if (!collectedCoins.has(p.id)) {
+            const c = document.createElement("div");
+            c.className = "coin"; c.dataset.id = p.id;
+            c.style.left = p.x + "px"; c.style.bottom = p.y + "px";
+            viewport.appendChild(c); coinsArr.push(c);
+        }
+    });
+    if (flagData[currentStage]) {
+        const f = flagData[currentStage];
+        const flag = document.createElement("div"); flag.className = "flag";
+        flag.style.left = f.x + "px"; flag.style.bottom = f.y + "px";
+        viewport.appendChild(flag); activeFlag = flag;
+    }
+    if (currentStage === 6 && !bossDead) spawnBoss();
+    else startEnemySpawning();
+}
+
+function loadStage(i, side) {
+    const img = new Image();
+    img.src = stages[i].src;
+    img.onload = () => {
+        stages[i].width = img.width; stages[i].height = img.height;
+        viewport.style.backgroundImage = `url('${stages[i].src}')`;
+        currentStage = i;
+        spawnObjects();
+        const bg = getRenderedBackground();
+        x = side === "left" ? 5 : bg.width - playerWidth - 5;
+        if (i === 0) startBGM();
+    };
+}
+
+function performSlash() {
+    if (gameFinished) return;
+    playSlashSound();
+    const slash = document.createElement("div");
+    slash.className = "slash";
+    slash.style.backgroundImage = `url('${SLASH_IMG}')`;
+    slash.style.setProperty("--dir", direction);
+    slash.style.left = (direction === 1 ? x + 30 : x - 62) + "px";
+    slash.style.bottom = (y - 30) + "px"; 
+    viewport.appendChild(slash);
+    const sx = direction === 1 ? x + 30 : x - 62;
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
+        if (sx + 100 > en.x && sx < en.x + 100 && Math.abs(y - en.y) < 110) {
+             dropCoin(en.x + 30, en.y);
+             en.element.remove(); enemies.splice(i, 1);
+        }
+    }
+    if (activeBoss) {
+        if (sx + 100 > activeBoss.x + 40 && sx < activeBoss.x + 210 && Math.abs(y - activeBoss.y) < 180) {
+            activeBoss.hp--;
+            bossHpFill.style.width = (activeBoss.hp / BOSS_MAX_HP * 100) + "%";
+            if (activeBoss.hp <= 0) {
+                for(let i=0; i<15; i++) {
+                    const dc = document.createElement("div"); dc.className = "coin";
+                    dc.style.left = (activeBoss.x + Math.random()*220) + "px"; 
+                    dc.style.bottom = (activeBoss.y + Math.random()*120) + "px";
+                    viewport.appendChild(dc); coinsArr.push(dc);
+                }
+                activeBoss.element.remove(); activeBoss = null;
+                bossUi.style.display = "none"; bossDead = true; 
+            }
+        }
+    }
+    setTimeout(() => slash.remove(), 200);
+}
+
+document.addEventListener("mousedown", e => { if (e.button === 0) performSlash(); });
+
+function collideObjectSide(nx) {
+    for (const s of stonesArr) {
+        const sx = s.offsetLeft, sy = parseInt(s.style.bottom);
+        if (nx + playerWidth - 10 > sx && nx + 10 < sx + 64 && y < sy + 55 && y + playerHeight > sy + 10) return true;
+    }
+    for (const p of platformsArr) {
+        const px = p.offsetLeft, py = parseInt(p.style.bottom);
+        if (nx + playerWidth - 20 > px && nx + 20 < px + platW && y < py + 20 && y + playerHeight > py + 5) return true;
+    }
+    return false;
+}
+
+function checkCollisions() {
+    let landed = false;
+    if (activeFlag && !gameFinished) {
+        const fx = activeFlag.offsetLeft, fy = parseInt(activeFlag.style.bottom);
+        if (x + playerWidth - 20 > fx && x + 20 < fx + 120 && y < fy + 120 && y + playerHeight > fy) finishGame();
+    }
+    for (const s of stonesArr) {
+        const sx = s.offsetLeft, sy = parseInt(s.style.bottom);
+        const stoneTop = sy + 64;
+        if (x + playerWidth - 12 > sx && x + 12 < sx + 64 && velocityY <= 0 && y >= stoneTop - 15 && y <= stoneTop + 10) {
+            y = stoneTop - 4; velocityY = 0; isJumping = false; landed = true; break;
+        }
+    }
+    if (!landed) {
+        for (const p of platformsArr) {
+            const px = p.offsetLeft, py = parseInt(p.style.bottom);
+            const platTop = py + 30, platBottom = py;
+            if (x + playerWidth - 20 > px && x + 20 < px + platW && velocityY <= 0 && y >= platTop - 25 && y <= platTop + 10) {
+                y = platTop; velocityY = 0; isJumping = false; landed = true; break;
+            }
+            if (x + playerWidth - 20 > px && x + 20 < px + platW && velocityY > 0) {
+                if (y + playerHeight >= platBottom && y + playerHeight <= platBottom + 20) {
+                    y = platBottom - playerHeight; velocityY = 0; 
+                }
+            }
+        }
+    }
+    onPlatform = landed;
+}
+
+function finishGame() {
+    if (gameFinished) return;
+    gameFinished = true;
+    if (enemySpawnTimer) clearInterval(enemySpawnTimer);
+    if (timerInterval) clearInterval(timerInterval);
+    handleWalkingSound(false);
+    playVictorySound();
+    document.getElementById("modalTitle").innerText = "LEVEL COMPLETE";
+    document.getElementById("modalDesc").innerText = "Kamu berhasil melewati level easy!";
+    document.getElementById("finalScore").innerText = "Total Koin: " + score;
+    btnPrimary.innerText = "Lanjut ke Medium";
+    btnPrimary.onclick = () => window.location.href = 'medium.html';
+    gameModal.style.display = "block";
+}
+
+function gameOver() {
+    if (gameFinished) return;
+    gameFinished = true;
+    if (enemySpawnTimer) clearInterval(enemySpawnTimer);
+    if (timerInterval) clearInterval(timerInterval);
+    handleWalkingSound(false);
+    playLoseSound();
+    document.getElementById("modalTitle").innerText = "GAME OVER";
+    document.getElementById("modalDesc").innerText = "Kamu kalah!";
+    document.getElementById("finalScore").innerText = "Skor Akhir: " + score;
+    btnPrimary.innerText = "Main Lagi";
+    btnPrimary.onclick = () => location.reload();
+    gameModal.style.display = "block";
+}
+
+function update() {
+    if (gameFinished) return;
+    
+    // --- GAMEPAD HANDLING ---
+    const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+    const gp = gamepads[0]; 
+    
+    let gpLeft = false, gpRight = false, gpJump = false, gpSlash = false;
+
+    if (gp) {
+        const xAxis = gp.axes[0];
+        if (xAxis < -0.3) gpLeft = true;
+        if (xAxis > 0.3) gpRight = true;
+        if (gp.buttons[0].pressed) gpJump = true;
+        if (gp.buttons[5].pressed) gpSlash = true;
+    }
+
+    let walking = false, nx = x;
+    const bg = getRenderedBackground();
+
+    if (keys["a"] || gpLeft) { nx -= speed; direction = -1; walking = true; }
+    if (keys["d"] || gpRight) { nx += speed; direction = 1; walking = true; }
+    
+    if (currentStage === 6 && activeBoss) {
+        if (nx < 0) nx = 0;
+        if (nx + playerWidth > bg.width) nx = bg.width - playerWidth;
+    } else {
+        if (currentStage === 0 && nx < 0) nx = 0;
+    }
+
+    if (!collideObjectSide(nx)) x = nx;
+
+    if ((keys["w"] || gpJump) && !isJumping) { 
+        if (!gpJumpPressed) { 
+            velocityY = jumpPower; 
+            isJumping = true; 
+            playJumpSound();
+            if (gpJump) gpJumpPressed = true;
+        }
+    }
+    if (!gpJump) gpJumpPressed = false;
+
+    if (gpSlash && !gpSlashPressed) {
+        performSlash();
+        gpSlashPressed = true;
+    }
+    if (!gpSlash) gpSlashPressed = false;
+
+    handleWalkingSound(walking && !isJumping);
+    velocityY -= gravity;
+    y += velocityY;
+
+    checkCollisions();
+
+    if (activeBoss) {
+        activeBoss.x += (4 * activeBoss.dir);
+        if (activeBoss.x <= 10) activeBoss.dir = 1;
+        if (activeBoss.x >= bg.width - 260) activeBoss.dir = -1;
+        activeBoss.jumpTimer++;
+        if (activeBoss.jumpTimer > 100 && activeBoss.y <= groundY) {
+            activeBoss.vY = 22; activeBoss.isJumping = true; activeBoss.jumpTimer = 0;
+        }
+        activeBoss.vY -= gravity; activeBoss.y += activeBoss.vY;
+        if (activeBoss.y <= groundY) { activeBoss.y = groundY; activeBoss.vY = 0; activeBoss.isJumping = false; }
+        activeBoss.element.classList.toggle("boss-walk", !activeBoss.isJumping);
+        activeBoss.element.style.left = activeBoss.x + "px";
+        activeBoss.element.style.bottom = activeBoss.y + "px";
+        activeBoss.element.style.setProperty("--dir", -activeBoss.dir);
+        const bLeft = activeBoss.x + 45, bRight = activeBoss.x + 205, bTop = activeBoss.y + 160;
+        if (activeBoss.y < groundY + 110) { 
+            if (x + 54 > bLeft && x + 10 < bRight && y < bTop && y + 60 > activeBoss.y) takeDamage();
+        }
+    }
+
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
+        stonesArr.forEach(stone => {
+            if (en.x - (stone.offsetLeft + 64) > 5 && en.x - (stone.offsetLeft + 64) < 40 && !en.isJumping) {
+                en.vY = enemyJumpPower; en.isJumping = true;
+            }
+        });
+        en.x -= (en.isJumping ? 5 : enemySpeedNormal);
+        en.vY -= gravity; en.y += en.vY;
+        if (en.y <= groundY) { en.y = groundY; en.vY = 0; en.isJumping = false; }
+        en.element.style.left = en.x + "px"; en.element.style.bottom = en.y + "px";
+        if (x + 40 > en.x + 20 && x + 20 < en.x + 100 && Math.abs(y - en.y) < 80) {
+            takeDamage(); en.element.remove(); enemies.splice(i, 1); continue;
+        }
+        if (en.x < -150) { en.element.remove(); enemies.splice(i, 1); }
+    }
+
+    for (let i = coinsArr.length - 1; i >= 0; i--) {
+        const c = coinsArr[i];
+        if (x + 50 > c.offsetLeft && x < c.offsetLeft + 50 && y + 60 > parseInt(c.style.bottom) && y < parseInt(c.style.bottom) + 60) {
+            score++; coinCountEl.innerText = score; playCoinSound();
+            if (c.dataset.id) collectedCoins.add(c.dataset.id);
+            c.remove(); coinsArr.splice(i, 1);
+        }
+    }
+
+    if (!onPlatform && y <= groundY) { y = groundY; velocityY = 0; isJumping = false; }
+    const canMoveStage = !(currentStage === 6 && activeBoss);
+    if (x + playerWidth >= bg.width + 10) {
+        if (canMoveStage) {
+            if (currentStage < stages.length - 1) loadStage(currentStage + 1, "left");
+            else finishGame();
+        } else x = bg.width - playerWidth; 
+    } 
+    else if (x <= -10) {
+        if (canMoveStage && currentStage > 0) loadStage(currentStage - 1, "right");
+        else x = 0; 
+    }
+
+    player.style.backgroundImage = walking && !isJumping ? `url('${WALK}')` : `url('${IDLE}')`;
+    player.classList.toggle("walk", walking && !isJumping);
+    player.style.setProperty("--dir", direction);
+    player.style.left = x + "px"; player.style.bottom = y + "px";
+    
+    requestAnimationFrame(update);
+}
+
+const initImg = new Image();
+initImg.src = stages[0].src;
+initImg.onload = () => {
+    stages[0].width = initImg.width; stages[0].height = initImg.height;
+    loadStage(0, "left");
+    updateHealthUI(); updateTimerUI(); startTimer();
+    window.addEventListener('resize', syncViewport);
+    update();
+};
+</script>
+</body>
+</html>

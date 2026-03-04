@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Last Runner - Level Select</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+}
+
+/* ===== BACKGROUND ===== */
+.background-container {
+    width: 100vw;
+    height: 100vh;
+    background: url('assets/level.png') center / contain no-repeat;
+    position: relative;
+}
+
+/* ===== CLOUD ===== */
+.cloud-layer {
+    position: absolute;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.cloud {
+    position: absolute;
+    width: 280px;
+    image-rendering: pixelated;
+    animation: cloudMove 28s linear infinite;
+}
+
+.cloud-low  { top: 0px;  animation-duration: 24s; }
+.cloud-mid  { top: 35px; animation-duration: 30s; }
+.cloud-high { top: 70px; animation-duration: 36s; }
+
+.cloud:nth-child(2) { animation-delay: -14s; }
+.cloud:nth-child(3) { animation-delay: -22s; }
+
+@keyframes cloudMove {
+    from { left: 100%; }
+    to   { left: -280px; }
+}
+
+/* ===== LAYER BUTTON ===== */
+.level-hitbox {
+    position: absolute;
+    z-index: 3;
+}
+
+/* ===== AREA KLIK & GEMBOK ===== */
+.level-btn {
+    position: absolute;
+    width: 260px;
+    height: 70px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* Posisi Tombol */
+.btn-easy   { top: 210px; left: 50%; transform: translateX(-50%); }
+.btn-medium { top: 315px; left: 50%; transform: translateX(-50%); }
+.btn-hard   { top: 420px; left: 50%; transform: translateX(-50%); }
+
+/* Style Gembok */
+.lock-icon {
+    width: 100px; /* Sesuaikan ukuran gembok */
+    height: auto;
+    image-rendering: pixelated;
+    z-index: 10;
+}
+
+/* Menonaktifkan tombol yang terkunci */
+.locked {
+    cursor: not-allowed;
+    pointer-events: none; /* Ini yang bikin tidak bisa diklik */
+}
+
+</style>
+</head>
+
+<body>
+
+<audio id="bgMusic" loop>
+    <source src="assets/music.mp3" type="audio/mpeg">
+</audio>
+
+<div class="background-container" id="bg">
+
+    <div class="cloud-layer" id="cloudLayer">
+        <img src="assets/awan.png" class="cloud cloud-low">
+        <img src="assets/awan.png" class="cloud cloud-mid">
+        <img src="assets/awan.png" class="cloud cloud-high">
+    </div>
+
+    <div class="level-hitbox" id="hitbox">
+        <a href="easy.html" class="level-btn btn-easy" aria-label="Easy"></a>
+
+        <a href="medium.html" class="level-btn btn-medium" aria-label="Medium"></a>
+
+        <a href="#" class="level-btn btn-hard locked" aria-label="Hard">
+            <img src="assets/lock.png" class="lock-icon" alt="Locked">
+        </a>
+    </div>
+
+</div>
+
+<script>
+const bg = document.getElementById("bg");
+const cloudLayer = document.getElementById("cloudLayer");
+const hitbox = document.getElementById("hitbox");
+const bgMusic = document.getElementById("bgMusic");
+
+const img = new Image();
+img.src = "assets/level.png";
+
+img.onload = () => {
+    const cw = bg.clientWidth;
+    const ch = bg.clientHeight;
+
+    const ir = img.width / img.height;
+    const cr = cw / ch;
+
+    let rw, rh;
+
+    if (ir > cr) {
+        rw = cw;
+        rh = cw / ir;
+    } else {
+        rh = ch;
+        rw = ch * ir;
+    }
+
+    const ox = (cw - rw) / 2;
+    const oy = (ch - rh) / 2;
+
+    /* Penyesuaian Cloud */
+    cloudLayer.style.left = ox + "px";
+    cloudLayer.style.top  = (oy + 10) + "px";
+    cloudLayer.style.width = rw + "px";
+    cloudLayer.style.height = "220px";
+
+    /* Penyesuaian Hitbox (Tempat tombol berada) */
+    hitbox.style.left = ox + "px";
+    hitbox.style.top  = oy + "px";
+    hitbox.style.width  = rw + "px";
+    hitbox.style.height = rh + "px";
+};
+
+// Fungsi Musik
+function playMusic() {
+    bgMusic.play().then(() => {
+        window.removeEventListener('click', playMusic);
+        window.removeEventListener('touchstart', playMusic);
+    }).catch(e => console.log("Menunggu interaksi untuk musik..."));
+}
+
+window.addEventListener('click', playMusic);
+window.addEventListener('touchstart', playMusic);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Guide</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('assets/guide.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Biar konten bisa disusun ke bawah */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-ok {
+            cursor: pointer;
+            transition: transform 0.2s;
+            /* Ukuran bisa disesuaikan */
+            width: 200px; 
+            margin-top: 300px; /* Atur jarak dari atas sesuai desain guide kamu */
+        }
+
+        .btn-ok:hover {
+            transform: scale(1.1); /* Efek membesar dikit pas di-hover */
+        }
+
+        .btn-ok:active {
+            transform: scale(0.9); /* Efek nekan pas diklik */
+        }
+    </style>
+</head>
+<body>
+
+    <a href="level.html"> <img src="assets/ok.png" alt="OK Button" class="btn-ok">
+    </a>
+
+</body>
+</html>

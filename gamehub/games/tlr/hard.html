@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Last Runner - Hard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        user-select: none;
+    }
+
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .game {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    #game-viewport {
+        position: relative;
+        overflow: hidden;
+        background: #000 center bottom / cover no-repeat;
+        width: 100%;
+        height: 100%;
+        transition: background-image 0.1s ease-in-out;
+    }
+
+    #ui-layer {
+        position: absolute;
+        top: 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 100;
+        pointer-events: none;
+        padding: 0 40px;
+        width: 100%;
+    }
+
+    #health-container { display: flex; gap: 10px; }
+    .heart {
+        width: 45px;
+        height: 45px;
+        image-rendering: pixelated;
+        background: url("assets/heart.png") no-repeat center / contain;
+    }
+
+    .right-ui-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    #score-container {
+        background: rgba(0, 0, 0, 0.6);
+        padding: 8px 18px;
+        border-radius: 50px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        color: #ffd700;
+        font-size: 28px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    #timer-container {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 5px 15px;
+        border-radius: 10px;
+        border: 2px solid #ff4444;
+        color: #fff;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .coin-icon {
+        width: 35px;
+        height: 35px;
+        background: url("assets/coin.png") no-repeat center / contain;
+        image-rendering: pixelated;
+    }
+
+    .player {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        transform-origin: center bottom;
+        z-index: 10;
+    }
+
+    .enemy {
+        position: absolute;
+        width: 120px;
+        height: 120px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        transform-origin: center bottom;
+        z-index: 9;
+        transform: translateY(var(--y-anim, 0px));
+    }
+
+    .boss {
+        position: absolute;
+        width: 280px;
+        height: 280px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        transform-origin: center bottom;
+        z-index: 9;
+        margin-bottom: -40px; 
+        filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.6));
+    }
+    
+    .boss-walk {
+        animation: bossSway 0.4s infinite alternate ease-in-out;
+    }
+
+    @keyframes bossSway {
+        from { transform: scaleX(var(--boss-dir)) translateY(0px) rotate(0deg); }
+        to { transform: scaleX(var(--boss-dir)) translateY(-12px) rotate(2deg); }
+    }
+
+    .player { transform: translateY(calc(var(--y-anim, 0px) + 2px)) scaleX(var(--dir, 1)); }
+
+    .fireball {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: url("assets/fireball.png") no-repeat center / contain;
+        image-rendering: pixelated;
+        z-index: 8;
+        filter: drop-shadow(0 0 10px orange);
+    }
+
+    .coin {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        background: url("assets/coin.png") no-repeat center / contain;
+        image-rendering: pixelated;
+        animation: coinSway 1.2s ease-in-out infinite alternate;
+        z-index: 5;
+    }
+
+    .flag {
+        position: absolute;
+        width: 80px;
+        height: 120px;
+        background: url("assets/flag.png") no-repeat center / contain;
+        image-rendering: pixelated;
+        z-index: 5;
+        filter: drop-shadow(0 0 10px #00f);
+    }
+
+    .brick-platform {
+        position: absolute;
+        height: 45px;
+        background: url("assets/brickplatform.png") repeat-x center / contain;
+        image-rendering: pixelated;
+        z-index: 3;
+    }
+
+    #fire-pit {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%; 
+        height: 100px;
+        background: url("assets/fire.png") repeat-x bottom;
+        background-size: auto 100%;
+        image-rendering: pixelated;
+        z-index: 2;
+        animation: fireFlicker 0.15s steps(2) infinite;
+    }
+
+    #boss-ui {
+        position: absolute;
+        top: 140px; 
+        left: 50%;
+        transform: translateX(-50%);
+        width: 600px;
+        max-width: 80%;
+        height: 30px;
+        background: #222;
+        border: 4px solid #fff;
+        display: none;
+        z-index: 100;
+        box-shadow: 0 0 15px rgba(255,0,0,0.5);
+    }
+    #boss-hp-fill {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, #ff0000, #880000);
+        transition: width 0.2s ease;
+    }
+    #boss-name {
+        position: absolute;
+        top: -25px;
+        left: 0;
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 2px 2px #000;
+    }
+
+    /* PERINGATAN BOSS */
+    #boss-warning {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #ff0000;
+        font-size: 32px;
+        font-weight: 900;
+        text-shadow: 3px 3px 0px #000, 0 0 20px rgba(255,0,0,0.5);
+        z-index: 200;
+        display: none;
+        white-space: nowrap;
+        pointer-events: none;
+        animation: warningBlink 0.4s infinite alternate;
+    }
+
+    @keyframes warningBlink {
+        from { opacity: 1; transform: translateX(-50%) scale(1); }
+        to { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+    }
+
+    @keyframes fireFlicker { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+    @keyframes coinSway { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+    .walk { animation: walkAnim 0.2s infinite alternate; }
+    @keyframes walkAnim { from { --y-anim: 0px; } to { --y-anim: -6px; } }
+
+    #gameModal {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(20, 0, 0, 0.95);
+        color: white;
+        padding: 40px;
+        border: 4px solid #ff4500;
+        border-radius: 15px;
+        text-align: center;
+        z-index: 1000;
+        min-width: 320px;
+    }
+
+    .modal-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 25px;
+    }
+
+    #gameModal button {
+        padding: 12px 25px;
+        cursor: pointer;
+        background: #fff;
+        color: #000;
+        border: none;
+        font-weight: bold;
+        border-radius: 5px;
+        transition: transform 0.1s, background 0.2s;
+        width: 100%;
+    }
+
+    #gameModal button:active { transform: scale(0.95); }
+
+    #gameModal button.menu-btn {
+        background: #ff4444;
+        color: white;
+    }
+
+    #gameModal button.play-btn {
+        background: #FFFFFF;
+        color: black;
+    }
+
+    .slash {
+        position: absolute;
+        width: 96px;
+        height: 96px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        pointer-events: none;
+        z-index: 11;
+        animation: slashAnim 0.2s linear forwards;
+    }
+
+    @keyframes slashAnim {
+        from { opacity: 1; transform: translateX(0) scaleX(var(--dir)) scale(0.8); }
+        to { opacity: 0; transform: translateX(calc(60px * var(--dir))) scaleX(var(--dir)) scale(1.2); }
+    }
+
+    .is-hurt { animation: hurtEffect 0.2s 4; }
+    @keyframes hurtEffect { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+</style>
+</head>
+
+<body>
+
+<div class="game">
+    <div id="game-viewport">
+        <div id="boss-warning">BOSS SEGERA DATANG!!!</div>
+
+        <div id="ui-layer">
+            <div id="health-container"></div>
+            
+            <div class="right-ui-stack">
+                <div id="score-container">
+                    <div class="coin-icon"></div>
+                    <span id="coin-count">0</span>
+                </div>
+                <div id="timer-container">
+                    TIME: <span id="time-left">01:00</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="boss-ui">
+            <div id="boss-name">THE DEVIL</div>
+            <div id="boss-hp-fill"></div>
+        </div>
+
+        <div id="fire-pit"></div>
+        <div class="player" id="player"></div>
+    </div>
+</div>
+
+<div id="gameModal">
+    <h1 id="modalTitle">Info</h1>
+    <p id="modalDesc"></p>
+    <p id="finalScore" style="font-size: 24px; color: #ffd700; margin-top: 10px;"></p>
+    <div class="modal-buttons">
+        <button class="play-btn" onclick="location.reload()">Main Lagi</button>
+        <button class="menu-btn" onclick="window.location.href='level3.html'">Kembali ke Level</button>
+    </div>
+</div>
+
+<script>
+// --- AUDIO SETUP ---
+const bgm = new Audio("assets/bgm.mp3");
+const coinSound = new Audio("assets/coinsound.mp3");
+const walkingSound = new Audio("assets/walking.mp3");
+const jumpSound = new Audio("assets/jump.mp3");
+const slashSound = new Audio("assets/slash.mp3"); 
+const damageSound = new Audio("assets/damage.mp3"); 
+const victorySound = new Audio("assets/victory.mp3"); 
+const loseSound = new Audio("assets/lose.mp3"); 
+
+bgm.loop = true;
+bgm.volume = 0.4;
+walkingSound.loop = true;
+walkingSound.volume = 0.5;
+
+function startBGM() {
+    if (bgm.paused && !gameFinished) {
+        bgm.play().catch(e => console.log("Audio play blocked until interaction"));
+    }
+}
+
+function playCoinSound() { coinSound.currentTime = 0; coinSound.play().catch(e => {}); }
+function playJumpSound() { jumpSound.currentTime = 0; jumpSound.play().catch(e => {}); }
+function playSlashSound() { slashSound.currentTime = 0; slashSound.play().catch(e => {}); }
+function playDamageSound() { damageSound.currentTime = 0; damageSound.play().catch(e => {}); }
+function playVictorySound() { victorySound.currentTime = 0; victorySound.play().catch(e => {}); }
+function playLoseSound() { loseSound.currentTime = 0; loseSound.play().catch(e => {}); }
+
+function handleWalkingSound(isWalking) {
+    if (isWalking) {
+        if (walkingSound.paused) walkingSound.play().catch(e => {});
+    } else {
+        walkingSound.pause();
+    }
+}
+
+// --- CONFIG ---
+const viewport = document.getElementById("game-viewport");
+const player = document.getElementById("player");
+const coinCountEl = document.getElementById("coin-count");
+const timeLeftEl = document.getElementById("time-left");
+const healthContainer = document.getElementById("health-container");
+const gameModal = document.getElementById("gameModal");
+const bossUI = document.getElementById("boss-ui");
+const bossHPFill = document.getElementById("boss-hp-fill");
+const bossWarningEl = document.getElementById("boss-warning");
+
+const stages = [
+    { src: "assets/hard.png" },     
+    { src: "assets/hard 2.png" },   
+    { src: "assets/hard 3.png" },   
+    { src: "assets/hard 4.png" },   
+    { src: "assets/hard 5.png" },   
+    { src: "assets/hard 6.png" },   
+    { src: "assets/hard 7.png" },
+    { src: "assets/hard 8.png" },
+    { src: "assets/hard 9.png" } 
+];
+
+stages.forEach(s => { const img = new Image(); img.src = s.src; });
+
+const stageObjects = {
+    0: { platforms: [{x: -60, y: 80, w: 300}, {x: 270, y: 180, w: 180}, {x: 550, y: 200, w: 180}, {x: 820, y: 80, w: 460}], coins: [{id: "h0c1", x: 340, y: 240}, {id: "h0c2", x: 620, y: 260}, {id: "h0c3", x: 950, y: 140}] },
+    1: { platforms: [{x: -60, y: 80, w: 310}, {x: 350, y: 220, w: 150}, {x: 600, y: 120, w: 150}, {x: 850, y: 250, w: 400}], coins: [{id: "h1c1", x: 400, y: 300}, {id: "h1c2", x: 900, y: 320}] },
+    2: { platforms: [{x: -60, y: 250, w: 360}, {x: 440, y: 300, w: 200}, {x: 750, y: 200, w: 100}, {x: 950, y: 100, w: 300}], coins: [{id: "h2c1", x: 100, y: 350}, {id: "h2c2", x: 510, y: 400}] },
+    3: { platforms: [{x: -60, y: 100, w: 360}, {x: 400, y: 100, w: 100}, {x: 600, y: 100, w: 100}, {x: 800, y: 250, w: 450}], coins: [{id: "h3c1", x: 425, y: 160}, {id: "h3c2", x: 625, y: 160}] },
+    4: { platforms: [{x: -60, y: 250, w: 210}, {x: 200, y: 350, w: 150}, {x: 400, y: 200, w: 150}, {x: 650, y: 300, w: 200}, {x: 900, y: 380, w: 380}], coins: [{id: "h4c1", x: 250, y: 410}, {id: "h4c2", x: 1000, y: 440}] },
+    5: { platforms: [{x: -60, y: 380, w: 310}, {x: 320, y: 300, w: 180}, {x: 580, y: 220, w: 180}, {x: 830, y: 140, w: 450}], coins: [{id: "h5c1", x: 100, y: 440}, {id: "h5c2", x: 380, y: 360}, {id: "h5c3", x: 950, y: 200}] },
+    6: { platforms: [{x: -60, y: 140, w: 210}, {x: 200, y: 280, w: 150}, {x: 400, y: 160, w: 200}, {x: 650, y: 220, w: 150}, {x: 850, y: 80, w: 450}], coins: [{id: "h6c1", x: 250, y: 340}, {id: "h6c2", x: 480, y: 220}, {id: "h6c3", x: 700, y: 300}] },
+    7: { platforms: [{x: -60, y: 80, w: 1400}], coins: [] }, 
+    8: { platforms: [{x: -60, y: 80, w: 1400}], coins: [], hasFlag: true }
+};
+
+const IDLE = "assets/chara 1.png";
+const WALK = "assets/chara 2.png";
+const ENEMY_IMG = "assets/enemy.png";
+const SLASH_IMG = "assets/slash.png";
+const BOSS_IMG = "assets/bosshard.png"; 
+
+let currentStage = 0;
+let x = 30, y = 120, vY = 0;
+let score = 0, lives = 3, direction = 1;
+let totalSeconds = 60;
+let isJumping = false, isInvulnerable = false, isTransitioning = false, gameFinished = false;
+let enemies = [], activePlatforms = [], coins = [], fireballs = [];
+let flagEl = null; 
+let collectedCoins = new Set();
+const keys = {};
+let boss = null;
+let timerInterval = null;
+let isBossDefeated = false;
+
+// --- GAMEPAD LOGIC ---
+let lastAtkButton = false;
+
+function handleAttack() {
+    if (gameFinished || isTransitioning) return;
+    playSlashSound(); 
+    const slash = document.createElement("div");
+    slash.className = "slash";
+    slash.style.backgroundImage = `url('${SLASH_IMG}')`;
+    slash.style.setProperty("--dir", direction);
+    slash.style.left = (direction === 1 ? x + 30 : x - 62) + "px";
+    slash.style.bottom = (y - 30) + "px"; 
+    viewport.appendChild(slash);
+    const sx = direction === 1 ? x + 30 : x - 62;
+    
+    if (boss && sx + 100 > boss.x && sx < boss.x + 280 && Math.abs(y - boss.y) < 220) {
+        boss.hp--; bossHPFill.style.width = (boss.hp / boss.maxHp * 100) + "%";
+        if (boss.hp <= 0) {
+            for(let i=0; i<15; i++) {
+                const dc = document.createElement("div"); dc.className = "coin";
+                dc.style.left = (boss.x + Math.random()*250) + "px"; dc.style.bottom = (boss.y + Math.random()*150) + "px";
+                viewport.appendChild(dc); coins.push(dc);
+            }
+            boss.el.remove(); boss = null; isBossDefeated = true; bossUI.style.display = "none";
+        }
+    }
+    for (let i = enemies.length - 1; i >= 0; i--) {
+        const en = enemies[i];
+        if (sx + 100 > en.x && sx < en.x + 100 && Math.abs(y - en.y) < 110) {
+            const dc = document.createElement("div"); dc.className = "coin";
+            dc.style.left = (en.x + 30) + "px"; dc.style.bottom = (en.y + 20) + "px";
+            viewport.appendChild(dc); coins.push(dc);
+            en.el.remove(); enemies.splice(i, 1);
+        }
+    }
+    setTimeout(() => slash.remove(), 200);
+}
+
+function pollGamepad() {
+    const gamepads = navigator.getGamepads();
+    if (!gamepads[0]) return;
+    const gp = gamepads[0];
+    
+    const axisX = gp.axes[0];
+    if (axisX < -0.3) { keys["a"] = true; keys["d"] = false; }
+    else if (axisX > 0.3) { keys["d"] = true; keys["a"] = false; }
+    else { keys["a"] = false; keys["d"] = false; }
+
+    if (gp.buttons[0].pressed && !isJumping) {
+        keys["w"] = true;
+    } else {
+        keys["w"] = false;
+    }
+
+    const atkPressed = gp.buttons[5].pressed;
+    if (atkPressed && !lastAtkButton) {
+        handleAttack();
+        startBGM();
+    }
+    lastAtkButton = atkPressed;
+}
+
+function syncViewportSize() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const ratio = 16 / 9;
+    let targetWidth, targetHeight;
+    if (w / h > ratio) { targetHeight = h; targetWidth = h * ratio; } 
+    else { targetWidth = w; targetHeight = w / ratio; }
+    viewport.style.width = targetWidth + "px";
+    viewport.style.height = targetHeight + "px";
+    return {vw: targetWidth, vh: targetHeight};
+}
+
+function updateHealthUI() {
+    healthContainer.innerHTML = '';
+    for(let i = 0; i < lives; i++) {
+        const heart = document.createElement("div");
+        heart.className = "heart";
+        healthContainer.appendChild(heart);
+    }
+}
+
+function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (gameFinished) { clearInterval(timerInterval); return; }
+        totalSeconds--;
+        updateTimerUI();
+        if (totalSeconds <= 0) { clearInterval(timerInterval); timeOver(); }
+    }, 1000);
+}
+
+function updateTimerUI() {
+    const min = Math.floor(totalSeconds / 60);
+    const sec = totalSeconds % 60;
+    timeLeftEl.innerText = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+}
+
+function timeOver() {
+    if (gameFinished) return;
+    endGame("WAKTU HABIS!", "Yah, kamu kehabisan waktu!");
+}
+
+function spawnObjects() {
+    document.querySelectorAll(".brick-platform, .coin, .flag").forEach(el => el.remove());
+    activePlatforms = []; coins = []; flagEl = null;
+    const {vw} = syncViewportSize();
+    const data = stageObjects[currentStage];
+    if (data) {
+        data.platforms.forEach(p => {
+            const el = document.createElement("div");
+            el.className = "brick-platform";
+            el.style.left = p.x + "px";
+            el.style.bottom = p.y + "px";
+            el.style.width = p.w + "px";
+            viewport.appendChild(el);
+            activePlatforms.push({el, ...p});
+        });
+        data.coins.forEach(c => {
+            if (!collectedCoins.has(c.id)) {
+                const el = document.createElement("div");
+                el.className = "coin";
+                el.dataset.id = c.id;
+                el.style.left = c.x + "px";
+                el.style.bottom = c.y + "px";
+                viewport.appendChild(el);
+                coins.push(el);
+            }
+        });
+        if (data.hasFlag) {
+            const el = document.createElement("div");
+            el.className = "flag";
+            el.style.left = (vw - 150) + "px"; 
+            el.style.bottom = "120px";
+            viewport.appendChild(el);
+            flagEl = el;
+        }
+    }
+}
+
+function showBossWarning() {
+    bossWarningEl.style.display = "block";
+    setTimeout(() => { bossWarningEl.style.display = "none"; }, 3000);
+}
+
+function spawnBoss() {
+    if (isBossDefeated) return;
+    const {vw} = syncViewportSize();
+    const bossEl = document.createElement("div");
+    bossEl.className = "boss boss-walk"; 
+    bossEl.style.backgroundImage = `url('${BOSS_IMG}')`;
+    bossEl.style.left = (vw - 350) + "px";
+    bossEl.style.bottom = "120px";
+    viewport.appendChild(bossEl);
+    boss = { el: bossEl, x: vw - 350, y: 120, vY: 0, dir: -1, hp: 30, maxHp: 30, isJumping: false, speed: 4, jumpTimer: 0 };
+    bossUI.style.display = "block";
+    bossHPFill.style.width = "100%";
+}
+
+function loadStage(index, side) {
+    isTransitioning = true;
+    currentStage = index;
+    enemies.forEach(en => en.el.remove());
+    enemies = [];
+    fireballs.forEach(fb => fb.el.remove());
+    fireballs = [];
+    if (boss && boss.el) { boss.el.remove(); }
+    boss = null; 
+    bossUI.style.display = "none";
+    
+    viewport.style.backgroundImage = `url('${stages[index].src}')`;
+    const {vw} = syncViewportSize();
+    x = (side === "right") ? vw - 80 : 20;
+    spawnObjects();
+
+    // LOGIKA PERINGATAN VS BOSS
+    if (currentStage === 6) { // hard 7.png
+        showBossWarning(); // Muncul Peringatan doang
+    }
+    if (currentStage === 7) { // hard 8.png
+        spawnBoss(); // Muncul Boss-nya
+    }
+    
+    setTimeout(() => { isTransitioning = false; }, 50);
+}
+
+function spawnEnemy() {
+    if (gameFinished || isTransitioning || currentStage >= 7) return;
+    const {vw} = syncViewportSize();
+    const enemyEl = document.createElement("div");
+    enemyEl.className = "enemy walk";
+    enemyEl.style.backgroundImage = `url('${ENEMY_IMG}')`;
+    const rightmostPlat = activePlatforms.reduce((prev, curr) => (curr.x > prev.x) ? curr : prev, activePlatforms[0]);
+    let ex = vw + 50, ey = (rightmostPlat ? rightmostPlat.y : 80) + 40; 
+    enemyEl.style.left = ex + "px";
+    enemyEl.style.bottom = ey + "px";
+    viewport.appendChild(enemyEl);
+    enemies.push({ el: enemyEl, x: ex, y: ey, vY: 0, isJumping: false, dir: -1, jumpBoostX: 0 });
+}
+
+function spawnFireball() {
+    if (gameFinished || isTransitioning || currentStage === 8) return;
+    const {vw} = syncViewportSize();
+    const fireballEl = document.createElement("div");
+    fireballEl.className = "fireball";
+    let fx = Math.random() * (vw - 80);
+    fireballEl.style.left = fx + "px";
+    fireballEl.style.top = "-100px"; 
+    viewport.appendChild(fireballEl);
+    fireballs.push({ el: fireballEl, x: fx, y: -100, speed: 5 + Math.random() * 5 });
+}
+
+function takeDamage() {
+    if (isInvulnerable || gameFinished) return;
+    lives--;
+    updateHealthUI();
+    playDamageSound(); 
+    if (lives <= 0) endGame("GAME OVER", "Kamu kalah!");
+    else {
+        isInvulnerable = true;
+        player.classList.add("is-hurt");
+        setTimeout(() => { isInvulnerable = false; player.classList.remove("is-hurt"); }, 1200);
+    }
+}
+
+function update() {
+    if (gameFinished) return;
+    pollGamepad(); 
+    let walking = false;
+    const {vw, vh} = syncViewportSize();
+    
+    if (keys["a"]) { x -= 6; direction = -1; walking = true; if (currentStage === 0 && x < 0) x = 0; }
+    if (keys["d"]) { 
+        x += 6; direction = 1; walking = true; 
+        if (currentStage === 7 && x > vw - 75 && boss) x = vw - 75; 
+        if (currentStage === 8 && x > vw - 80) x = vw - 80; 
+    }
+    if (keys["w"] && !isJumping) { vY = 16; isJumping = true; playJumpSound(); }
+    handleWalkingSound(walking && !isJumping);
+    vY -= 0.8; y += vY;
+    
+    let currentFloor = -1000;
+    activePlatforms.forEach(p => { if (x + 54 > p.x && x + 10 < p.x + p.w) { if (y >= p.y + 10 && vY <= 0) currentFloor = Math.max(currentFloor, p.y + 40); } });
+    if (y <= currentFloor) { y = currentFloor; vY = 0; isJumping = false; } else { isJumping = true; }
+    if (y < -150) { lives = 0; updateHealthUI(); endGame("GAME OVER", "Kamu terjatuh ke jurang api!"); return; }
+    
+    if (boss) {
+        boss.x += boss.speed * boss.dir;
+        if (boss.x <= 0) boss.dir = 1;
+        if (boss.x >= vw - 280) boss.dir = -1;
+        let bFloor = -1000;
+        activePlatforms.forEach(p => { if (boss.x + 200 > p.x && boss.x + 80 < p.x + p.w) { if (boss.y >= p.y - 20 && boss.vY <= 0) bFloor = Math.max(bFloor, p.y + 40); } });
+        boss.jumpTimer++;
+        if (!boss.isJumping && boss.y <= bFloor + 2) {
+            let nP = boss.x + (150 * boss.dir); let hP = false;
+            activePlatforms.forEach(p => { if (nP + 150 > p.x && nP + 50 < p.x + p.w) hP = true; });
+            if (!hP || (boss.jumpTimer > 100 && Math.random() > 0.6)) { boss.vY = 22; boss.isJumping = true; boss.jumpTimer = 0; }
+        }
+        boss.vY -= 0.8; boss.y += boss.vY;
+        if (boss.y <= bFloor) { boss.y = bFloor; boss.vY = 0; boss.isJumping = false; }
+        boss.el.style.left = boss.x + "px"; boss.el.style.bottom = boss.y + "px";
+        boss.el.style.setProperty("--boss-dir", -boss.dir); 
+        if (!isInvulnerable && Math.abs((x+32) - (boss.x+140)) < 90 && y < boss.y + 150 && y > boss.y - 20) takeDamage();
+    }
+
+    enemies.forEach((en, i) => {
+        let mX = 4 + en.jumpBoostX; en.x += mX * en.dir;
+        let eF = -1000;
+        activePlatforms.forEach(p => { if (en.x + 100 > p.x && en.x + 20 < p.x + p.w) { if (en.y >= p.y + 10 && en.vY <= 0) eF = Math.max(eF, p.y + 40); } });
+        if (!en.isJumping && en.y === eF) {
+            let nP = en.x + (60 * en.dir); let onP = false;
+            activePlatforms.forEach(p => { if (nP + 60 > p.x && nP + 20 < p.x + p.w) onP = true; });
+            if (!onP) { en.vY = 15; en.isJumping = true; en.jumpBoostX = 1.5; }
+        }
+        en.vY -= 0.8; en.y += en.vY;
+        if (en.y <= eF) { en.y = eF; en.vY = 0; en.isJumping = false; en.jumpBoostX = 0; }
+        en.el.style.left = en.x + "px"; en.el.style.bottom = en.y + "px";
+        if (!isInvulnerable && Math.abs(x + 32 - (en.x + 60)) < 60 && Math.abs(y - en.y) < 80) { takeDamage(); en.el.remove(); enemies.splice(i, 1); }
+        if (en.x < -200 || en.x > vw + 200) { en.el.remove(); enemies.splice(i, 1); }
+    });
+    
+    fireballs.forEach((fb, i) => {
+        fb.y += fb.speed; fb.el.style.top = fb.y + "px";
+        let pTop = vh - y - 64; 
+        if (!isInvulnerable && Math.abs((x+32) - (fb.x+50)) < 45 && Math.abs((pTop+32) - (fb.y+50)) < 45) { takeDamage(); fb.el.remove(); fireballs.splice(i, 1); }
+        else if (fb.y > vh + 100) { fb.el.remove(); fireballs.splice(i, 1); }
+    });
+    
+    coins.forEach((c, i) => {
+        if (Math.abs(x - parseFloat(c.style.left)) < 40 && Math.abs(y - parseFloat(c.style.bottom)) < 50) {
+            if(c.dataset.id) collectedCoins.add(c.dataset.id);
+            c.remove(); score++; coinCountEl.innerText = score; playCoinSound(); coins.splice(i, 1);
+        }
+    });
+
+    if (flagEl && Math.abs(x - (vw - 150)) < 40) endGame("LEVEL COMPLETE", "Kamu berhasil melewati level hard!");
+    
+    if (!isTransitioning) {
+        if (x > vw + 10) { 
+            if (currentStage < stages.length - 1) {
+                if (currentStage !== 7 || (currentStage === 7 && !boss)) { loadStage(currentStage + 1, "left"); }
+            } 
+        } 
+        else if (currentStage > 0 && x < -45) { 
+            if (currentStage !== 7 || (currentStage === 7 && !boss)) { loadStage(currentStage - 1, "right"); }
+        }
+    }
+
+    player.style.backgroundImage = isJumping ? `url('${IDLE}')` : (walking ? `url('${WALK}')` : `url('${IDLE}')`);
+    player.classList.toggle("walk", !isJumping && walking);
+    player.style.left = x + "px"; player.style.bottom = y + "px";
+    player.style.setProperty("--dir", direction);
+    requestAnimationFrame(update);
+}
+
+document.addEventListener("mousedown", e => {
+    startBGM();
+    if (e.button !== 0 || gameFinished || isTransitioning) return;
+    handleAttack();
+});
+
+function endGame(title, desc) {
+    if (gameFinished) return;
+    gameFinished = true; clearInterval(timerInterval);
+    handleWalkingSound(false); bgm.pause();
+    if (title === "LEVEL COMPLETE") playVictorySound(); 
+    else playLoseSound(); 
+    document.getElementById("modalTitle").innerText = title;
+    document.getElementById("modalDesc").innerText = desc;
+    document.getElementById("finalScore").innerText = "Total Koin: " + score;
+    gameModal.style.display = "block";
+}
+
+document.addEventListener("keydown", e => {
+    startBGM();
+    keys[e.key.toLowerCase()] = true;
+});
+document.addEventListener("keyup", e => keys[e.key.toLowerCase()] = false);
+window.addEventListener('resize', syncViewportSize);
+
+setInterval(spawnEnemy, 2000);
+setInterval(spawnFireball, 2000); 
+
+syncViewportSize();
+loadStage(0, "left");
+updateHealthUI();
+updateTimerUI();
+startTimer();
+update();
+</script>
+</body>
+</html>
