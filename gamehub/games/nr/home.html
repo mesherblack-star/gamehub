@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nebula Rush - Home</title>
+
+    <style>
+      :root {
+        --primary-color: #00ffff;
+        --secondary-color: #ff3366;
+        --accent-color: #ff9900;
+        --bg-dark: #0a0a2a;
+        --bg-darker: #050515;
+        --card-bg: rgba(10, 20, 40, 0.8);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, var(--bg-darker) 0%, #1a0033 100%);
+        color: white;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+      /* Stars Background */
+
+      .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      .star {
+        position: absolute;
+        background-color: white;
+        border-radius: 50%;
+        animation: twinkle 3s infinite;
+      }
+
+      @keyframes twinkle {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+      /* Welcome Message */
+      .welcome-message {
+        background: rgba(0, 100, 200, 0.2);
+        border: 1px solid rgba(0, 200, 255, 0.3);
+        border-radius: 10px;
+        padding: 15px 25px;
+        margin: 20px auto;
+        max-width: 800px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+      }
+      
+      .welcome-message .player-name {
+        color: var(--primary-color);
+        font-weight: bold;
+        font-size: 1.2em;
+      }
+      
+      /* Audio Controls */
+      .audio-controls {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1000;
+        display: flex;
+        gap: 10px;
+      }
+
+      .audio-btn {
+        background: rgba(0, 10, 30, 0.8);
+        border: 1px solid rgba(0, 200, 255, 0.3);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9em;
+        transition: all 0.3s;
+        backdrop-filter: blur(10px);
+      }
+
+      .audio-btn:hover {
+        background: rgba(0, 30, 60, 0.9);
+        transform: scale(1.05);
+        border-color: var(--primary-color);
+      }
+      /* Settings Modal */
+
+      .settings-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .settings-content {
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 500px;
+        width: 90%;
+        border: 2px solid rgba(0, 200, 255, 0.3);
+        box-shadow: 0 0 40px rgba(0, 150, 255, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .settings-content h2 {
+        color: var(--primary-color);
+        margin-bottom: 25px;
+        text-align: center;
+        border-bottom: 2px solid rgba(0, 200, 255, 0.3);
+        padding-bottom: 10px;
+      }
+
+      .setting-group {
+        margin-bottom: 25px;
+      }
+
+      .setting-group label {
+        display: block;
+        margin-bottom: 10px;
+        color: #ccccff;
+        font-weight: 500;
+      }
+
+      .setting-group input[type="range"] {
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.5);
+        outline: none;
+        -webkit-appearance: none;
+      }
+
+      .setting-group input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        cursor: pointer;
+        border: 2px solid white;
+      }
+
+      .setting-group input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 150, 255, 0.4);
+        border-radius: 10px;
+        color: white;
+      }
+
+      .setting-group input[type="file"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+      }
+
+      .volume-display {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        color: #aaaacc;
+        font-size: 0.9em;
+      }
+      /* Header */
+
+      header {
+        text-align: center;
+        padding: 30px 20px;
+        position: relative;
+      }
+
+      .logo {
+        font-size: 4.5em;
+        font-weight: 800;
+        margin-bottom: 10px;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        letter-spacing: 3px;
+      }
+
+      .tagline {
+        font-size: 1.3em;
+        color: #ccccff;
+        margin-bottom: 30px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        line-height: 1.5;
+      }
+      /* Main Content */
+
+      main {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-top: 20px;
+      }
+      /* Left Panel - Game Info */
+
+      .game-info {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .info-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 25px;
+        border: 1px solid rgba(0, 200, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .info-card h2 {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        font-size: 1.8em;
+        border-bottom: 2px solid rgba(0, 200, 255, 0.3);
+        padding-bottom: 10px;
+      }
+
+      .feature-list {
+        list-style: none;
+      }
+
+      .feature-list li {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+      }
+
+      .feature-list li:before {
+        content: "▶";
+        color: var(--accent-color);
+        margin-right: 12px;
+        font-size: 0.8em;
+      }
+
+      .feature-list li:last-child {
+        border-bottom: none;
+      }
+
+      .controls-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .control-item {
+        background: rgba(0, 30, 60, 0.5);
+        padding: 12px;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid rgba(0, 150, 255, 0.2);
+      }
+
+      .key {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 8px 15px;
+        margin: 5px;
+        border-radius: 8px;
+        font-family: monospace;
+        font-size: 1.2em;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        min-width: 45px;
+      }
+      /* Right Panel - High Scores */
+
+      .high-scores {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .scores-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        padding: 30px;
+        border: 1px solid rgba(0, 200, 255, 0.2);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        height: 100%;
+      }
+
+      .scores-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+      }
+
+      .scores-header h2 {
+        color: var(--primary-color);
+        font-size: 1.8em;
+      }
+
+      #reset-scores {
+        background: rgba(255, 50, 50, 0.2);
+        color: #ff6666;
+        border: 1px solid rgba(255, 100, 100, 0.3);
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9em;
+      }
+
+      #reset-scores:hover {
+        background: rgba(255, 50, 50, 0.3);
+        transform: scale(1.05);
+      }
+
+      .scores-list {
+        margin-bottom: 30px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 10px;
+      }
+      /* Scrollbar styling */
+
+      .scores-list::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .scores-list::-webkit-scrollbar-track {
+        background: rgba(0, 20, 40, 0.5);
+        border-radius: 4px;
+      }
+
+      .scores-list::-webkit-scrollbar-thumb {
+        background: rgba(0, 200, 255, 0.5);
+        border-radius: 4px;
+      }
+
+      .score-item {
+        display: flex;
+        align-items: center;
+        padding: 18px 15px;
+        margin-bottom: 12px;
+        background: rgba(0, 40, 80, 0.3);
+        border-radius: 12px;
+        border: 1px solid rgba(0, 150, 255, 0.1);
+        transition: all 0.3s;
+      }
+
+      .score-item:hover {
+        transform: translateX(5px);
+        background: rgba(0, 60, 120, 0.3);
+        border-color: rgba(0, 200, 255, 0.2);
+      }
+
+      .score-item.current-player {
+        background: rgba(0, 100, 200, 0.25);
+        border: 1px solid rgba(0, 200, 255, 0.4);
+        box-shadow: 0 0 15px rgba(0, 150, 255, 0.2);
+      }
+
+      .rank {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: var(--accent-color);
+        min-width: 50px;
+        text-align: center;
+      }
+
+      .rank-1 {
+        color: gold;
+      }
+
+      .rank-2 {
+        color: silver;
+      }
+
+      .rank-3 {
+        color: #cd7f32;
+      }
+
+      .score-details {
+        flex-grow: 1;
+      }
+
+      .player-name {
+        font-size: 1.3em;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: white;
+      }
+
+      .player-name.current {
+        color: var(--primary-color);
+      }
+
+      .score-info {
+        display: flex;
+        gap: 20px;
+        color: #aaaacc;
+        font-size: 0.95em;
+      }
+
+      .score-value {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: white;
+        min-width: 100px;
+        text-align: right;
+      }
+
+      .no-scores {
+        text-align: center;
+        padding: 40px 20px;
+        color: #8888cc;
+        font-style: italic;
+      }
+      /* Action Buttons */
+
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 30px;
+      }
+
+      .btn {
+        padding: 18px 30px;
+        font-size: 1.3em;
+        font-weight: 600;
+        border: none;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0088cc, #006699);
+        color: white;
+        box-shadow: 0 8px 20px rgba(0, 100, 255, 0.4);
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #00aaff, #0088cc);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(0, 150, 255, 0.5);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      .btn-icon {
+        font-size: 1.5em;
+      }
+      /* Footer */
+
+      footer {
+        text-align: center;
+        padding: 40px 20px 20px;
+        color: #8899aa;
+        margin-top: 50px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
+      .footer-links a {
+        color: #aaaacc;
+        text-decoration: none;
+        transition: color 0.3s;
+      }
+
+      .footer-links a:hover {
+        color: var(--primary-color);
+      }
+      /* Modal untuk nama player */
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.95);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal-content {
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 20px;
+        max-width: 500px;
+        width: 90%;
+        border: 2px solid rgba(0, 200, 255, 0.3);
+        box-shadow: 0 0 40px rgba(0, 150, 255, 0.3);
+      }
+
+      .modal h2 {
+        color: var(--primary-color);
+        margin-bottom: 20px;
+        text-align: center;
+      }
+
+      .form-group {
+        margin-bottom: 25px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        color: #ccccff;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(0, 150, 255, 0.4);
+        border-radius: 10px;
+        color: white;
+        font-size: 1.1em;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+      }
+
+      .modal-buttons {
+        display: flex;
+        gap: 15px;
+      }
+      
+      .name-error {
+        color: #FF6666;
+        margin-top: 10px;
+        display: none;
+        text-align: center;
+      }
+      /* Responsive */
+
+      @media (max-width: 768px) {
+        .logo {
+          font-size: 3em;
+        }
+        main {
+          flex-direction: column;
+        }
+        .controls-info {
+          grid-template-columns: 1fr;
+        }
+        .action-buttons {
+          flex-direction: column;
+        }
+        .score-info {
+          flex-direction: column;
+          gap: 5px;
+        }
+        .audio-controls {
+          top: 10px;
+          right: 10px;
+        }
+        .audio-btn {
+          padding: 8px 12px;
+          font-size: 0.8em;
+        }
+        .welcome-message {
+          margin: 10px;
+          padding: 10px 15px;
+        }
+      }
+      /* Animation for new high score */
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .new-high-score {
+        animation: pulse 1s infinite;
+        color: gold !important;
+      }
+      /* Audio Wave Animation */
+
+      .audio-wave {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        height: 20px;
+      }
+
+      .wave-bar {
+        width: 3px;
+        background: var(--primary-color);
+        border-radius: 2px;
+        animation: wave 1.5s ease-in-out infinite;
+      }
+
+      .wave-bar:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+
+      .wave-bar:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+
+      .wave-bar:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+
+      .wave-bar:nth-child(5) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes wave {
+        0%,
+        100% {
+          height: 5px;
+        }
+        50% {
+          height: 20px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+      <button class="audio-btn" id="mute-btn">
+        <span id="mute-icon">🔊</span>
+        <span id="mute-text">ON</span>
+      </button>
+      <button class="audio-btn" id="settings-btn">
+        <span>⚙️</span>
+        <span>SETTINGS</span>
+      </button>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settings-modal">
+      <div class="settings-content">
+        <h2>SETTINGS</h2>
+
+        <div class="setting-group">
+          <label for="volume-slider">Volume Background Music</label>
+          <input type="range" id="volume-slider" min="0" max="100" value="50" />
+          <div class="volume-display">
+            <span>0%</span>
+            <span id="volume-percentage">50%</span>
+            <span>100%</span>
+          </div>
+        </div>
+
+        <div class="setting-group">
+          <label for="custom-music">Upload Custom Background Music</label>
+          <input type="file" id="custom-music" accept="audio/*" />
+          <small style="color: #8888cc; display: block; margin-top: 5px">
+            Format: MP3, WAV, OGG (Max: 5MB)
+          </small>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="btn btn-primary" id="save-settings">SIMPAN</button>
+          <button class="btn btn-secondary" id="close-settings">BATAL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Background Stars -->
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+      <header>
+        <h1 class="logo">NEBULA RUSH</h1>
+        <p class="tagline">
+          Berkelana melalui nebula berbahaya, hindari rintangan kosmik, dan raih
+          skor tertinggi!
+        </p>
+        
+        <!-- Welcome Message -->
+        <div class="welcome-message" id="welcome-message" style="display: none;">
+          <p>Selamat datang kembali, <span class="player-name" id="welcome-player-name">Player</span>!</p>
+          <p style="font-size: 0.9em; margin-top: 5px; color: #aaaacc;">
+            Skor tertinggi Anda: <span id="player-high-score">0</span> | Peringkat: <span id="player-rank">-</span>
+          </p>
+        </div>
+      </header>
+
+      <main>
+        <!-- Left Panel - Game Info -->
+        <div class="game-info">
+          <div class="info-card">
+            <h2>🏆 TENTANG GAME</h2>
+            <ul class="feature-list">
+              <li>Kendalikan kapal ruang angkasa melalui 5 jalur nebula</li>
+              <li>Hindari rintangan asteroid dan energi kosmik</li>
+              <li>Lawan AI yang semakin cerdas seiring level naik</li>
+              <li>Kumpulkan skor setinggi mungkin</li>
+              <li>Efek visual dan suara yang memukau</li>
+              <li>Sistem high score dengan nama pemain</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h2>🎮 KONTROL</h2>
+            <div class="controls-info">
+              <div class="control-item">
+                <h3>GERAK KIRI</h3>
+                <div class="key">←</div>
+                <div class="key">A</div>
+                <div class="key">Klik Kiri</div>
+              </div>
+              <div class="control-item">
+                <h3>GERAK KANAN</h3>
+                <div class="key">→</div>
+                <div class="key">D</div>
+                <div class="key">Klik Kanan</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel - High Scores -->
+        <div class="high-scores">
+          <div class="scores-card">
+            <div class="scores-header">
+              <h2>🏆 HIGH SCORES</h2>
+              <button id="reset-scores">Reset Scores</button>
+            </div>
+
+            <div class="scores-list" id="scores-list">
+              <!-- High scores akan dimuat di sini -->
+              <div class="no-scores">
+                <p>Belum ada skor tertinggi.</p>
+                <p>Jadilah yang pertama mencapai puncak!</p>
+              </div>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-primary" id="play-btn">
+                <span class="btn-icon">🚀</span>
+                MAIN SEKARANG
+              </button>
+              <button class="btn btn-secondary" id="how-to-play-btn">
+                <span class="btn-icon">❓</span>
+                CARA BERMAIN
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <p>
+          © 2023 Nebula Rush - Game arcade ruang angkasa | Dibuat dengan HTML5
+          Canvas
+        </p>
+        <div class="footer-links">
+          <a href="#" id="view-game-code">Lihat Kode Game</a>
+          <a href="#" id="privacy-link">Kebijakan Privasi</a>
+          <a href="#" id="contact-link">Kontak</a>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Modal untuk input nama -->
+    <div class="modal" id="name-modal">
+      <div class="modal-content">
+        <h2>Masukkan Nama Anda</h2>
+        <p style="margin-bottom: 20px; color: #ccccff">
+          Nama Anda akan digunakan untuk menyimpan high score di leaderboard
+        </p>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="player-name"
+            maxlength="12"
+            placeholder="Masukkan nama (3-12 karakter)"
+            autofocus
+          />
+          <div class="name-error" id="name-error">
+            Nama harus 3-12 karakter dan hanya boleh mengandung huruf, angka, dan spasi
+          </div>
+        </div>
+
+        <div class="modal-buttons">
+          <button class="btn btn-primary" id="start-game-btn">
+            MULAI GAME
+          </button>
+          <button class="btn btn-secondary" id="cancel-btn">BATAL</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Cara Bermain -->
+    <div class="modal" id="how-to-play-modal">
+      <div class="modal-content">
+        <h2>CARA BERMAIN</h2>
+
+        <div style="margin-bottom: 25px">
+          <h3 style="color: var(--primary-color); margin-bottom: 10px">
+            🎯 Tujuan
+          </h3>
+          <p>
+            Kendalikan kapal ruang angkasa melalui nebula berbahaya dan hindari
+            rintangan sebanyak mungkin untuk meraih skor tinggi.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 25px">
+          <h3 style="color: var(--primary-color); margin-bottom: 10px">
+            🚀 Kontrol
+          </h3>
+          <p>
+            Gunakan tombol panah kiri/kanan atau A/D untuk berpindah jalur. Anda
+            juga bisa menggunakan klik mouse atau tombol di layar.
+          </p>
+        </div>
+
+        <div style="margin-bottom: 25px">
+          <h3 style="color: var(--primary-color); margin-bottom: 10px">
+            ⭐ Sistem Poin
+          </h3>
+          <ul style="padding-left: 20px; color: #ccccff">
+            <li>Setiap rintangan yang berhasil dihindari: +1 poin</li>
+            <li>Setiap 8 poin: Naik level</li>
+            <li>Setiap level baru: Kecepatan meningkat</li>
+            <li>Skor tertinggi disimpan di leaderboard</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 style="color: var(--primary-color); margin-bottom: 10px">
+            💡 Tips
+          </h3>
+          <ul style="padding-left: 20px; color: #ccccff">
+            <li>Jangan terburu-buru, perhatikan pola rintangan</li>
+            <li>AI lawan bisa membantu memprediksi jalur aman</li>
+            <li>Level tinggi = kecepatan tinggi, siapkan refleks!</li>
+            <li>Fokus pada kelangsungan hidup, bukan hanya skor</li>
+          </ul>
+        </div>
+
+        <div class="modal-buttons" style="margin-top: 30px">
+          <button class="btn btn-primary" id="close-how-to-play">
+            MENGERTI
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Audio System untuk Home Page
+      class AudioManager {
+        constructor() {
+          this.backgroundMusic = null;
+          this.isMuted = false;
+          this.volume = 0.5;
+          this.customMusic = null;
+          this.defaultMusicUrl = "Asset/Backsound HOME.wav";
+
+          // Load saved settings
+          this.loadSettings();
+          this.init();
+        }
+
+        loadSettings() {
+          const savedVolume = localStorage.getItem("nebulaRushVolume");
+          const savedMute = localStorage.getItem("nebulaRushMute");
+          const savedCustomMusic = localStorage.getItem(
+            "nebulaRushCustomMusic"
+          );
+
+          if (savedVolume) this.volume = parseFloat(savedVolume);
+          if (savedMute) this.isMuted = savedMute === "true";
+          if (savedCustomMusic) this.customMusic = savedCustomMusic;
+        }
+
+        saveSettings() {
+          localStorage.setItem("nebulaRushVolume", this.volume);
+          localStorage.setItem("nebulaRushMute", this.isMuted);
+          if (this.customMusic) {
+            localStorage.setItem("nebulaRushCustomMusic", this.customMusic);
+          }
+        }
+
+        init() {
+          // Create audio element
+          this.backgroundMusic = new Audio();
+          this.backgroundMusic.loop = true;
+          this.backgroundMusic.volume = this.volume;
+          this.backgroundMusic.muted = this.isMuted;
+
+          // Try to load custom music first, then default
+          this.loadMusic();
+
+          // Auto-play when user interacts
+          document.addEventListener(
+            "click",
+            () => {
+              if (this.backgroundMusic.paused) {
+                this.backgroundMusic.play().catch((e) => {
+                  console.log("Audio play blocked:", e);
+                });
+              }
+            },
+            {
+              once: true,
+            }
+          );
+        }
+
+        loadMusic() {
+          const musicUrl = this.customMusic || this.defaultMusicUrl;
+
+          this.backgroundMusic.src = musicUrl;
+          this.backgroundMusic.load();
+
+          // Try to play
+          const playPromise = this.backgroundMusic.play();
+          if (playPromise !== undefined) {
+            playPromise.catch((e) => {
+              console.log("Autoplay blocked, waiting for user interaction");
+            });
+          }
+        }
+
+        toggleMute() {
+          this.isMuted = !this.isMuted;
+          this.backgroundMusic.muted = this.isMuted;
+          this.saveSettings();
+          return this.isMuted;
+        }
+
+        setVolume(volume) {
+          this.volume = volume / 100;
+          this.backgroundMusic.volume = this.volume;
+          this.saveSettings();
+        }
+
+        setCustomMusic(file) {
+          if (file) {
+            const objectUrl = URL.createObjectURL(file);
+            this.customMusic = objectUrl;
+            this.saveSettings();
+            this.loadMusic();
+            return true;
+          }
+          return false;
+        }
+
+        resetToDefault() {
+          this.customMusic = null;
+          localStorage.removeItem("nebulaRushCustomMusic");
+          this.loadMusic();
+        }
+      }
+
+      // Initialize Audio Manager
+      const audioManager = new AudioManager();
+
+      // Generate stars background
+      function createStars() {
+        const starsContainer = document.getElementById("stars");
+        const starCount = 150;
+
+        for (let i = 0; i < starCount; i++) {
+          const star = document.createElement("div");
+          star.classList.add("star");
+
+          // Random position
+          const x = Math.random() * 100;
+          const y = Math.random() * 100;
+
+          // Random size
+          const size = Math.random() * 3 + 1;
+
+          // Random animation delay
+          const delay = Math.random() * 3;
+
+          star.style.left = `${x}%`;
+          star.style.top = `${y}%`;
+          star.style.width = `${size}px`;
+          star.style.height = `${size}px`;
+          star.style.animationDelay = `${delay}s`;
+
+          starsContainer.appendChild(star);
+        }
+      }
+
+      /* ===== VALIDASI NAMA ===== */
+      function validateName(name) {
+        // Hapus spasi di awal dan akhir
+        name = name.trim();
+        
+        // Cek panjang
+        if (name.length < 3 || name.length > 12) {
+          return false;
+        }
+        
+        // Cek karakter yang diperbolehkan: huruf, angka, spasi, underscore
+        const validChars = /^[a-zA-Z0-9 _]+$/;
+        if (!validChars.test(name)) {
+          return false;
+        }
+        
+        return true;
+      }
+
+      // High Score System - YANG SAMA DENGAN GAME.HTML
+      class HighScoreManager {
+        constructor() {
+          this.key = 'nebulaRushHighScores';
+          this.scores = this.loadScores();
+          this.currentPlayerName = localStorage.getItem('nebulaRushPlayerName') || '';
+        }
+
+        loadScores() {
+          const savedScores = localStorage.getItem(this.key);
+          if (savedScores) {
+            return JSON.parse(savedScores);
+          } else {
+            return [];
+          }
+        }
+
+        saveScores() {
+          localStorage.setItem(this.key, JSON.stringify(this.scores));
+        }
+
+        addScore(name, score, level) {
+          const newScore = {
+            name: name.toUpperCase(),
+            score: score,
+            level: level,
+            date: new Date().toISOString().split('T')[0]
+          };
+
+          this.scores.push(newScore);
+          // Sort by score (descending)
+          this.scores.sort((a, b) => b.score - a.score);
+          // Keep only top 20 scores
+          if (this.scores.length > 20) {
+            this.scores = this.scores.slice(0, 20);
+          }
+
+          this.saveScores();
+          this.displayScores();
+
+          // Return rank (1-based index)
+          const rank = this.scores.findIndex(
+            (s) => s.name === newScore.name && s.score === newScore.score
+          ) + 1;
+          
+          return rank;
+        }
+
+        resetScores() {
+          if (confirm("Apakah Anda yakin ingin mereset semua high score? Tindakan ini tidak dapat dibatalkan.")) {
+            this.scores = [];
+            this.saveScores();
+            this.displayScores();
+          }
+        }
+
+        displayScores() {
+          const scoresList = document.getElementById("scores-list");
+
+          if (this.scores.length === 0) {
+            scoresList.innerHTML = `
+                <div class="no-scores">
+                    <p>Belum ada skor tertinggi.</p>
+                    <p>Jadilah yang pertama mencapai puncak!</p>
+                </div>
+            `;
+            return;
+          }
+
+          let html = "";
+          this.scores.forEach((score, index) => {
+            const rank = index + 1;
+            const isCurrentPlayer = score.name === this.currentPlayerName.toUpperCase();
+
+            html += `
+                <div class="score-item ${isCurrentPlayer ? "current-player" : ""}">
+                    <div class="rank ${rank <= 3 ? "rank-" + rank : ""}">${rank}</div>
+                    <div class="score-details">
+                        <div class="player-name ${isCurrentPlayer ? "current" : ""}">
+                            ${score.name}
+                        </div>
+                        <div class="score-info">
+                            <span>Level: ${score.level}</span>
+                            <span>Tanggal: ${score.date}</span>
+                        </div>
+                    </div>
+                    <div class="score-value">${score.score}</div>
+                </div>
+            `;
+          });
+
+          scoresList.innerHTML = html;
+          
+          // Update player stats
+          updatePlayerStats();
+        }
+
+        setPlayerName(name) {
+          this.currentPlayerName = name;
+          localStorage.setItem("nebulaRushPlayerName", this.currentPlayerName);
+        }
+
+        getPlayerName() {
+          return this.currentPlayerName;
+        }
+        
+        getPlayerStats() {
+          if (!this.currentPlayerName) return null;
+          
+          const playerScores = this.scores.filter(s => 
+            s.name === this.currentPlayerName.toUpperCase()
+          );
+          
+          if (playerScores.length === 0) return null;
+          
+          // Cari score tertinggi player
+          const highestScore = Math.max(...playerScores.map(s => s.score));
+          const highestScoreData = playerScores.find(s => s.score === highestScore);
+          
+          // Cari rank
+          const rank = this.scores.findIndex(s => 
+            s.name === this.currentPlayerName.toUpperCase() && 
+            s.score === highestScore
+          ) + 1;
+          
+          return {
+            name: this.currentPlayerName,
+            highScore: highestScore,
+            level: highestScoreData.level,
+            rank: rank
+          };
+        }
+      }
+
+      // Initialize
+      createStars();
+      const scoreManager = new HighScoreManager();
+      
+      // Update player stats
+      function updatePlayerStats() {
+        const playerStats = scoreManager.getPlayerStats();
+        const welcomeMessage = document.getElementById("welcome-message");
+        const playerHighScore = document.getElementById("player-high-score");
+        const playerRank = document.getElementById("player-rank");
+        const welcomePlayerName = document.getElementById("welcome-player-name");
+        
+        if (playerStats && playerStats.name) {
+          welcomePlayerName.textContent = playerStats.name;
+          playerHighScore.textContent = playerStats.highScore;
+          playerRank.textContent = playerStats.rank > 0 ? `#${playerStats.rank}` : '-';
+          welcomeMessage.style.display = 'block';
+        } else {
+          welcomeMessage.style.display = 'none';
+        }
+      }
+
+      // Tampilkan scores
+      scoreManager.displayScores();
+
+      // DOM Elements
+      const playBtn = document.getElementById("play-btn");
+      const howToPlayBtn = document.getElementById("how-to-play-btn");
+      const resetScoresBtn = document.getElementById("reset-scores");
+      const nameModal = document.getElementById("name-modal");
+      const howToPlayModal = document.getElementById("how-to-play-modal");
+      const playerNameInput = document.getElementById("player-name");
+      const startGameBtn = document.getElementById("start-game-btn");
+      const cancelBtn = document.getElementById("cancel-btn");
+      const closeHowToPlayBtn = document.getElementById("close-how-to-play");
+      const nameError = document.getElementById("name-error");
+
+      // Audio Control Elements
+      const muteBtn = document.getElementById("mute-btn");
+      const muteIcon = document.getElementById("mute-icon");
+      const muteText = document.getElementById("mute-text");
+      const settingsBtn = document.getElementById("settings-btn");
+      const settingsModal = document.getElementById("settings-modal");
+      const volumeSlider = document.getElementById("volume-slider");
+      const volumePercentage = document.getElementById("volume-percentage");
+      const customMusicInput = document.getElementById("custom-music");
+      const saveSettingsBtn = document.getElementById("save-settings");
+      const closeSettingsBtn = document.getElementById("close-settings");
+
+      // Initialize UI based on audio settings
+      function updateAudioUI() {
+        // Update mute button
+        muteIcon.textContent = audioManager.isMuted ? "🔇" : "🔊";
+        muteText.textContent = audioManager.isMuted ? "OFF" : "ON";
+
+        // Update volume slider
+        volumeSlider.value = audioManager.volume * 100;
+        volumePercentage.textContent = `${Math.round(
+          audioManager.volume * 100
+        )}%`;
+      }
+
+      // Event Listeners for Audio Controls
+      muteBtn.addEventListener("click", () => {
+        const isMuted = audioManager.toggleMute();
+        muteIcon.textContent = isMuted ? "🔇" : "🔊";
+        muteText.textContent = isMuted ? "OFF" : "ON";
+      });
+
+      settingsBtn.addEventListener("click", () => {
+        settingsModal.style.display = "flex";
+        updateAudioUI();
+      });
+
+      closeSettingsBtn.addEventListener("click", () => {
+        settingsModal.style.display = "none";
+      });
+
+      // Close settings modal when clicking outside
+      settingsModal.addEventListener("click", (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.style.display = "none";
+        }
+      });
+
+      // Volume slider
+      volumeSlider.addEventListener("input", (e) => {
+        const volume = e.target.value;
+        volumePercentage.textContent = `${volume}%`;
+        audioManager.setVolume(volume);
+      });
+
+      // Custom music upload
+      customMusicInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          // Check file size (max 5MB)
+          if (file.size > 5 * 1024 * 1024) {
+            alert("Ukuran file terlalu besar! Maksimal 5MB.");
+            e.target.value = "";
+            return;
+          }
+
+          // Check file type
+          if (!file.type.startsWith("audio/")) {
+            alert("Harap pilih file audio (MP3, WAV, OGG, dll)!");
+            e.target.value = "";
+            return;
+          }
+
+          // Show loading message
+          const originalText = saveSettingsBtn.textContent;
+          saveSettingsBtn.textContent = "Mengupload...";
+          saveSettingsBtn.disabled = true;
+
+          // Simulate upload and processing
+          setTimeout(() => {
+            audioManager.setCustomMusic(file);
+            saveSettingsBtn.textContent = originalText;
+            saveSettingsBtn.disabled = false;
+            alert("Musik custom berhasil diupload!");
+          }, 1000);
+        }
+      });
+
+      // Save settings
+      saveSettingsBtn.addEventListener("click", () => {
+        settingsModal.style.display = "none";
+        alert("Pengaturan berhasil disimpan!");
+      });
+
+      // Event Listeners untuk Game
+      playBtn.addEventListener("click", () => {
+        const playerName = scoreManager.getPlayerName();
+
+        if (playerName && playerName.trim() !== "") {
+          // Langsung mulai game jika nama sudah ada
+          startGame();
+        } else {
+          // Tampilkan modal input nama
+          nameModal.style.display = "flex";
+          playerNameInput.focus();
+          
+          // Pre-fill jika ada di URL parameter
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.has('player')) {
+            playerNameInput.value = decodeURIComponent(urlParams.get('player'));
+          }
+        }
+      });
+
+      howToPlayBtn.addEventListener("click", () => {
+        howToPlayModal.style.display = "flex";
+      });
+
+      resetScoresBtn.addEventListener("click", () => {
+        scoreManager.resetScores();
+      });
+
+      // Validasi real-time
+      playerNameInput.addEventListener('input', () => {
+        const name = playerNameInput.value.trim();
+        if (validateName(name)) {
+          nameError.style.display = 'none';
+          playerNameInput.style.borderColor = '#00FF00';
+        } else {
+          playerNameInput.style.borderColor = 'rgba(0, 150, 255, 0.4)';
+        }
+      });
+
+      startGameBtn.addEventListener("click", () => {
+        const name = playerNameInput.value.trim();
+
+        if (!validateName(name)) {
+          nameError.style.display = 'block';
+          playerNameInput.style.borderColor = '#FF6666';
+          playerNameInput.focus();
+          return;
+        }
+
+        scoreManager.setPlayerName(name);
+        nameModal.style.display = "none";
+        startGame();
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        nameModal.style.display = "none";
+        playerNameInput.value = "";
+        nameError.style.display = 'none';
+        playerNameInput.style.borderColor = 'rgba(0, 150, 255, 0.4)';
+      });
+
+      closeHowToPlayBtn.addEventListener("click", () => {
+        howToPlayModal.style.display = "none";
+      });
+
+      // Enter key to submit name
+      playerNameInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          startGameBtn.click();
+        }
+      });
+
+      // Close modals when clicking outside
+      window.addEventListener("click", (e) => {
+        if (e.target === nameModal) {
+          nameModal.style.display = "none";
+          playerNameInput.value = "";
+          nameError.style.display = 'none';
+          playerNameInput.style.borderColor = 'rgba(0, 150, 255, 0.4)';
+        }
+        if (e.target === howToPlayModal) {
+          howToPlayModal.style.display = "none";
+        }
+      });
+
+      // Fungsi untuk memulai game - DIPERBAIKI
+      function startGame() {
+        const playerName = scoreManager.getPlayerName();
+        
+        // Simpan data player sebelum pindah halaman
+        localStorage.setItem('nebulaRushPlayerName', playerName);
+        
+        // Redirect ke halaman game
+        window.location.href = 'game.html';
+      }
+
+      // Fungsi untuk menampilkan game code
+      document
+        .getElementById("view-game-code")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          alert(
+            "Kode game dapat dilihat di: https://github.com/example/nebula-rush\n\n(Catatan: Ini adalah contoh, sesuaikan dengan URL repositori Anda)"
+          );
+        });
+
+      // Footer links
+      document.getElementById("privacy-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        alert(
+          "Kebijakan Privasi:\n\nData yang disimpan: Nama pemain dan skor tinggi disimpan secara lokal di browser Anda. Kami tidak mengumpulkan data pribadi lainnya."
+        );
+      });
+
+      document.getElementById("contact-link").addEventListener("click", (e) => {
+        e.preventDefault();
+        alert(
+          "Kontak:\n\nEmail: support@nebularush.game\nTwitter: @NebulaRushGame\n\n(Catatan: Ini adalah informasi contoh)"
+        );
+      });
+
+      // Check if there's a new high score from previous game - DIPERBAIKI
+      window.addEventListener("load", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const newScore = urlParams.get("newScore");
+        const newLevel = urlParams.get("newLevel");
+        const playerName = urlParams.get("player");
+        const rank = urlParams.get("rank");
+
+        if (newScore && newLevel && playerName) {
+          // Set player name jika ada
+          if (playerName) {
+            scoreManager.setPlayerName(decodeURIComponent(playerName));
+          }
+          
+          // Add score ke leaderboard
+          const addedRank = scoreManager.addScore(
+            decodeURIComponent(playerName),
+            parseInt(newScore),
+            parseInt(newLevel)
+          );
+
+          // Highlight the new score
+          setTimeout(() => {
+            const scoreItems = document.querySelectorAll(".score-item");
+            const itemIndex = addedRank - 1; // Convert to 0-based index
+            
+            if (scoreItems[itemIndex]) {
+              scoreItems[itemIndex].classList.add("new-high-score");
+
+              // Scroll to the new score
+              scoreItems[itemIndex].scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+              });
+
+              // Remove animation after 3 seconds
+              setTimeout(() => {
+                scoreItems[itemIndex].classList.remove("new-high-score");
+              }, 3000);
+            }
+          }, 500);
+
+          // Tampilkan notifikasi
+          setTimeout(() => {
+            alert(`🎉 Selamat ${decodeURIComponent(playerName)}!\n\nAnda mendapatkan skor baru: ${newScore}\nLevel: ${newLevel}\nPeringkat: #${addedRank}`);
+          }, 1000);
+
+          // Clean URL
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // Initialize audio UI
+        updateAudioUI();
+        
+        // Update player stats
+        updatePlayerStats();
+      });
+
+      // Add audio wave animation to mute button when music is playing
+      function createAudioWave() {
+        const waveContainer = document.createElement("div");
+        waveContainer.className = "audio-wave";
+
+        for (let i = 0; i < 5; i++) {
+          const bar = document.createElement("div");
+          bar.className = "wave-bar";
+          waveContainer.appendChild(bar);
+        }
+
+        return waveContainer;
+      }
+
+      // Add visual feedback for audio playback
+      setTimeout(() => {
+        const muteBtn = document.getElementById("mute-btn");
+        if (!audioManager.isMuted) {
+          const wave = createAudioWave();
+          muteBtn.appendChild(wave);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>

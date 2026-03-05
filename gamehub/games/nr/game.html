@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Rush - Game Lengkap</title>
+
+    <style>
+        :root {
+            --ui-font: 20px;
+            --primary-color: #00FFFF;
+            --secondary-color: #FF3366;
+            --accent-color: #FF9900;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+            background: linear-gradient(135deg, #0a0a2a 0%, #1a0033 100%);
+            color: white;
+        }
+        /* Preloader */
+        
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loader {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(0, 200, 255, 0.3);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        #loading-text {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin-top: 10px;
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        /* Name Input Modal */
+        
+        #name-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .name-modal-content {
+            background: rgba(10, 20, 40, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            border: 2px solid rgba(0, 200, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 150, 255, 0.3);
+            text-align: center;
+        }
+        
+        .name-modal-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .name-modal-content p {
+            color: #CCCCFF;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+        
+        #player-name-input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(0, 150, 255, 0.4);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        #player-name-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+        }
+        
+        #start-game-btn {
+            background: linear-gradient(135deg, var(--primary-color), #0088CC);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.4);
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        #start-game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 150, 255, 0.6);
+        }
+        
+        .name-error {
+            color: #FF6666;
+            margin-top: 10px;
+            display: none;
+        }
+        /* Game Header */
+        
+        #game-header {
+            width: 100%;
+            padding: 15px 30px;
+            background: rgba(0, 20, 40, 0.9);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0, 150, 255, 0.3);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        #player-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        #player-name-display {
+            font-size: 1.3em;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+        
+        #game-title {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        #game-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.05);
+            border-color: var(--primary-color);
+        }
+        /* Game Container */
+        
+        #game-container {
+            position: relative;
+            width: 1000px;
+            height: 700px;
+            max-width: 95vw;
+            max-height: 80vh;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 100, 255, 0.3);
+            border: 3px solid rgba(0, 150, 255, 0.4);
+            margin-top: 80px;
+            display: none; /* Sembunyikan dulu sampai nama dimasukkan */
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        /* Game UI */
+        
+        #game-ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: var(--ui-font);
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 10, 30, 0.7);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 200, 255, 0.3);
+            min-width: 180px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .ui-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            align-items: center;
+            min-width: 160px;
+        }
+        
+        .ui-label {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        
+        .ui-value {
+            color: #FFFFFF;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: right;
+            min-width: 60px;
+        }
+        
+        #score-value {
+            color: #FFD700;
+        }
+        
+        #level-value {
+            color: #00FFAA;
+        }
+        
+        #speed-value {
+            color: #FF6666;
+        }
+        
+        #hi-score-value {
+            color: #FF9900;
+        }
+        /* Pause Overlay */
+        
+        #pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        #pause-title {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+        
+        .pause-info {
+            font-size: 1.3em;
+            margin: 10px 0;
+            color: #CCCCFF;
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.5;
+        }
+        
+        .key-hint {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px 10px;
+            margin: 0 5px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .pause-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .pause-btn {
+            background: linear-gradient(135deg, var(--primary-color), #0088CC);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.4);
+            font-weight: bold;
+            min-width: 180px;
+        }
+        
+        .pause-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 150, 255, 0.6);
+        }
+        
+        #resume-btn {
+            background: linear-gradient(135deg, #00CC00, #00AA00);
+        }
+        
+        #home-btn {
+            background: linear-gradient(135deg, var(--secondary-color), #CC2255);
+        }
+        /* Game Over Overlay */
+        
+        #game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        
+        #game-over-title {
+            font-size: 4em;
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 50, 100, 0.7);
+        }
+        
+        .game-over-message {
+            font-size: 1.5em;
+            margin: 10px 0;
+            color: #FFAAAA;
+        }
+        
+        .score-display {
+            font-size: 3em;
+            color: #FFD700;
+            margin: 20px 0;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+        
+        .score-details {
+            font-size: 1.3em;
+            margin: 10px 0;
+            color: #CCCCFF;
+        }
+        
+        .new-high-score {
+            color: #FF9900 !important;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .game-over-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+        
+        .game-over-btn {
+            background: linear-gradient(135deg, var(--primary-color), #0088CC);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.4);
+            font-weight: bold;
+            min-width: 180px;
+        }
+        
+        .game-over-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 150, 255, 0.6);
+        }
+        
+        #play-again-btn {
+            background: linear-gradient(135deg, #00CC00, #00AA00);
+        }
+        
+        #back-to-home-btn {
+            background: linear-gradient(135deg, var(--secondary-color), #CC2255);
+        }
+        /* Footer */
+        
+        #game-footer {
+            color: #8899AA;
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            font-size: 0.9em;
+            max-width: 800px;
+            display: none; /* Sembunyikan dulu */
+        }
+        
+        .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        /* Responsive */
+        
+        @media (max-width: 768px) {
+            #game-header {
+                padding: 10px 15px;
+            }
+            #game-title {
+                font-size: 1.4em;
+                position: static;
+                transform: none;
+                margin: 0 auto;
+            }
+            #player-info {
+                display: none;
+            }
+            #game-controls {
+                gap: 5px;
+            }
+            .control-btn {
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+            #game-container {
+                height: 60vh;
+                margin-top: 70px;
+            }
+            .pause-buttons,
+            .game-over-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .pause-btn,
+            .game-over-btn {
+                min-width: 150px;
+                padding: 12px 30px;
+            }
+            #pause-title,
+            #game-over-title {
+                font-size: 3em;
+            }
+            .name-modal-content {
+                padding: 25px;
+            }
+            .name-modal-content h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="preloader">
+        <div class="loader"></div>
+        <div id="loading-text">Memuat game...</div>
+    </div>
+
+    <!-- Name Input Modal -->
+    <div id="name-modal">
+        <div class="name-modal-content">
+            <h2>MASUKKAN NAMA ANDA</h2>
+            <p>Nama Anda akan digunakan untuk menyimpan high score di leaderboard</p>
+            
+            <input type="text" id="player-name-input" 
+                   placeholder="Masukkan nama (3-12 karakter)" 
+                   maxlength="12"
+                   autocomplete="off">
+            
+            <div class="name-error" id="name-error">
+                Nama harus 3-12 karakter dan hanya boleh mengandung huruf, angka, dan spasi
+            </div>
+            
+            <button id="start-game-btn">MULAI GAME</button>
+        </div>
+    </div>
+
+    <!-- Game Header -->
+    <div id="game-header" style="display: none;">
+        <div id="player-info">
+            <div>👤</div>
+            <div id="player-name-display">PEMAIN</div>
+        </div>
+
+        <div id="game-title">NEBULA RUSH</div>
+
+        <div id="game-controls">
+            <button class="control-btn" id="pause-control">
+                <span>⏸️</span> <span>PAUSE</span>
+            </button>
+            <button class="control-btn" id="mute-control">
+                <span id="mute-icon">🔊</span> <span id="mute-text">ON</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="game-container">
+        <canvas id="game"></canvas>
+
+        <!-- Game UI -->
+        <div id="game-ui">
+            <div class="ui-row">
+                <div class="ui-label">SCORE:</div>
+                <div id="score-value" class="ui-value">0</div>
+            </div>
+            <div class="ui-row">
+                <div class="ui-label">LEVEL:</div>
+                <div id="level-value" class="ui-value">1</div>
+            </div>
+            <div class="ui-row">
+                <div class="ui-label">SPEED:</div>
+                <div id="speed-value" class="ui-value">5</div>
+            </div>
+            <div class="ui-row">
+                <div class="ui-label">HI-SCORE:</div>
+                <div id="hi-score-value" class="ui-value">0</div>
+            </div>
+        </div>
+
+        <!-- Pause Overlay -->
+        <div id="pause-overlay">
+            <div id="pause-title">GAME PAUSED</div>
+            <div class="pause-info">Tekan <span class="key-hint">P</span> atau <span class="key-hint">ESC</span> untuk melanjutkan</div>
+            <div class="pause-info">Kontrol: <span class="key-hint">←</span> <span class="key-hint">→</span> atau <span class="key-hint">A</span> <span class="key-hint">D</span></div>
+            <div class="pause-info">Klik kiri/kanan layar untuk bergerak</div>
+
+            <div class="pause-buttons">
+                <button id="resume-btn" class="pause-btn">LANJUTKAN</button>
+                <button id="home-btn" class="pause-btn">KE HOME</button>
+            </div>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div id="game-over-overlay">
+            <div id="game-over-title">GAME OVER</div>
+            <div class="game-over-message">Kapal Anda hancur!</div>
+
+            <div class="score-display">
+                Skor: <span id="final-score">0</span>
+            </div>
+
+            <div class="score-details">
+                Level: <span id="final-level">1</span>
+            </div>
+
+            <div class="score-details">
+                Skor Tertinggi: <span id="final-hi-score">0</span>
+            </div>
+
+            <div id="new-high-score-msg" class="score-details new-high-score" style="display: none;">
+                🎉 REKOR BARU! 🎉
+            </div>
+
+            <div class="game-over-buttons">
+                <button id="play-again-btn" class="game-over-btn">MAIN LAGI</button>
+                <button id="back-to-home-btn" class="game-over-btn">KE HOME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Footer -->
+    <div id="game-footer">
+        <p>Gunakan <span class="highlight">tombol panah kiri/kanan</span> atau <span class="highlight">A/D</span> untuk mengontrol kapal</p>
+        <p>Tekan <span class="highlight">P</span> untuk pause | Tekan <span class="highlight">ESC</span> untuk kembali</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const preloader = document.getElementById("preloader");
+        const loadingText = document.getElementById("loading-text");
+        const nameModal = document.getElementById("name-modal");
+        const nameInput = document.getElementById("player-name-input");
+        const nameError = document.getElementById("name-error");
+        const startGameBtn = document.getElementById("start-game-btn");
+        const playerNameDisplay = document.getElementById("player-name-display");
+        const gameContainer = document.getElementById("game-container");
+        const gameHeader = document.getElementById("game-header");
+        const gameFooter = document.getElementById("game-footer");
+
+        let playerName = "";
+
+        /* ===== VALIDASI NAMA ===== */
+        function validateName(name) {
+            // Hapus spasi di awal dan akhir
+            name = name.trim();
+            
+            // Cek panjang
+            if (name.length < 3 || name.length > 12) {
+                return false;
+            }
+            
+            // Cek karakter yang diperbolehkan: huruf, angka, spasi, underscore
+            const validChars = /^[a-zA-Z0-9 _]+$/;
+            if (!validChars.test(name)) {
+                return false;
+            }
+            
+            return true;
+        }
+
+        /* ===== HIGH SCORE SYSTEM ===== */
+        class HighScoreSystem {
+            constructor() {
+                this.key = 'nebulaRushHighScores';
+                this.scores = this.loadScores();
+            }
+
+            loadScores() {
+                const saved = localStorage.getItem(this.key);
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveScores() {
+                localStorage.setItem(this.key, JSON.stringify(this.scores));
+            }
+
+            addScore(name, score, level) {
+                const newScore = {
+                    name: name.toUpperCase(),
+                    score: score,
+                    level: level,
+                    date: new Date().toISOString().split('T')[0]
+                };
+
+                this.scores.push(newScore);
+                // Sort by score descending
+                this.scores.sort((a, b) => b.score - a.score);
+                
+                // Keep top 20 scores
+                if (this.scores.length > 20) {
+                    this.scores = this.scores.slice(0, 20);
+                }
+
+                this.saveScores();
+                
+                // Return rank (1-based index)
+                const rank = this.scores.findIndex(s => 
+                    s.name === newScore.name && 
+                    s.score === newScore.score && 
+                    s.date === newScore.date
+                ) + 1;
+                
+                return rank;
+            }
+
+            getHighScore() {
+                return this.scores.length > 0 ? this.scores[0].score : 0;
+            }
+
+            getPlayerHighScore(name) {
+                const playerScores = this.scores.filter(s => s.name === name.toUpperCase());
+                return playerScores.length > 0 ? Math.max(...playerScores.map(s => s.score)) : 0;
+            }
+        }
+
+        const highScoreSystem = new HighScoreSystem();
+
+        /* ===== ASSET LOADING ===== */
+        const assets = {
+            images: {},
+            audio: {}
+        };
+
+        let assetsLoaded = 0;
+        let totalAssets = 0;
+
+        function loadAssets() {
+            const imageFiles = [{
+                name: 'playerShip',
+                url: 'Asset/output-onlinegiftools.gif'
+            }, {
+                name: 'background',
+                url: 'Asset/02.png'
+            }];
+
+            const audioFiles = [{
+                name: 'backgroundMusic',
+                url: 'Asset/Backsound GAME.mp3'
+            }];
+
+            totalAssets = imageFiles.length + audioFiles.length;
+
+            // Load images
+            imageFiles.forEach(file => {
+                const img = new Image();
+                img.onload = () => {
+                    assets.images[file.name] = img;
+                    assetsLoaded++;
+                    updateLoadingProgress();
+                };
+                img.onerror = () => {
+                    console.warn(`Gagal memuat gambar: ${file.url}`);
+                    assets.images[file.name] = null;
+                    assetsLoaded++;
+                    updateLoadingProgress();
+                };
+                img.src = file.url;
+            });
+
+            // Load audio
+            audioFiles.forEach(file => {
+                const audio = new Audio();
+                audio.preload = 'auto';
+                audio.oncanplaythrough = () => {
+                    assets.audio[file.name] = audio;
+                    assetsLoaded++;
+                    updateLoadingProgress();
+                };
+                audio.onerror = () => {
+                    console.warn(`Gagal memuat audio: ${file.url}`);
+                    assets.audio[file.name] = null;
+                    assetsLoaded++;
+                    updateLoadingProgress();
+                };
+                audio.src = file.url;
+                audio.load();
+            });
+        }
+
+        function updateLoadingProgress() {
+            const progress = Math.floor((assetsLoaded / totalAssets) * 100);
+            loadingText.textContent = `Memuat game... ${progress}%`;
+
+            if (assetsLoaded === totalAssets) {
+                setTimeout(() => {
+                    preloader.style.display = 'none';
+                    // Tampilkan modal nama
+                    nameModal.style.display = 'flex';
+                    nameInput.focus();
+                }, 500);
+            }
+        }
+
+        // Fallback images jika asset custom tidak tersedia
+        function createFallbackImages() {
+            // Fallback untuk player ship
+            const playerCanvas = document.createElement('canvas');
+            playerCanvas.width = 50;
+            playerCanvas.height = 50;
+            const playerCtx = playerCanvas.getContext('2d');
+
+            playerCtx.fillStyle = "#00FFFF";
+            playerCtx.beginPath();
+            playerCtx.moveTo(25, 5);
+            playerCtx.lineTo(10, 45);
+            playerCtx.lineTo(40, 45);
+            playerCtx.closePath();
+            playerCtx.fill();
+
+            playerCtx.fillStyle = '#FFFF00';
+            playerCtx.fillRect(20, 45, 10, 8);
+
+            assets.images.playerShip = playerCanvas;
+
+            // Fallback untuk background
+            assets.images.background = null;
+        }
+
+        // Event listener untuk mulai game
+        startGameBtn.addEventListener('click', startGameWithName);
+        
+        // Enter key untuk submit nama
+        nameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                startGameWithName();
+            }
+        });
+
+        // Validasi real-time
+        nameInput.addEventListener('input', () => {
+            const name = nameInput.value.trim();
+            if (validateName(name)) {
+                nameError.style.display = 'none';
+                nameInput.style.borderColor = '#00FF00';
+            } else {
+                nameInput.style.borderColor = 'rgba(0, 150, 255, 0.4)';
+            }
+        });
+
+        function startGameWithName() {
+            const name = nameInput.value.trim();
+            
+            if (!validateName(name)) {
+                nameError.style.display = 'block';
+                nameInput.style.borderColor = '#FF6666';
+                nameInput.focus();
+                return;
+            }
+            
+            playerName = name;
+            
+            // Simpan nama di localStorage
+            localStorage.setItem('nebulaRushPlayerName', playerName);
+            
+            // Update display name
+            playerNameDisplay.textContent = playerName;
+            
+            // Sembunyikan modal, tampilkan game
+            nameModal.style.display = 'none';
+            gameHeader.style.display = 'flex';
+            gameContainer.style.display = 'block';
+            gameFooter.style.display = 'block';
+            
+            // Mulai game
+            initGame();
+        }
+
+        // Mulai loading assets
+        loadAssets();
+
+        /* ===== GAME INITIALIZATION ===== */
+        function initGame() {
+            // Gunakan fallback jika asset tidak tersedia
+            if (!assets.images.playerShip) {
+                createFallbackImages();
+            }
+
+            // Setup audio
+            let isMuted = false;
+            let backgroundMusic = assets.audio.backgroundMusic;
+
+            if (backgroundMusic) {
+                backgroundMusic.loop = true;
+                backgroundMusic.volume = 0.5;
+
+                // Coba play audio
+                const playPromise = backgroundMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        console.log("Autoplay blocked");
+                    });
+                }
+            }
+
+            // Setup mute button
+            const muteBtn = document.getElementById("mute-control");
+            const muteIcon = document.getElementById("mute-icon");
+            const muteText = document.getElementById("mute-text");
+
+            muteBtn.addEventListener("click", () => {
+                isMuted = !isMuted;
+
+                if (backgroundMusic) {
+                    backgroundMusic.muted = isMuted;
+                }
+
+                muteIcon.textContent = isMuted ? '🔇' : '🔊';
+                muteText.textContent = isMuted ? 'OFF' : 'ON';
+            });
+
+            /* ===== INISIALISASI CANVAS ===== */
+            function resizeCanvas() {
+                const container = document.getElementById("game-container");
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+
+                laneWidth = canvas.width / lanes;
+
+                player.y = canvas.height * 0.85;
+                player.targetX = player.lane * laneWidth + laneWidth / 2;
+                player.x = player.targetX;
+
+                ai.y = canvas.height * 0.75;
+                ai.targetX = ai.lane * laneWidth + laneWidth / 2;
+                ai.x = ai.targetX;
+
+                player.size = Math.max(30, canvas.width * 0.025);
+                ai.size = Math.max(30, canvas.width * 0.025);
+            }
+
+            window.addEventListener('resize', resizeCanvas);
+
+            /* ===== DATA GAME ===== */
+            const lanes = 5;
+            let laneWidth;
+
+            const player = {
+                lane: 2,
+                x: 0,
+                y: 0,
+                targetX: 0,
+                size: 30,
+                speed: 0.4,
+                moving: false,
+                color: "#00FFFF"
+            };
+
+            const ai = {
+                lane: 1,
+                x: 0,
+                y: 0,
+                targetX: 0,
+                size: 30,
+                speed: 0.25,
+                color: "#FF9900"
+            };
+
+            let obstacles = [];
+            let particles = [];
+            let score = 0;
+            let level = 1;
+            let baseSpeed = 5;
+            let gameOver = false;
+            let gamePaused = false;
+            let hiScore = highScoreSystem.getHighScore();
+
+            /* ===== PARTICLE SYSTEM ===== */
+            function createParticles(x, y, color, count = 15) {
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: x,
+                        y: y,
+                        vx: (Math.random() - 0.5) * 12,
+                        vy: (Math.random() - 0.5) * 12,
+                        size: Math.random() * 4 + 1,
+                        color: color,
+                        life: 1.0,
+                        decay: 0.015 + Math.random() * 0.02
+                    });
+                }
+            }
+
+            function updateParticles() {
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.15;
+                    p.life -= p.decay;
+
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                    }
+                }
+            }
+
+            function drawParticles() {
+                particles.forEach(p => {
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+                ctx.globalAlpha = 1.0;
+            }
+
+            /* ===== UI UPDATES ===== */
+            function updateUI() {
+                document.getElementById("score-value").textContent = score;
+                document.getElementById("level-value").textContent = level;
+                document.getElementById("speed-value").textContent = baseSpeed.toFixed(1);
+                document.getElementById("hi-score-value").textContent = hiScore;
+            }
+
+            /* ===== KONTROL GAME ===== */
+            const pauseBtn = document.getElementById("pause-control");
+            const resumeBtn = document.getElementById("resume-btn");
+            const homeBtn = document.getElementById("home-btn");
+            const playAgainBtn = document.getElementById("play-again-btn");
+            const backToHomeBtn = document.getElementById("back-to-home-btn");
+            const pauseOverlay = document.getElementById("pause-overlay");
+            const gameOverOverlay = document.getElementById("game-over-overlay");
+
+            // Fungsi gerak kiri
+            function moveLeft() {
+                if (player.lane > 0 && !player.moving && !gameOver && !gamePaused) {
+                    player.lane--;
+                    player.targetX = player.lane * laneWidth + laneWidth / 2;
+                    player.moving = true;
+                    createParticles(player.x, player.y, '#00FFFF', 8);
+                }
+            }
+
+            // Fungsi gerak kanan
+            function moveRight() {
+                if (player.lane < lanes - 1 && !player.moving && !gameOver && !gamePaused) {
+                    player.lane++;
+                    player.targetX = player.lane * laneWidth + laneWidth / 2;
+                    player.moving = true;
+                    createParticles(player.x, player.y, '#00FFFF', 8);
+                }
+            }
+
+            // Smooth movement interpolation
+            function updatePlayerPosition() {
+                if (Math.abs(player.x - player.targetX) > 0.5) {
+                    const dx = player.targetX - player.x;
+                    player.x += dx * player.speed;
+                } else {
+                    player.x = player.targetX;
+                    if (player.moving) {
+                        player.moving = false;
+                        createParticles(player.x, player.y, '#FFFFFF', 5);
+                    }
+                }
+            }
+
+            function updateAIPosition() {
+                if (Math.abs(ai.x - ai.targetX) > 0.5) {
+                    const dx = ai.targetX - ai.x;
+                    ai.x += dx * ai.speed;
+                } else {
+                    ai.x = ai.targetX;
+                }
+            }
+
+            /* ===== EVENT LISTENERS ===== */
+            // Kontrol keyboard
+            document.addEventListener('keydown', (e) => {
+                if (gameOver) return;
+
+                switch (e.key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        moveLeft();
+                        e.preventDefault();
+                        break;
+
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        moveRight();
+                        e.preventDefault();
+                        break;
+
+                    case 'p':
+                    case 'P':
+                    case 'Escape':
+                        togglePause();
+                        e.preventDefault();
+                        break;
+                }
+            });
+
+            // Kontrol mouse (klik kiri/kanan di canvas)
+            canvas.addEventListener('mousedown', (e) => {
+                if (gameOver || gamePaused) return;
+
+                const rect = canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const canvasCenter = canvas.width / 2;
+
+                if (clickX < canvasCenter) {
+                    moveLeft();
+                } else {
+                    moveRight();
+                }
+            });
+
+            // Pause game
+            pauseBtn.addEventListener('click', togglePause);
+            resumeBtn.addEventListener('click', togglePause);
+
+            // Home button - DIPERBAIKI
+            homeBtn.addEventListener('click', goToHome);
+            backToHomeBtn.addEventListener('click', goToHome);
+
+            // Play again
+            playAgainBtn.addEventListener('click', () => {
+                location.reload();
+            });
+
+            function togglePause() {
+                if (gameOver) return;
+
+                gamePaused = !gamePaused;
+                pauseOverlay.style.display = gamePaused ? 'flex' : 'none';
+
+                if (backgroundMusic) {
+                    if (gamePaused) {
+                        backgroundMusic.pause();
+                    } else {
+                        backgroundMusic.play().catch(e => console.log("Audio play error:", e));
+                    }
+                }
+            }
+
+            function goToHome() {
+                // Simpan skor jika lebih tinggi dari hi-score sebelumnya
+                if (score > hiScore && playerName) {
+                    const rank = highScoreSystem.addScore(playerName, score, level);
+                    
+                    // Redirect ke home.html dengan parameter score baru
+                    window.location.href = 'home.html?newScore=' + score + 
+                                           '&newLevel=' + level + 
+                                           '&player=' + encodeURIComponent(playerName) +
+                                           '&rank=' + rank;
+                } else {
+                    // Redirect tanpa parameter
+                    window.location.href = 'home.html';
+                }
+            }
+
+            /* ===== OBSTACLE SYSTEM ===== */
+            function spawnObstacle() {
+                if (gameOver || gamePaused) return;
+
+                const obstacleSize = Math.max(25, canvas.width * 0.025);
+                const lane = Math.floor(Math.random() * lanes);
+
+                const obstaclesToSpawn = Math.random() < 0.2 ? 2 : 1;
+
+                for (let i = 0; i < obstaclesToSpawn; i++) {
+                    const actualLane = (lane + i) % lanes;
+                    obstacles.push({
+                        lane: actualLane,
+                        x: 0,
+                        y: -40 - (i * 30),
+                        size: obstacleSize,
+                        wobble: Math.random() * Math.PI * 2,
+                        wobbleSpeed: 0.03 + Math.random() * 0.04,
+                        color: `hsl(${Math.random() * 60 + 330}, 85%, 65%)`
+                    });
+                }
+            }
+
+            /* ===== GRAFIK ===== */
+            function drawBackground() {
+                if (assets.images.background) {
+                    const bgWidth = assets.images.background.width;
+                    const bgHeight = assets.images.background.height;
+                    const scale = Math.max(canvas.width / bgWidth, canvas.height / bgHeight);
+
+                    ctx.save();
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.scale(scale, scale);
+                    ctx.drawImage(assets.images.background, -bgWidth / 2, -bgHeight / 2);
+                    ctx.restore();
+                } else {
+                    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+                    gradient.addColorStop(0, "#000822");
+                    gradient.addColorStop(0.5, "#0a0022");
+                    gradient.addColorStop(1, "#1a0033");
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+                    for (let i = 0; i < 80; i++) {
+                        const x = (i * 157) % canvas.width;
+                        const y = (i * 113) % canvas.height;
+                        const size = (Math.sin(Date.now() * 0.0005 + i) * 0.5 + 0.5) * 2;
+                        const alpha = 0.5 + Math.sin(Date.now() * 0.001 + i * 0.5) * 0.3;
+                        ctx.globalAlpha = alpha;
+                        ctx.beginPath();
+                        ctx.arc(x, y, size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    ctx.globalAlpha = 1.0;
+                }
+
+                ctx.strokeStyle = "rgba(100, 150, 255, 0.2)";
+                ctx.lineWidth = 2;
+                ctx.setLineDash([8, 12]);
+                for (let i = 1; i < lanes; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(laneWidth * i, 0);
+                    ctx.lineTo(laneWidth * i, canvas.height);
+                    ctx.stroke();
+                }
+                ctx.setLineDash([]);
+            }
+
+            function drawShip(x, y, color, size = 30, isPlayer = true) {
+                if (assets.images.playerShip) {
+                    ctx.save();
+                    ctx.translate(x, y);
+
+                    const rotation = isPlayer ? (player.moving ? (player.targetX > player.x ? 0.1 : -0.1) : 0) : 0;
+                    ctx.rotate(rotation);
+
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = isPlayer ? 25 : 15;
+
+                    const imgSize = size * 1.5;
+                    ctx.drawImage(assets.images.playerShip, -imgSize / 2, -imgSize / 2, imgSize, imgSize);
+
+                    const flameSize = size * 0.7 * (Math.sin(Date.now() * 0.012) * 0.4 + 0.7);
+                    const gradient = ctx.createRadialGradient(0, size * 0.5, 0, 0, size * 0.5, flameSize);
+                    gradient.addColorStop(0, '#FFFF00');
+                    gradient.addColorStop(0.6, '#FF6600');
+                    gradient.addColorStop(1, 'transparent');
+
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(0, size * 0.5, flameSize, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.restore();
+                } else {
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = isPlayer ? 25 : 15;
+
+                    ctx.fillStyle = color;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - size * 0.9);
+                    ctx.lineTo(x - size * 0.7, y + size * 0.7);
+                    ctx.lineTo(x + size * 0.7, y + size * 0.7);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = isPlayer ? '#FFFFFF' : '#CCCCFF';
+                    ctx.beginPath();
+                    ctx.arc(x, y - size * 0.3, size * 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#FFFF00';
+                    ctx.beginPath();
+                    ctx.moveTo(x - size * 0.35, y + size * 0.7);
+                    ctx.lineTo(x + size * 0.35, y + size * 0.7);
+                    ctx.lineTo(x + size * 0.2, y + size * 1.1);
+                    ctx.lineTo(x - size * 0.2, y + size * 1.1);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    const flameSize = size * 0.7 * (Math.sin(Date.now() * 0.012) * 0.4 + 0.7);
+                    const gradient = ctx.createRadialGradient(
+                        x, y + size * 1.1, 0,
+                        x, y + size * 1.1, flameSize
+                    );
+                    gradient.addColorStop(0, '#FFFF00');
+                    gradient.addColorStop(0.6, '#FF6600');
+                    gradient.addColorStop(1, 'transparent');
+
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(x, y + size * 1.1, flameSize, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.shadowBlur = 0;
+            }
+
+            function drawObstacle(obstacle, time) {
+                const x = obstacle.lane * laneWidth + laneWidth / 2 + Math.sin(obstacle.wobble) * 4;
+                obstacle.wobble += obstacle.wobbleSpeed;
+
+                ctx.shadowColor = obstacle.color;
+                ctx.shadowBlur = 15;
+
+                ctx.fillStyle = obstacle.color;
+                ctx.beginPath();
+                ctx.arc(x, obstacle.y, obstacle.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                const pulse = Math.sin(time * 0.006) * 0.2 + 0.8;
+                ctx.fillStyle = `rgba(255, 120, 120, ${0.6 * pulse})`;
+                ctx.beginPath();
+                ctx.arc(x, obstacle.y, obstacle.size * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FFFFFF';
+                ctx.beginPath();
+                ctx.arc(x, obstacle.y, obstacle.size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.shadowBlur = 0;
+            }
+
+            /* ===== GAME LOGIC ===== */
+            function checkCollisions() {
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const o = obstacles[i];
+
+                    const dx = player.x - (o.lane * laneWidth + laneWidth / 2);
+                    const dy = player.y - o.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const collisionDistance = player.size * 0.8 + o.size * 0.8;
+
+                    if (distance < collisionDistance) {
+                        gameOver = true;
+
+                        for (let j = 0; j < 70; j++) {
+                            createParticles(
+                                player.x,
+                                player.y,
+                                j % 4 === 0 ? '#FF3333' :
+                                j % 4 === 1 ? '#FF9933' :
+                                j % 4 === 2 ? '#FFFF33' : '#FF33FF',
+                                1
+                            );
+                        }
+
+                        // Cek high score
+                        const isNewHighScore = score > hiScore;
+                        if (isNewHighScore && playerName) {
+                            hiScore = score;
+                            const rank = highScoreSystem.addScore(playerName, score, level);
+                            document.getElementById('new-high-score-msg').style.display = 'block';
+                        }
+
+                        // Update UI game over
+                        setTimeout(() => {
+                            document.getElementById("final-score").textContent = score;
+                            document.getElementById("final-level").textContent = level;
+                            document.getElementById("final-hi-score").textContent = hiScore;
+                            gameOverOverlay.style.display = "flex";
+                        }, 500);
+
+                        return;
+                    }
+
+                    // AI menghindar
+                    const aiDx = ai.x - (o.lane * laneWidth + laneWidth / 2);
+                    const aiDy = ai.y - o.y;
+                    const aiDistance = Math.sqrt(aiDx * aiDx + aiDy * aiDy);
+
+                    if (aiDistance < collisionDistance && !gameOver && !gamePaused) {
+                        const possibleLanes = [];
+                        for (let l = 0; l < lanes; l++) {
+                            if (l !== o.lane && l !== ai.lane) {
+                                const otherObstacles = obstacles.filter(obs =>
+                                    obs !== o && obs.lane === l &&
+                                    Math.abs(obs.y - ai.y) < 100
+                                );
+
+                                if (otherObstacles.length === 0) {
+                                    possibleLanes.push(l);
+                                }
+                            }
+                        }
+
+                        if (possibleLanes.length > 0) {
+                            ai.lane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
+                            ai.targetX = ai.lane * laneWidth + laneWidth / 2;
+                            createParticles(ai.x, ai.y, ai.color, 8);
+                        }
+                    }
+
+                    // Hapus obstacle jika keluar layar
+                    if (o.y > canvas.height + 50) {
+                        obstacles.splice(i, 1);
+                        score++;
+                        updateUI();
+
+                        // Update level
+                        if (score % 8 === 0) {
+                            level++;
+                            baseSpeed += 0.7;
+                            updateUI();
+
+                            // Update AI
+                            const oldLane = ai.lane;
+                            let newLane;
+                            do {
+                                newLane = Math.floor(Math.random() * lanes);
+                            } while (newLane === oldLane);
+
+                            ai.lane = newLane;
+                            ai.targetX = ai.lane * laneWidth + laneWidth / 2;
+                        }
+                    }
+                }
+            }
+
+            /* ===== GAME LOOP ===== */
+            let lastTime = 0;
+            let obstacleSpawnTime = 0;
+            const obstacleInterval = 750;
+
+            function update(currentTime = 0) {
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+
+                if (gamePaused) {
+                    requestAnimationFrame(update);
+                    return;
+                }
+
+                // Spawn obstacle
+                obstacleSpawnTime += deltaTime;
+                if (obstacleSpawnTime > obstacleInterval && !gameOver) {
+                    spawnObstacle();
+                    obstacleSpawnTime = 0;
+
+                    const newInterval = Math.max(350, obstacleInterval - (level * 20));
+                    if (newInterval < obstacleInterval) {
+                        obstacleSpawnTime = -100;
+                    }
+                }
+
+                // Clear canvas
+                ctx.fillStyle = 'rgba(0, 0, 10, 0.08)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Update posisi
+                updatePlayerPosition();
+                updateAIPosition();
+                updateParticles();
+
+                // Gambar
+                drawBackground();
+                drawParticles();
+
+                // Gambar obstacles
+                obstacles.forEach(o => {
+                    o.y += baseSpeed * (deltaTime / 16);
+                    drawObstacle(o, currentTime);
+                });
+
+                // Gambar kapal
+                drawShip(player.x, player.y, player.color, player.size, true);
+                drawShip(ai.x, ai.y, ai.color, ai.size, false);
+
+                // Cek tabrakan
+                if (!gameOver) {
+                    checkCollisions();
+                }
+
+                requestAnimationFrame(update);
+            }
+
+            /* ===== AI BEHAVIOR ===== */
+            setInterval(() => {
+                if (!gameOver && !gamePaused) {
+                    const upcomingObstacles = obstacles.filter(o =>
+                        o.y > ai.y - 120 && o.y < ai.y + 80
+                    );
+
+                    if (upcomingObstacles.length > 0) {
+                        const dangerousLanes = new Set(upcomingObstacles.map(o => o.lane));
+                        const safeLanes = [];
+
+                        for (let l = 0; l < lanes; l++) {
+                            if (!dangerousLanes.has(l) && l !== ai.lane) {
+                                safeLanes.push(l);
+                            }
+                        }
+
+                        if (safeLanes.length > 0) {
+                            ai.lane = safeLanes[Math.floor(Math.random() * safeLanes.length)];
+                            ai.targetX = ai.lane * laneWidth + laneWidth / 2;
+                        }
+                    } else {
+                        const moveChance = 0.2 + (level * 0.02);
+                        if (Math.random() < moveChance) {
+                            const oldLane = ai.lane;
+                            let newLane;
+                            do {
+                                newLane = Math.floor(Math.random() * lanes);
+                            } while (newLane === oldLane);
+
+                            ai.lane = newLane;
+                            ai.targetX = ai.lane * laneWidth + laneWidth / 2;
+                        }
+                    }
+                }
+            }, 700);
+
+            /* ===== INISIALISASI GAME ===== */
+            resizeCanvas();
+            updateUI();
+            update();
+
+            // Fokus canvas
+            canvas.setAttribute('tabindex', '0');
+            canvas.focus();
+
+            canvas.addEventListener('focus', () => {
+                canvas.style.outline = '2px solid #00AAFF';
+            });
+
+            canvas.addEventListener('blur', () => {
+                canvas.style.outline = 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

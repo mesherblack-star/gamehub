@@ -1596,9 +1596,13 @@ h3 { font-size: clamp(1.1rem, 2vw, 1.4rem); }
 .trending-row::-webkit-scrollbar { display: none; }
 
 .trending-card {
-  min-width: 200px;
+  width: 200px;
   flex-shrink: 0;
   scroll-snap-align: start;
+}
+
+.trending-card .card-thumb {
+  height: 125px; /* 200px * 10/16 for 16:10 aspect ratio */
 }
 
 /* ── Bookmark Page ── */
