@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kucing Lucu - Game Play (Gamepad Support)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            position: relative;
+        }
+
+        .game-board {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #4d96ff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: #fff0f5;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-item {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            min-width: 120px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .score-value {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        .level-value {
+            color: #4d96ff;
+            font-weight: bold;
+        }
+
+        .lives-value {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            border: 3px solid #4d96ff;
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        .game-over-content h2 {
+            font-size: 3rem;
+            color: #ffd93d;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #ff6b6b;
+        }
+
+        .final-score {
+            font-size: 1.8rem;
+            color: #ffd93d;
+            margin-bottom: 10px;
+        }
+
+        .high-score {
+            font-size: 1.5rem;
+            color: #4d96ff;
+            margin-bottom: 30px;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .game-over-button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .game-over-button:hover {
+            background-color: #6aabff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(77, 150, 255, 0.4);
+        }
+
+        /* Virtual Joystick */
+        .joystick-container {
+            position: absolute;
+            bottom: 80px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            display: none;
+            z-index: 10;
+        }
+
+        .joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .joystick-stick {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(77, 150, 255, 0.9);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+        }
+
+        .joystick-stick.active {
+            background: rgba(107, 171, 255, 0.9);
+        }
+
+        /* Button Controls */
+        .button-controls {
+            position: absolute;
+            bottom: 80px;
+            right: 30px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-button {
+            width: 60px;
+            height: 60px;
+            font-size: 1.3rem;
+            background-color: rgba(255, 107, 107, 0.8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            touch-action: none;
+        }
+
+        .control-button:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 107, 107, 1);
+        }
+
+        .control-button.wasd {
+            background-color: rgba(77, 150, 255, 0.8);
+        }
+
+        .control-button.wasd:active {
+            background-color: rgba(77, 150, 255, 1);
+        }
+
+        .control-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            z-index: 10;
+            font-family: Arial, sans-serif;
+            display: none;
+        }
+
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+        }
+
+        .shock-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            display: none;
+            z-index: 50;
+            animation: shockFlash 0.5s infinite alternate;
+        }
+
+        /* Gamepad Indicator */
+        #gamepadIndicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 204, 68, 0.3);
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Pause Overlay */
+        #pauseOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 204, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 204, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 204, 68, 0); }
+        }
+
+        @keyframes gamepadConnect {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes gamepadDisconnect {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        @keyframes shockFlash {
+            0% { background-color: rgba(255, 255, 255, 0.3); }
+            100% { background-color: rgba(255, 107, 107, 0.3); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes deathPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes vibrateScreen {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-5px, -5px); }
+            20% { transform: translate(5px, 5px); }
+            30% { transform: translate(-5px, 5px); }
+            40% { transform: translate(5px, -5px); }
+            50% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, 5px); }
+            70% { transform: translate(-5px, 5px); }
+            80% { transform: translate(5px, -5px); }
+            90% { transform: translate(-5px, -5px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                max-width: 100%;
+                max-height: 100%;
+                border: none;
+            }
+            
+            .game-board {
+                border: none;
+                border-radius: 0;
+            }
+            
+            .joystick-container {
+                display: block;
+                bottom: 85px;
+                left: 25px;
+                width: 110px;
+                height: 110px;
+            }
+            
+            .button-controls {
+                display: flex;
+                bottom: 85px;
+                right: 25px;
+            }
+            
+            .control-info {
+                display: block;
+                bottom: 15px;
+                width: 90%;
+                font-size: 0.8rem;
+            }
+            
+            .hud-item {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+                min-width: 100px;
+            }
+            
+            .game-over-content h2 {
+                font-size: 2.2rem;
+            }
+            
+            .final-score {
+                font-size: 1.4rem;
+            }
+            
+            .high-score {
+                font-size: 1.2rem;
+            }
+            
+            .game-over-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-over-button {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .back-button {
+                bottom: 15px;
+                left: 15px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hud {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .hud-item {
+                width: 90%;
+                min-width: unset;
+            }
+            
+            .game-over-content {
+                padding: 20px;
+            }
+            
+            .joystick-container {
+                bottom: 80px;
+                left: 20px;
+                width: 100px;
+                height: 100px;
+            }
+            
+            .button-controls {
+                bottom: 80px;
+                right: 20px;
+            }
+            
+            .control-button {
+                width: 55px;
+                height: 55px;
+                font-size: 1.1rem;
+            }
+            
+            .control-info {
+                bottom: 10px;
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+            
+            .back-button {
+                bottom: 10px;
+                left: 10px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .joystick-container {
+                bottom: 65px;
+            }
+            
+            .button-controls {
+                bottom: 65px;
+            }
+            
+            .control-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-board">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Loading Screen -->
+            <div class="loading" id="loadingScreen">
+                <p>Memuat gambar kucing...</p>
+            </div>
+            
+            <!-- Shock Effect -->
+            <div class="shock-effect" id="shockEffect"></div>
+            
+            <!-- HUD -->
+            <div class="hud">
+                <div class="hud-item">
+                    Skor: <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="hud-item">
+                    Level: <span class="level-value" id="levelDisplay">MUDAH</span>
+                </div>
+                <div class="hud-item">
+                    Nyawa: <span class="lives-value" id="livesDisplay">2</span>
+                </div>
+            </div>
+            
+            <!-- Virtual Joystick -->
+            <div class="joystick-container" id="joystickContainer">
+                <div class="joystick-base"></div>
+                <div class="joystick-stick" id="joystickStick"></div>
+            </div>
+            
+            <!-- Button Controls -->
+            <div class="button-controls" id="buttonControls">
+                <div class="button-row">
+                    <button class="control-button wasd" id="wButton">W</button>
+                </div>
+                <div class="button-row">
+                    <button class="control-button wasd" id="aButton">A</button>
+                    <button class="control-button wasd" id="sButton">S</button>
+                    <button class="control-button wasd" id="dButton">D</button>
+                </div>
+            </div>
+            
+            <!-- Control Info -->
+            <div class="control-info" id="controlInfo">
+                Gunakan Joystick atau tombol WASD untuk mengontrol kucing
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div class="game-over-overlay" id="gameOverScreen">
+                <div class="game-over-content">
+                    <h2>GAME OVER</h2>
+                    <div class="final-score" id="finalScoreText">Skor Akhir: 0</div>
+                    <div class="high-score" id="highScoreText">Skor Tertinggi: 0</div>
+                    <div class="game-over-buttons">
+                        <button class="game-over-button" id="playAgainButton">MAIN LAGI</button>
+                        <button class="game-over-button" id="menuButton">MENU UTAMA</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back Button -->
+            <button class="back-button" id="backButton">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- AUDIO ELEMENTS -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/backsound/playgame.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+    
+    <audio id="gameOverSound">
+        <source src="assets/backsound/game_over.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="eatSound">
+        <source src="assets/backsound/eat.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="shockSound">
+        <source src="assets/backsound/shock.mp3" type="audio/mpeg">
+    </audio>
+    
+    <!-- TAMBAH ELEMEN AUDIO UNTUK SUARA MAKAN KUCING -->
+    <audio id="kucingEatSound">
+        <source src="assets/backsound/makan.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <script>
+        // ============= SISTEM LEVEL DINAMIS 4 LEVEL =============
+        let currentLevel = 'mudah';
+        let baseSpeed = 180; // Kecepatan dasar
+
+        // Fungsi untuk menentukan level berdasarkan skor (4 LEVEL)
+        function getLevelBasedOnScore(score) {
+            if (score < 50) { // 0-49 poin
+                return {
+                    level: 'mudah',
+                    name: 'MUDAH',
+                    speedMultiplier: 1.0, // Kecepatan normal
+                    color: '#b5ffb0',
+                    description: 'Kecepatan: Lambat',
+                    minScore: 0,
+                    maxScore: 49
+                };
+            } else if (score >= 50 && score < 100) { // 50-99 poin
+                return {
+                    level: 'normal',
+                    name: 'NORMAL',
+                    speedMultiplier: 1.4, // 40% lebih cepat
+                    color: '#4d96ff',
+                    description: 'Kecepatan: Standar',
+                    minScore: 50,
+                    maxScore: 99
+                };
+            } else if (score >= 100 && score < 150) { // 100-149 poin
+                return {
+                    level: 'sedang',
+                    name: 'SEDANG',
+                    speedMultiplier: 1.6, // 60% lebih cepat
+                    color: '#ffd93d',
+                    description: 'Kecepatan: Cepat',
+                    minScore: 100,
+                    maxScore: 149
+                };
+            } else if (score >= 150) { // 150+ poin
+                return {
+                    level: 'sulit',
+                    name: 'SULIT',
+                    speedMultiplier: 2.0, // 100% lebih cepat
+                    color: '#ff6b6b',
+                    description: 'Kecepatan: Sangat Cepat',
+                    minScore: 150,
+                    maxScore: Infinity
+                };
+            }
+        }
+
+        // Fungsi untuk update level berdasarkan skor
+        function updateLevelBasedOnScore() {
+            const newLevel = getLevelBasedOnScore(score);
+            
+            // Hanya update jika level berubah
+            if (newLevel.level !== currentLevel) {
+                currentLevel = newLevel.level;
+                
+                // Update kecepatan game
+                gameSpeed = Math.round(baseSpeed / newLevel.speedMultiplier);
+                
+                // Update tampilan level
+                document.getElementById('levelDisplay').textContent = newLevel.name;
+                document.getElementById('levelDisplay').style.color = newLevel.color;
+                
+                // Update interval game loop
+                if (gameLoopInterval) {
+                    clearInterval(gameLoopInterval);
+                    startGameLoop();
+                }
+                
+                console.log(`📊 Skor: ${score} → Level: ${newLevel.name}`);
+                console.log(`⚡ Multiplier: ${newLevel.speedMultiplier}x`);
+                console.log(`⏱️  Kecepatan baru: ${gameSpeed}ms per gerakan`);
+                
+                // Beri feedback visual
+                showLevelUpNotification(newLevel.name);
+            }
+        }
+        
+        // Fungsi untuk menampilkan notifikasi level up
+        function showLevelUpNotification(levelName) {
+            const notification = document.createElement('div');
+            
+            // Tentukan warna dan ikon berdasarkan level
+            let levelColor;
+            let levelIcon;
+            let levelMessage;
+            
+            switch(levelName) {
+                case 'MUDAH':
+                    levelColor = '#b5ffb0';
+                    levelIcon = '😺';
+                    levelMessage = 'Kecepatan lambat, nikmati permainan!';
+                    break;
+                case 'NORMAL':
+                    levelColor = '#4d96ff';
+                    levelIcon = '🐱';
+                    levelMessage = 'Kecepatan meningkat, tetap fokus!';
+                    break;
+                case 'SEDANG':
+                    levelColor = '#ffd93d';
+                    levelIcon = '😼';
+                    levelMessage = 'Kecepatan cepat, hati-hati!';
+                    break;
+                case 'SULIT':
+                    levelColor = '#ff6b6b';
+                    levelIcon = '😾';
+                    levelMessage = 'Kecepatan maksimal, siap-siap!';
+                    break;
+                default:
+                    levelColor = '#4d96ff';
+                    levelIcon = '🎮';
+                    levelMessage = 'Kecepatan meningkat!';
+            }
+            
+            notification.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.85);
+                color: white;
+                padding: 20px 40px;
+                border-radius: 15px;
+                font-size: 2rem;
+                font-weight: bold;
+                z-index: 200;
+                text-align: center;
+                border: 3px solid ${levelColor};
+                animation: fadeInOut 2s ease-in-out;
+                pointer-events: none;
+            `;
+            
+            notification.innerHTML = `
+                <div style="margin-bottom: 10px; color: ${levelColor}; font-size: 2.2rem;">${levelIcon} LEVEL UP!</div>
+                <div style="font-size: 2.5rem; color: ${levelColor}; font-weight: bold; text-shadow: 2px 2px 0 rgba(0,0,0,0.3);">${levelName}</div>
+                <div style="font-size: 1rem; margin-top: 10px; opacity: 0.8;">${levelMessage}</div>
+            `;
+            
+            document.querySelector('.game-board').appendChild(notification);
+            
+            // Hapus notifikasi setelah 2 detik
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 2000);
+            
+            // Animasi CSS untuk fade in/out
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+                    40% { transform: translate(-50%, -50%) scale(1); }
+                    60% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const gameOverSound = document.getElementById('gameOverSound');
+        const eatSound = document.getElementById('eatSound');
+        const shockSound = document.getElementById('shockSound');
+        const kucingEatSound = document.getElementById('kucingEatSound');
+        
+        const joystickContainer = document.getElementById('joystickContainer');
+        const joystickStick = document.getElementById('joystickStick');
+        const buttonControls = document.getElementById('buttonControls');
+        const controlInfo = document.getElementById('controlInfo');
+        
+        function resizeCanvas() {
+            const container = document.querySelector('.game-board');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        let gameRunning = false;
+        let score = 0;
+        let lives = 2;
+        let gameSpeed = 180;
+        let assetsLoaded = false;
+        let isShocked = false;
+        let isDead = false;
+        let deathAnimationFrame = 0;
+        let deathStartTime = 0;
+        let safeAreaPadding = 2;
+        let animationTime = 0;
+        let foodAnimationTime = 0;
+        let decorationAnimationTime = 0;
+        let highScore = localStorage.getItem('kucingSnakeHighScore') || 0;
+        
+        // ============= JOYSTICK VIRTUAL VARIABLES =============
+        let joystickActive = false;
+        let joystickDirection = { x: 0, y: 0 };
+        let joystickStartX = 0;
+        let joystickStartY = 0;
+        let joystickMaxDistance = 40;
+        let joystickCurrentX = 0;
+        let joystickCurrentY = 0;
+        let joystickBaseRect = null;
+        
+        // ============= GAMEPAD BLUETOOTH VARIABLES =============
+        let gamepadConnected = false;
+        let gamepadIndex = null;
+        let currentGamepadType = 'standard';
+        let gamepadPollingInterval = null;
+        let gamepadVibrationSupported = false;
+        let lastButtonState = {};
+        
+        // ============= GAMEPAD INDICATOR =============
+        const gamepadIndicator = document.createElement('div');
+        gamepadIndicator.id = 'gamepadIndicator';
+        gamepadIndicator.style.cssText = `
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 204, 68, 0.3);
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+            font-family: Arial, sans-serif;
+        `;
+        document.body.appendChild(gamepadIndicator);
+        
+        // ============= GAMEPAD MAPPING =============
+        const gamepadMappings = {
+            'standard': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            },
+            'xbox': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            },
+            'playstation': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                CROSS: 0,
+                CIRCLE: 1,
+                SQUARE: 2,
+                TRIANGLE: 3,
+                START: 9,
+                SELECT: 8,
+                L1: 4,
+                R1: 5,
+                L2: 6,
+                R2: 7,
+                L3: 10,
+                R3: 11
+            },
+            'nintendo': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                B: 0,
+                A: 1,
+                Y: 2,
+                X: 3,
+                PLUS: 9,
+                MINUS: 8,
+                L: 4,
+                R: 5,
+                ZL: 6,
+                ZR: 7,
+                LS: 10,
+                RS: 11
+            },
+            'generic': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            }
+        };
+        
+        // ============= ASET KUCING =============
+        const catAssets = {
+            headRight: new Image(),
+            headLeft: new Image(),
+            headUp: new Image(),
+            headDown: new Image(),
+            headRightShock: new Image(),
+            headLeftShock: new Image(),
+            headUpShock: new Image(),
+            headDownShock: new Image(),
+            headRightDead: new Image(),
+            headLeftDead: new Image(),
+            headUpDead: new Image(),
+            headDownDead: new Image(),
+            childRight: new Image(),
+            childLeft: new Image(),
+            childUp: new Image(),
+            childDown: new Image(),
+            foodIkan: new Image()
+        };
+        
+        const basePath = 'assets/kucing/';
+        catAssets.headRight.src = basePath + 'kucing_dewasa_hadap_kanan.png';
+        catAssets.headLeft.src = basePath + 'kucing_dewasa_hadap_kiri.png';
+        catAssets.headUp.src = basePath + 'kucing_dewasa_hadap_belakang.png';
+        catAssets.headDown.src = basePath + 'kucing_dewasa_hadap_depan.png';
+        catAssets.headRightShock.src = basePath + 'kucing_dewasa_hadap_kanan_kaget.png';
+        catAssets.headLeftShock.src = basePath + 'kucing_dewasa_hadap_kiri_kaget.png';
+        catAssets.headUpShock.src = basePath + 'kucing_dewasa_hadap_belakang_kaget.png';
+        catAssets.headDownShock.src = basePath + 'kucing_dewasa_hadap_depan_kaget.png';
+        catAssets.headRightDead.src = basePath + 'kucing_dewasa_hadap_kanan_mati.png';
+        catAssets.headLeftDead.src = basePath + 'kucing_dewasa_hadap_kiri_mati.png';
+        catAssets.headUpDead.src = basePath + 'kucing_dewasa_hadap_belakang_mati.png';
+        catAssets.headDownDead.src = basePath + 'kucing_dewasa_hadap_depan_mati.png';
+        catAssets.childRight.src = basePath + 'anak_kucing_hadap_kanan.png';
+        catAssets.childLeft.src = basePath + 'anak_kucing_hadap_kiri.png';
+        catAssets.childUp.src = basePath + 'anak_kucing_hadap_belakang.png';
+        catAssets.childDown.src = basePath + 'anak_kucing_hadap_depan.png';
+        catAssets.foodIkan.src = 'assets/kucing/makanan/ikan.png';
+        
+        // ============= DEKORASI =============
+        const decorations = {
+            catFamily: new Image(),
+            catPlaying: new Image(),
+            catSleeping: new Image(),
+            sun: new Image(),
+            cloud: new Image(),
+            grass: new Image(),
+            flower: new Image(),
+            tree: new Image(),
+            grain: new Image(),
+            fence: new Image(),
+            nest: new Image(),
+            pond: new Image()
+        };
+        
+        decorations.catFamily.src = 'assets/decorations/cat_family.png';
+        decorations.catPlaying.src = 'assets/decorations/cat_playing.png';
+        decorations.catSleeping.src = 'assets/decorations/cat_sleeping.png';
+        decorations.sun.src = 'assets/decorations/sun.png';
+        decorations.cloud.src = 'assets/decorations/cloud.png';
+        decorations.grass.src = 'assets/decorations/grass.png';
+        decorations.flower.src = 'assets/decorations/flower.png';
+        decorations.tree.src = 'assets/decorations/tree.png';
+        decorations.grain.src = 'assets/decorations/grain.png';
+        decorations.fence.src = 'assets/decorations/fence.png';
+        decorations.nest.src = 'assets/decorations/nest.png';
+        decorations.pond.src = 'assets/decorations/pond.png';
+        
+        let decorationElements = [];
+        let catHistory = [];
+        let historyLength = 50;
+        
+        // ============= VARIABEL GAME YANG HILANG =============
+        let cat = [];  // INI VARIABEL YANG HILANG!
+        let food = {};
+        let currentDirection = 'right';
+        let nextDirection = 'right';
+        let collisionPosition = {x: 0, y: 0, direction: 'right'};
+        let smoothMoveProgress = 0;
+        let smoothMoveStart = null;
+        let smoothMoveTarget = null;
+        let isAnimatingMove = false;
+        let lastFrameTime = 0;
+        let moveAnimationSpeed = 0.08;
+        
+        // ============= FUNGSI GAMEPAD BLUETOOTH =============
+        function detectGamepadType(id) {
+            const idLower = id.toLowerCase();
+            
+            if (idLower.includes('xbox') || idLower.includes('microsoft')) {
+                return 'xbox';
+            } else if (idLower.includes('playstation') || idLower.includes('ps3') || idLower.includes('ps4') || idLower.includes('ps5') || idLower.includes('dualshock') || idLower.includes('dualsense')) {
+                return 'playstation';
+            } else if (idLower.includes('nintendo') || idLower.includes('switch') || idLower.includes('pro controller') || idLower.includes('joy-con')) {
+                return 'nintendo';
+            } else {
+                return 'generic';
+            }
+        }
+        
+        function showGamepadConnected(name) {
+            gamepadIndicator.textContent = '🎮 GAMEPAD TERHUBUNG';
+            gamepadIndicator.style.display = 'block';
+            gamepadIndicator.style.animation = 'gamepadConnect 0.5s ease-out';
+            
+            if (controlInfo) {
+                controlInfo.innerHTML = '🎮 Gamepad terdeteksi! Gunakan D-pad/Analog untuk kontrol<br>START: Pause, O/B: Kembali ke Menu';
+                controlInfo.style.display = 'block';
+            }
+            
+            if (joystickContainer) joystickContainer.style.display = 'none';
+            if (buttonControls) buttonControls.style.display = 'none';
+            
+            if (navigator.vibrate || (navigator.getGamepads && navigator.getGamepads()[0] && navigator.getGamepads()[0].vibrationActuator)) {
+                gamepadVibrationSupported = true;
+            }
+            
+            console.log(`🎮 Gamepad terhubung: ${name}`);
+            console.log(`🎮 Tipe: ${currentGamepadType}`);
+        }
+        
+        function showGamepadDisconnected() {
+            gamepadIndicator.style.animation = 'gamepadDisconnect 0.5s ease-out';
+            setTimeout(() => {
+                gamepadIndicator.style.display = 'none';
+                gamepadIndicator.style.animation = 'pulse 2s infinite';
+            }, 500);
+            
+            if (controlInfo) {
+                controlInfo.innerHTML = 'Gunakan Joystick atau tombol WASD untuk mengontrol kucing';
+            }
+            
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                            ('ontouchstart' in window) || 
+                            (navigator.maxTouchPoints > 0);
+            
+            if (isMobile) {
+                if (joystickContainer) joystickContainer.style.display = 'block';
+                if (buttonControls) buttonControls.style.display = 'flex';
+            }
+            
+            console.log('🎮 Gamepad terputus');
+        }
+        
+        function triggerGamepadVibration(pattern) {
+            if (!gamepadVibrationSupported) return;
+            
+            try {
+                if (gamepadConnected && gamepadIndex !== null) {
+                    const gamepads = navigator.getGamepads();
+                    const gamepad = gamepads[gamepadIndex];
+                    
+                    if (gamepad && gamepad.vibrationActuator) {
+                        gamepad.vibrationActuator.playEffect("dual-rumble", {
+                            startDelay: 0,
+                            duration: pattern[0] || 100,
+                            weakMagnitude: pattern[1] || 0.5,
+                            strongMagnitude: pattern[2] || 0.5
+                        });
+                        return;
+                    }
+                }
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate(pattern);
+                }
+            } catch (error) {
+                console.log('Vibration not supported:', error);
+            }
+        }
+        
+        // ============= FUNGSI UNTUK TOMBOL GAMEPAD =============
+        function handleGamepadButtonA() {
+            console.log('🎮 Tombol A ditekan');
+            
+            if (!gameRunning) {
+                const gameOverScreen = document.getElementById('gameOverScreen');
+                if (gameOverScreen && gameOverScreen.style.display === 'flex') {
+                    console.log('🎮 Game Over → Tombol A: Main Lagi');
+                    triggerGamepadVibration([50, 0.3, 0.5]);
+                    
+                    const playAgainButton = document.getElementById('playAgainButton');
+                    if (playAgainButton) {
+                        playAgainButton.click();
+                    }
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function handleGamepadButtonB() {
+            console.log('🎮 Tombol B ditekan');
+            
+            // Selalu kembali ke menu utama ketika tombol B ditekan
+            console.log('🎮 Tombol B: Kembali ke Menu Utama');
+            triggerGamepadVibration([50, 0.3, 0.5]);
+            
+            goBackToMenu();
+            return true;
+        }
+        
+        function handleGamepadButtonStart() {
+            console.log('🎮 Tombol START ditekan');
+            
+            if (gameRunning && !isShocked && !isDead) {
+                gameRunning = !gameRunning;
+                showPauseMessage();
+                triggerGamepadVibration([100, 0.2, 0.3]);
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ============= FUNGSI UNTUK KEMBALI KE MENU =============
+        function goBackToMenu() {
+            console.log('🔙 Kembali ke Menu Utama');
+            
+            // Hentikan semua audio
+            backgroundMusic.pause();
+            gameOverSound.pause();
+            eatSound.pause();
+            shockSound.pause();
+            kucingEatSound.pause();
+            
+            // Hentikan polling gamepad
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+            
+            // Hentikan game loop
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+                gameLoopInterval = null;
+            }
+            
+            // Navigasi ke halaman utama
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 300);
+        }
+        
+        function showPauseMessage() {
+            const existingPauseOverlay = document.getElementById('pauseOverlay');
+            if (existingPauseOverlay) {
+                existingPauseOverlay.remove();
+            }
+            
+            const pauseOverlay = document.createElement('div');
+            pauseOverlay.id = 'pauseOverlay';
+            pauseOverlay.innerHTML = `
+                <div style="font-size: 3rem; color: #4d96ff; margin-bottom: 20px; font-weight: bold;">PAUSE</div>
+                <div style="font-size: 1.2rem; margin-bottom: 30px;">Tekan START untuk melanjutkan</div>
+                <div style="font-size: 0.9rem; opacity: 0.8;">🎮 Gamepad: START untuk lanjut, O/B untuk kembali ke menu</div>
+            `;
+            
+            document.querySelector('.game-board').appendChild(pauseOverlay);
+        }
+        
+        function pollGamepad() {
+            if (!gamepadConnected || gamepadIndex === null) return;
+            
+            try {
+                const gamepads = navigator.getGamepads();
+                if (!gamepads || !gamepads[gamepadIndex]) {
+                    gamepadConnected = false;
+                    gamepadIndex = null;
+                    showGamepadDisconnected();
+                    if (gamepadPollingInterval) {
+                        clearInterval(gamepadPollingInterval);
+                        gamepadPollingInterval = null;
+                    }
+                    return;
+                }
+                
+                const gamepad = gamepads[gamepadIndex];
+                const mapping = gamepadMappings[currentGamepadType] || gamepadMappings.standard;
+                
+                const currentButtonState = {};
+                
+                // Tombol A - MAIN LAGI
+                if (gamepad.buttons[mapping.A]?.pressed) {
+                    currentButtonState.A = true;
+                    if (!lastButtonState.A) {
+                        handleGamepadButtonA();
+                    }
+                } else {
+                    currentButtonState.A = false;
+                }
+                
+                // Tombol B - KEMBALI KE MENU
+                if (gamepad.buttons[mapping.B]?.pressed) {
+                    currentButtonState.B = true;
+                    if (!lastButtonState.B) {
+                        handleGamepadButtonB();
+                    }
+                } else {
+                    currentButtonState.B = false;
+                }
+                
+                // Tombol START - PAUSE
+                if (gamepad.buttons[mapping.START]?.pressed) {
+                    currentButtonState.START = true;
+                    if (!lastButtonState.START) {
+                        handleGamepadButtonStart();
+                    }
+                } else {
+                    currentButtonState.START = false;
+                }
+                
+                lastButtonState = { ...currentButtonState };
+                
+                // KONTROL GERAKAN HANYA JIKA GAME SEDANG BERJALAN
+                if (gameRunning && !isShocked && !isDead) {
+                    let moveX = 0;
+                    let moveY = 0;
+                    
+                    if (gamepad.axes && gamepad.axes.length >= 2) {
+                        moveX = gamepad.axes[0];
+                        moveY = gamepad.axes[1];
+                    }
+                    
+                    // Gunakan D-pad jika analog stick di deadzone
+                    if (Math.abs(moveX) < 0.3 && Math.abs(moveY) < 0.3) {
+                        if (gamepad.buttons[mapping.UP]?.pressed) {
+                            moveY = -1;
+                        } else if (gamepad.buttons[mapping.DOWN]?.pressed) {
+                            moveY = 1;
+                        }
+                        if (gamepad.buttons[mapping.LEFT]?.pressed) {
+                            moveX = -1;
+                        } else if (gamepad.buttons[mapping.RIGHT]?.pressed) {
+                            moveX = 1;
+                        }
+                    }
+                    
+                    // Update arah kucing berdasarkan input gamepad
+                    if (Math.abs(moveX) > 0.3 || Math.abs(moveY) > 0.3) {
+                        if (Math.abs(moveX) > Math.abs(moveY)) {
+                            if (moveX > 0.3 && currentDirection !== 'left') {
+                                nextDirection = 'right';
+                            } else if (moveX < -0.3 && currentDirection !== 'right') {
+                                nextDirection = 'left';
+                            }
+                        } else {
+                            if (moveY > 0.3 && currentDirection !== 'up') {
+                                nextDirection = 'down';
+                            } else if (moveY < -0.3 && currentDirection !== 'down') {
+                                nextDirection = 'up';
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error polling gamepad:', error);
+            }
+        }
+        
+        // ============= GAME LOGIC =============
+        function calculateGridDimensions() {
+            const minGridSize = 35;
+            const maxGridSize = 45;
+            const calculatedSize = Math.floor(Math.min(canvas.width, canvas.height) / 14);
+            gridSize = Math.max(minGridSize, Math.min(maxGridSize, calculatedSize));
+            gridWidth = Math.floor(canvas.width / gridSize);
+            gridHeight = Math.floor(canvas.height / gridSize);
+        }
+        
+        function initGame() {
+            // Mulai dari level mudah
+            currentLevel = 'mudah';
+            const initialLevel = getLevelBasedOnScore(0);
+            gameSpeed = Math.round(baseSpeed / initialLevel.speedMultiplier);
+            lives = 2;
+            
+            document.getElementById('levelDisplay').textContent = initialLevel.name;
+            document.getElementById('livesDisplay').textContent = lives;
+            document.getElementById('levelDisplay').style.color = initialLevel.color;
+            
+            console.log(`🐱 Game dimulai dengan level: ${initialLevel.name}`);
+            console.log(`⏱️  Kecepatan game: ${gameSpeed}ms per gerakan`);
+            console.log(`🎯 Sistem level dinamis aktif! (4 Level)`);
+            console.log(`📊 Level akan naik otomatis berdasarkan skor:`);
+            console.log(`   • 0-49 poin: MUDAH (1.0x)`);
+            console.log(`   • 50-99 poin: NORMAL (1.4x)`);
+            console.log(`   • 100-149 poin: SEDANG (1.6x)`);
+            console.log(`   • 150+ poin: SULIT (2.0x)`);
+            
+            gameRunning = true;
+            isShocked = false;
+            isDead = false;
+            deathAnimationFrame = 0;
+            score = 0;
+            animationTime = 0;
+            foodAnimationTime = 0;
+            decorationAnimationTime = 0;
+            smoothMoveProgress = 0;
+            isAnimatingMove = false;
+            lastFrameTime = performance.now();
+            catHistory = [];
+            
+            calculateGridDimensions();
+            const startX = Math.floor(gridWidth / 2);
+            const startY = Math.floor(gridHeight / 2);
+            
+            cat = [{x: startX, y: startY, direction: 'right'}];
+            currentDirection = 'right';
+            nextDirection = 'right';
+            
+            catHistory.push({x: startX, y: startY, direction: 'right'});
+            
+            initializeDecorations();
+            
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('shockEffect').style.display = 'none';
+            
+            generateFood();
+            drawGame();
+            
+            playBackgroundMusic();
+            updateJoystickBaseRect();
+            
+            checkGamepadSupport();
+        }
+        
+        function initializeDecorations() {
+            decorationElements = [];
+            
+            const boardPadding = safeAreaPadding * gridSize;
+            const boardWidth = (gridWidth - (safeAreaPadding * 2)) * gridSize;
+            const boardHeight = (gridHeight - (safeAreaPadding * 2)) * gridSize;
+            
+            decorationElements.push({
+                type: 'catFamily',
+                x: boardPadding * 0.3,
+                y: boardPadding * 0.3,
+                size: 65,
+                speed: 0.05,
+                angle: 0,
+                floatOffset: 0
+            });
+            
+            decorationElements.push({
+                type: 'catPlaying',
+                x: boardPadding * 0.3,
+                y: boardPadding + boardHeight - boardPadding * 0.3,
+                size: 55,
+                speed: 0.1,
+                angle: 0,
+                floatOffset: Math.PI / 2
+            });
+            
+            decorationElements.push({
+                type: 'catSleeping',
+                x: boardPadding + boardWidth - boardPadding * 0.3,
+                y: boardPadding * 0.3,
+                size: 50,
+                speed: 0.08,
+                angle: 0,
+                floatOffset: Math.PI
+            });
+            
+            for (let i = 0; i < 5; i++) {
+                decorationElements.push({
+                    type: 'fence',
+                    x: boardPadding * 0.2,
+                    y: boardPadding + (i * boardHeight / 5) + 10,
+                    size: 25,
+                    speed: 0,
+                    angle: 0,
+                    floatOffset: i * 0.5
+                });
+            }
+            
+            for (let i = 0; i < 5; i++) {
+                decorationElements.push({
+                    type: 'fence',
+                    x: boardPadding + boardWidth - boardPadding * 0.2,
+                    y: boardPadding + (i * boardHeight / 5) + 10,
+                    size: 25,
+                    speed: 0,
+                    angle: 0,
+                    floatOffset: i * 0.5 + 0.3
+                });
+            }
+            
+            decorationElements.push({
+                type: 'sun',
+                x: canvas.width * 0.08,
+                y: canvas.height * 0.08,
+                size: 70,
+                speed: 0.01,
+                angle: 0,
+                floatOffset: 0
+            });
+            
+            for (let i = 0; i < 4; i++) {
+                decorationElements.push({
+                    type: 'cloud',
+                    x: canvas.width * 0.1 + (i * 150),
+                    y: canvas.height * 0.12 + (Math.sin(i) * 20),
+                    size: 50 + Math.random() * 40,
+                    speed: 0.02 + Math.random() * 0.02,
+                    angle: 0,
+                    floatOffset: i * 0.5
+                });
+            }
+            
+            for (let i = 0; i < 15; i++) {
+                decorationElements.push({
+                    type: 'grain',
+                    x: boardPadding * 0.5 + Math.random() * (canvas.width - boardPadding),
+                    y: boardPadding * 0.5 + Math.random() * (canvas.height - boardPadding),
+                    size: 8 + Math.random() * 8,
+                    speed: 0.05 + Math.random() * 0.05,
+                    angle: 0,
+                    floatOffset: Math.random() * Math.PI * 2
+                });
+            }
+        }
+        
+        function generateFood() {
+            calculateGridDimensions();
+            
+            let newFoodPosition;
+            let foodOnCat;
+            
+            do {
+                foodOnCat = false;
+                newFoodPosition = {
+                    x: Math.floor(Math.random() * (gridWidth - (safeAreaPadding * 2))) + safeAreaPadding,
+                    y: Math.floor(Math.random() * (gridHeight - (safeAreaPadding * 2))) + safeAreaPadding
+                };
+                
+                for (let segment of cat) {
+                    if (segment.x === newFoodPosition.x && segment.y === newFoodPosition.y) {
+                        foodOnCat = true;
+                        break;
+                    }
+                }
+            } while (foodOnCat);
+            
+            food = newFoodPosition;
+        }
+        
+        function playBackgroundMusic() {
+            backgroundMusic.volume = 0.3;
+            backgroundMusic.loop = true;
+            
+            const playPromise = backgroundMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Autoplay blocked, music will play after user interaction');
+                });
+            }
+        }
+        
+        function playKucingEatSound() {
+            kucingEatSound.currentTime = 0;
+            kucingEatSound.volume = 0.6;
+            kucingEatSound.play().catch(e => console.log('Kucing eat sound error:', e));
+        }
+        
+        function playShockSound() {
+            shockSound.currentTime = 0;
+            shockSound.volume = 0.7;
+            shockSound.play().catch(e => console.log('Shock sound error:', e));
+        }
+        
+        function playGameOverSound() {
+            backgroundMusic.pause();
+            gameOverSound.currentTime = 0;
+            gameOverSound.volume = 0.6;
+            gameOverSound.play().catch(e => console.log('Game over sound error:', e));
+        }
+        
+        function triggerCollisionVibration() {
+            if (gamepadConnected) {
+                if (lives === 2) {
+                    triggerGamepadVibration([100, 0.3, 0.7]);
+                } else if (lives === 1) {
+                    triggerGamepadVibration([150, 0.6, 0.8]);
+                }
+            }
+        }
+        
+        function triggerEatVibration() {
+            if (gamepadConnected) {
+                triggerGamepadVibration([50, 0.2, 0.4]);
+            }
+        }
+        
+        function triggerGameOverVibration() {
+            if (gamepadConnected) {
+                triggerGamepadVibration([200, 0.8, 0.9]);
+            }
+        }
+        
+        function drawGame() {
+            const currentTime = performance.now();
+            const deltaTime = Math.min(currentTime - lastFrameTime, 100) / 1000;
+            lastFrameTime = currentTime;
+            
+            animationTime += deltaTime * 1.5;
+            foodAnimationTime += deltaTime * 1.2;
+            decorationAnimationTime += deltaTime * 0.8;
+            
+            if (isAnimatingMove) {
+                smoothMoveProgress += moveAnimationSpeed * (deltaTime * 60);
+                if (smoothMoveProgress >= 1) {
+                    smoothMoveProgress = 1;
+                    isAnimatingMove = false;
+                }
+            }
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#f0e6ff');
+            gradient.addColorStop(1, '#e6d6ff');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawDecorations();
+            drawChessboard();
+            drawFood();
+            drawCat();
+            drawArenaBorder();
+            
+            if (isDead) {
+                drawDeathInPlace();
+            }
+        }
+        
+        function drawDecorations() {
+            for (let element of decorationElements) {
+                const floatY = Math.sin(decorationAnimationTime * element.speed + element.floatOffset) * 3;
+                
+                ctx.save();
+                
+                let img;
+                switch(element.type) {
+                    case 'catFamily': img = decorations.catFamily; break;
+                    case 'catPlaying': img = decorations.catPlaying; break;
+                    case 'catSleeping': img = decorations.catSleeping; break;
+                    case 'sun': img = decorations.sun; break;
+                    case 'cloud': img = decorations.cloud; break;
+                    case 'grain': img = decorations.grain; break;
+                    case 'fence': img = decorations.fence; break;
+                    default: img = decorations.flower;
+                }
+                
+                if (img && img.complete && img.naturalWidth > 0) {
+                    if (element.type.includes('cat') || element.type === 'grain') {
+                        element.angle += 0.01 * element.speed * 0.2;
+                    }
+                    
+                    const pulse = 0.8 + 0.2 * Math.sin(decorationAnimationTime * element.speed * 2);
+                    
+                    ctx.translate(element.x, element.y + floatY);
+                    ctx.rotate(element.angle);
+                    ctx.globalAlpha = pulse;
+                    
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 1;
+                    ctx.shadowOffsetY = 1;
+                    
+                    ctx.drawImage(
+                        img,
+                        -element.size/2,
+                        -element.size/2,
+                        element.size,
+                        element.size
+                    );
+                }
+                
+                ctx.restore();
+            }
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowColor = 'transparent';
+            ctx.shadowBlur = 0;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+        }
+        
+        function drawChessboard() {
+            const boardPadding = safeAreaPadding * gridSize;
+            const boardWidth = (gridWidth - (safeAreaPadding * 2)) * gridSize;
+            const boardHeight = (gridHeight - (safeAreaPadding * 2)) * gridSize;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(boardPadding, boardPadding, boardWidth, boardHeight);
+            
+            const cols = gridWidth - (safeAreaPadding * 2);
+            const rows = gridHeight - (safeAreaPadding * 2);
+            
+            const darkColor = '#ffc1cc';
+            const lightColor = '#ffe6ee';
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const rectX = boardPadding + x * gridSize;
+                    const rectY = boardPadding + y * gridSize;
+                    
+                    if ((x + y) % 2 === 0) {
+                        ctx.fillStyle = lightColor;
+                    } else {
+                        ctx.fillStyle = darkColor;
+                    }
+                    
+                    ctx.fillRect(rectX, rectY, gridSize, gridSize);
+                    
+                    ctx.strokeStyle = 'rgba(255, 193, 204, 0.1)';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(rectX, rectY, gridSize, gridSize);
+                }
+            }
+        }
+        
+        function drawArenaBorder() {
+            const boardPadding = safeAreaPadding * gridSize;
+            const boardWidth = (gridWidth - (safeAreaPadding * 2)) * gridSize;
+            const boardHeight = (gridHeight - (safeAreaPadding * 2)) * gridSize;
+            
+            ctx.strokeStyle = '#ff6b9d';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(boardPadding, boardPadding, boardWidth, boardHeight);
+            
+            ctx.strokeStyle = '#d45d8c';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boardPadding - 1, boardPadding - 1, boardWidth + 2, boardHeight + 2);
+        }
+        
+        function drawDeathInPlace() {
+            const elapsedTime = Date.now() - deathStartTime;
+            const deathDuration = 2000;
+            const progress = Math.min(elapsedTime / deathDuration, 1);
+            
+            const deadImg = getHeadImage(collisionPosition.direction, 'dead');
+            const x = collisionPosition.x * gridSize;
+            const y = collisionPosition.y * gridSize;
+            
+            if (deadImg.complete && deadImg.naturalWidth > 0) {
+                const opacity = 0.7 + 0.3 * Math.sin(progress * Math.PI * 4);
+                const scale = 1 + 0.1 * Math.sin(progress * Math.PI * 2);
+                
+                ctx.save();
+                ctx.globalAlpha = opacity;
+                ctx.translate(x + gridSize/2, y + gridSize/2);
+                ctx.scale(scale, scale);
+                ctx.drawImage(
+                    deadImg,
+                    -gridSize/2,
+                    -gridSize/2,
+                    gridSize,
+                    gridSize
+                );
+                ctx.restore();
+            }
+            
+            if (progress >= 1) {
+                showGameOver();
+            }
+        }
+        
+        function getHeadImage(direction, state) {
+            if (state === 'dead') {
+                switch(direction) {
+                    case 'right': return catAssets.headRightDead;
+                    case 'left': return catAssets.headLeftDead;
+                    case 'up': return catAssets.headUpDead;
+                    case 'down': return catAssets.headDownDead;
+                    default: return catAssets.headDownDead;
+                }
+            } else if (state === 'shock') {
+                switch(direction) {
+                    case 'right': return catAssets.headRightShock;
+                    case 'left': return catAssets.headLeftShock;
+                    case 'up': return catAssets.headUpShock;
+                    case 'down': return catAssets.headDownShock;
+                    default: return catAssets.headRightShock;
+                }
+            } else {
+                switch(direction) {
+                    case 'right': return catAssets.headRight;
+                    case 'left': return catAssets.headLeft;
+                    case 'up': return catAssets.headUp;
+                    case 'down': return catAssets.headDown;
+                    default: return catAssets.headRight;
+                }
+            }
+        }
+        
+        function getChildImage(direction) {
+            switch(direction) {
+                case 'right': return catAssets.childRight;
+                case 'left': return catAssets.childLeft;
+                case 'up': return catAssets.childUp;
+                case 'down': return catAssets.childDown;
+                default: return catAssets.childDown;
+            }
+        }
+        
+        function drawCat() {
+            if (isDead) return;
+            
+            for (let i = 0; i < cat.length; i++) {
+                const segment = cat[i];
+                
+                let drawX, drawY;
+                
+                if (i === 0 && isAnimatingMove && smoothMoveStart && smoothMoveTarget) {
+                    const easeProgress = easeOutCubic(smoothMoveProgress);
+                    drawX = smoothMoveStart.x + (smoothMoveTarget.x - smoothMoveStart.x) * easeProgress;
+                    drawY = smoothMoveStart.y + (smoothMoveTarget.y - smoothMoveStart.y) * easeProgress;
+                } else {
+                    drawX = segment.x;
+                    drawY = segment.y;
+                }
+                
+                const x = drawX * gridSize;
+                const y = drawY * gridSize;
+                
+                if (drawX < safeAreaPadding || drawX >= gridWidth - safeAreaPadding || 
+                    drawY < safeAreaPadding || drawY >= gridHeight - safeAreaPadding) {
+                    continue;
+                }
+                
+                if (i === 0) {
+                    let state = 'normal';
+                    if (isShocked) state = 'shock';
+                    
+                    const headImg = getHeadImage(segment.direction, state);
+                    if (headImg.complete && headImg.naturalWidth > 0) {
+                        const walkOffset = Math.sin(animationTime * 2) * 2;
+                        const bodySway = Math.sin(animationTime * 1.5) * 0.03;
+                        const headBob = Math.sin(animationTime * 3) * 1;
+                        
+                        ctx.save();
+                        ctx.translate(x + gridSize/2, y + gridSize/2 + walkOffset);
+                        ctx.rotate(bodySway);
+                        
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                        
+                        if (isAnimatingMove) {
+                            ctx.globalAlpha = 0.9 + 0.1 * Math.sin(animationTime * 10);
+                        }
+                        
+                        ctx.save();
+                        ctx.translate(0, headBob);
+                        
+                        const catSize = gridSize * 1.2;
+                        ctx.drawImage(
+                            headImg,
+                            -catSize/2,
+                            -catSize/2,
+                            catSize,
+                            catSize
+                        );
+                        ctx.restore();
+                        
+                        ctx.restore();
+                        ctx.globalAlpha = 1;
+                    }
+                } else {
+                    const childImg = getChildImage(segment.direction);
+                    if (childImg.complete && childImg.naturalWidth > 0) {
+                        const walkOffset = Math.sin(animationTime * 2 - i * 0.3) * 1.5;
+                        const bob = Math.sin(animationTime * 3 - i * 0.5) * 0.5;
+                        
+                        ctx.save();
+                        ctx.translate(x + gridSize/2, y + gridSize/2 + walkOffset + bob);
+                        
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                        ctx.shadowBlur = 6;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        
+                        const flash = 0.9 + 0.1 * Math.sin(animationTime * 6 - i * 0.8);
+                        ctx.globalAlpha = flash;
+                        
+                        const childSize = gridSize * 1.0;
+                        ctx.drawImage(
+                            childImg,
+                            -childSize/2,
+                            -childSize/2,
+                            childSize,
+                            childSize
+                        );
+                        
+                        ctx.restore();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+                
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+        }
+        
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        function drawFood() {
+            const x = food.x * gridSize;
+            const y = food.y * gridSize;
+            
+            if (catAssets.foodIkan.complete && catAssets.foodIkan.naturalWidth > 0) {
+                const bounceOffset = Math.sin(foodAnimationTime * 1.5) * 5;
+                const pulse = 0.9 + 0.1 * Math.sin(foodAnimationTime * 3);
+                
+                const drawSize = gridSize * 1.1 * pulse;
+                
+                ctx.save();
+                const centerX = x + gridSize/2;
+                const centerY = y + gridSize/2 + bounceOffset;
+                
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 15 + 5 * Math.sin(foodAnimationTime * 2);
+                ctx.globalAlpha = 0.95 + 0.05 * Math.sin(foodAnimationTime * 4);
+                
+                ctx.drawImage(
+                    catAssets.foodIkan,
+                    centerX - drawSize/2,
+                    centerY - drawSize/2,
+                    drawSize,
+                    drawSize
+                );
+                
+                ctx.restore();
+                ctx.globalAlpha = 1;
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function moveCat() {
+            if (!gameRunning || isShocked || isDead) return;
+            
+            if (isAnimatingMove) {
+                drawGame();
+                return;
+            }
+            
+            currentDirection = nextDirection;
+            const head = {x: cat[0].x, y: cat[0].y, direction: currentDirection};
+            
+            switch(currentDirection) {
+                case 'right': head.x++; break;
+                case 'left': head.x--; break;
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+            }
+            
+            smoothMoveStart = {x: cat[0].x, y: cat[0].y};
+            smoothMoveTarget = {x: head.x, y: head.y};
+            smoothMoveProgress = 0;
+            isAnimatingMove = true;
+            
+            catHistory.unshift({x: head.x, y: head.y, direction: currentDirection});
+            
+            if (catHistory.length > historyLength) {
+                catHistory.pop();
+            }
+            
+            cat[0] = head;
+            
+            for (let i = 1; i < cat.length; i++) {
+                if (i < catHistory.length) {
+                    const historyPos = catHistory[i];
+                    cat[i].x = historyPos.x;
+                    cat[i].y = historyPos.y;
+                    cat[i].direction = historyPos.direction;
+                } else {
+                    cat[i].x = cat[i-1].x;
+                    cat[i].y = cat[i-1].y;
+                    cat[i].direction = cat[i-1].direction;
+                }
+            }
+            
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                document.getElementById('scoreDisplay').textContent = score;
+                
+                // Update level berdasarkan skor
+                updateLevelBasedOnScore();
+                
+                playKucingEatSound();
+                triggerEatVibration();
+                
+                let newChildX, newChildY;
+                
+                if (cat.length === 1) {
+                    switch(currentDirection) {
+                        case 'right':
+                            newChildX = head.x - 1;
+                            newChildY = head.y;
+                            break;
+                        case 'left':
+                            newChildX = head.x + 1;
+                            newChildY = head.y;
+                            break;
+                        case 'up':
+                            newChildX = head.x;
+                            newChildY = head.y + 1;
+                            break;
+                        case 'down':
+                            newChildX = head.x;
+                            newChildY = head.y - 1;
+                            break;
+                    }
+                } else {
+                    const lastSegment = cat[cat.length - 1];
+                    newChildX = lastSegment.x;
+                    newChildY = lastSegment.y;
+                }
+                
+                const newChild = {
+                    x: newChildX,
+                    y: newChildY,
+                    direction: cat[cat.length - 1]?.direction || currentDirection
+                };
+                cat.push(newChild);
+                
+                catHistory.push({...newChild});
+                
+                generateFood();
+            }
+            
+            if (checkCollisions()) {
+                handleCollision();
+                return;
+            }
+            
+            drawGame();
+        }
+        
+        function checkCollisions() {
+            const head = cat[0];
+            
+            if (head.x < safeAreaPadding || 
+                head.x >= gridWidth - safeAreaPadding || 
+                head.y < safeAreaPadding || 
+                head.y >= gridHeight - safeAreaPadding) {
+                return true;
+            }
+            
+            for (let i = 1; i < cat.length; i++) {
+                if (head.x === cat[i].x && head.y === cat[i].y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function resetToCenter() {
+            calculateGridDimensions();
+            const centerX = Math.floor(gridWidth / 2);
+            const centerY = Math.floor(gridHeight / 2);
+            
+            cat[0] = {x: centerX, y: centerY, direction: 'right'};
+            currentDirection = 'right';
+            nextDirection = 'right';
+            
+            const newCat = [cat[0]];
+            
+            for (let i = 1; i < cat.length; i++) {
+                let safeX = centerX;
+                let safeY = centerY;
+                
+                if (i === 1) {
+                    safeX = Math.max(safeAreaPadding, centerX - 1);
+                } else if (i === 2) {
+                    safeX = Math.max(safeAreaPadding, centerX - 2);
+                } else {
+                    const prevSegment = newCat[newCat.length - 1];
+                    safeX = Math.max(safeAreaPadding, prevSegment.x - 1);
+                    safeY = prevSegment.y;
+                }
+                
+                newCat.push({x: safeX, y: safeY, direction: 'right'});
+            }
+            
+            cat = newCat;
+            
+            catHistory = [];
+            for (let i = 0; i < cat.length; i++) {
+                catHistory.push({x: cat[i].x, y: cat[i].y, direction: cat[i].direction});
+            }
+            
+            smoothMoveProgress = 0;
+            isAnimatingMove = false;
+            
+            for (let i = 0; i < cat.length; i++) {
+                cat[i].x = Math.max(safeAreaPadding, Math.min(gridWidth - safeAreaPadding - 1, cat[i].x));
+                cat[i].y = Math.max(safeAreaPadding, Math.min(gridHeight - safeAreaPadding - 1, cat[i].y));
+            }
+            
+            let foodOnCat = false;
+            for (let segment of cat) {
+                if (segment.x === food.x && segment.y === food.y) {
+                    foodOnCat = true;
+                    break;
+                }
+            }
+            
+            if (foodOnCat) {
+                generateFood();
+            }
+            
+            drawGame();
+        }
+        
+        function showShockEffectBrief() {
+            isShocked = true;
+            document.getElementById('shockEffect').style.display = 'block';
+            playShockSound();
+            drawGame();
+            
+            setTimeout(() => {
+                document.getElementById('shockEffect').style.display = 'none';
+                isShocked = false;
+                drawGame();
+            }, 1000);
+        }
+        
+        function showDeathAnimation() {
+            isDead = true;
+            deathStartTime = Date.now();
+            collisionPosition = {
+                x: cat[0].x,
+                y: cat[0].y,
+                direction: currentDirection
+            };
+            
+            playGameOverSound();
+            triggerGameOverVibration();
+            
+            function animateDeath() {
+                if (!isDead) return;
+                
+                drawGame();
+                requestAnimationFrame(animateDeath);
+            }
+            
+            animateDeath();
+        }
+        
+        function handleCollision() {
+            if (isShocked || isDead) return;
+            
+            triggerCollisionVibration();
+            
+            lives--;
+            document.getElementById('livesDisplay').textContent = lives;
+            
+            if (lives <= 0) {
+                showDeathAnimation();
+            } else {
+                resetToCenter();
+                showShockEffectBrief();
+            }
+        }
+        
+        function showGameOver() {
+            gameRunning = false;
+            isDead = false;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('kucingSnakeHighScore', highScore);
+            }
+            
+            saveHighScore();
+            
+            document.getElementById('finalScoreText').textContent = `Skor Akhir: ${score}`;
+            document.getElementById('highScoreText').textContent = `Skor Tertinggi: ${highScore}`;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+                gameLoopInterval = null;
+            }
+            
+            console.log('🎮 Game Over - Gamepad tetap aktif untuk tombol A/B');
+            console.log(`📊 Skor akhir: ${score} | Level akhir: ${currentLevel}`);
+        }
+        
+        function saveHighScore() {
+            const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+            
+            const playerName = localStorage.getItem('playerName') || 'Pemain';
+            const levelName = getLevelBasedOnScore(score).name;
+            
+            highScores.push({
+                name: playerName,
+                score: score,
+                level: levelName,
+                date: new Date().toLocaleDateString('id-ID'),
+                character: 'Kucing'
+            });
+            
+            highScores.sort((a, b) => b.score - a.score);
+            
+            const topScores = highScores.slice(0, 10);
+            
+            localStorage.setItem('highScores', JSON.stringify(topScores));
+        }
+        
+        let gameLoopInterval;
+        function startGameLoop() {
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+            }
+            
+            console.log(`⏱️  Game loop dimulai dengan interval: ${gameSpeed}ms`);
+            gameLoopInterval = setInterval(() => {
+                if (gameRunning && !isShocked && !isDead) {
+                    moveCat();
+                } else {
+                    drawGame();
+                }
+            }, gameSpeed);
+        }
+        
+        // ============= JOYSTICK VIRTUAL FUNCTIONS =============
+        function updateJoystickBaseRect() {
+            if (joystickContainer) {
+                const rect = joystickContainer.getBoundingClientRect();
+                joystickBaseRect = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+        }
+        
+        function handleJoystickStart(x, y) {
+            joystickActive = true;
+            joystickStartX = x;
+            joystickStartY = y;
+            joystickCurrentX = 0;
+            joystickCurrentY = 0;
+            joystickStick.classList.add('active');
+            updateJoystickPosition(x, y);
+        }
+        
+        function handleJoystickMove(x, y) {
+            if (!joystickActive) return;
+            
+            const deltaX = x - joystickStartX;
+            const deltaY = y - joystickStartY;
+            
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > joystickMaxDistance) {
+                const angle = Math.atan2(deltaY, deltaX);
+                joystickCurrentX = Math.cos(angle) * joystickMaxDistance;
+                joystickCurrentY = Math.sin(angle) * joystickMaxDistance;
+            } else {
+                joystickCurrentX = deltaX;
+                joystickCurrentY = deltaY;
+            }
+            
+            updateJoystickVisual();
+            updateDirectionFromJoystick();
+        }
+        
+        function handleJoystickEnd() {
+            joystickActive = false;
+            joystickCurrentX = 0;
+            joystickCurrentY = 0;
+            joystickStick.classList.remove('active');
+            updateJoystickVisual();
+        }
+        
+        function updateJoystickPosition(x, y) {
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            joystickStartX = x - (x - centerX);
+            joystickStartY = y - (y - centerY);
+        }
+        
+        function updateJoystickVisual() {
+            joystickStick.style.transform = `translate(calc(-50% + ${joystickCurrentX}px), calc(-50% + ${joystickCurrentY}px))`;
+        }
+        
+        function updateDirectionFromJoystick() {
+            if (!joystickActive || (!gameRunning || isShocked || isDead)) return;
+            
+            const sensitivity = 0.3;
+            const x = joystickCurrentX / joystickMaxDistance;
+            const y = joystickCurrentY / joystickMaxDistance;
+            
+            if (Math.abs(x) > sensitivity || Math.abs(y) > sensitivity) {
+                if (Math.abs(x) > Math.abs(y)) {
+                    if (x > sensitivity && currentDirection !== 'left') {
+                        nextDirection = 'right';
+                    } else if (x < -sensitivity && currentDirection !== 'right') {
+                        nextDirection = 'left';
+                    }
+                } else {
+                    if (y > sensitivity && currentDirection !== 'up') {
+                        nextDirection = 'down';
+                    } else if (y < -sensitivity && currentDirection !== 'down') {
+                        nextDirection = 'up';
+                    }
+                }
+            }
+        }
+        
+        // ============= GAMEPAD EVENT LISTENERS =============
+        window.addEventListener("gamepadconnected", function(e) {
+            console.log(`🎮 Gamepad terhubung: ${e.gamepad.id} (Index: ${e.gamepad.index})`);
+            
+            gamepadConnected = true;
+            gamepadIndex = e.gamepad.index;
+            currentGamepadType = detectGamepadType(e.gamepad.id);
+            
+            showGamepadConnected(e.gamepad.id);
+            
+            if (!gamepadPollingInterval) {
+                gamepadPollingInterval = setInterval(pollGamepad, 50);
+            }
+            
+            triggerGamepadVibration([100, 0.3, 0.7]);
+        });
+        
+        window.addEventListener("gamepaddisconnected", function(e) {
+            console.log(`🎮 Gamepad terputus: ${e.gamepad.id}`);
+            gamepadConnected = false;
+            gamepadIndex = null;
+            showGamepadDisconnected();
+            
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+            
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            if (pauseOverlay) {
+                pauseOverlay.remove();
+            }
+        });
+        
+        function checkGamepadSupport() {
+            if ('getGamepads' in navigator) {
+                console.log('🎮 Gamepad API didukung');
+                
+                const gamepads = navigator.getGamepads();
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        console.log(`🎮 Gamepad sudah terhubung: ${gamepads[i].id}`);
+                        gamepadConnected = true;
+                        gamepadIndex = i;
+                        currentGamepadType = detectGamepadType(gamepads[i].id);
+                        showGamepadConnected(gamepads[i].id);
+                        
+                        if (!gamepadPollingInterval) {
+                            gamepadPollingInterval = setInterval(pollGamepad, 50);
+                        }
+                        break;
+                    }
+                }
+                
+                return true;
+            } else {
+                console.log('⚠️ Gamepad API tidak didukung');
+                return false;
+            }
+        }
+        
+        // ============= LOAD ASSETS =============
+        function loadAssets(callback) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex';
+            
+            let assetsToLoad = Object.keys(catAssets).length + Object.keys(decorations).length;
+            let assetsLoadedCount = 0;
+            
+            function checkAssetLoaded() {
+                assetsLoadedCount++;
+                
+                if (assetsLoadedCount >= assetsToLoad) {
+                    setTimeout(() => {
+                        assetsLoaded = true;
+                        loadingScreen.style.display = 'none';
+                        if (callback) callback();
+                    }, 500);
+                }
+            }
+            
+            Object.entries(catAssets).forEach(([name, img]) => {
+                if (img.complete) {
+                    checkAssetLoaded();
+                } else {
+                    img.onload = checkAssetLoaded;
+                    img.onerror = () => {
+                        console.warn(`Gagal memuat aset: ${name} - ${img.src}`);
+                        checkAssetLoaded();
+                    };
+                }
+            });
+            
+            Object.entries(decorations).forEach(([name, img]) => {
+                if (img.complete) {
+                    checkAssetLoaded();
+                } else {
+                    img.onload = checkAssetLoaded;
+                    img.onerror = () => {
+                        console.warn(`Gagal memuat dekorasi: ${name}`);
+                        checkAssetLoaded();
+                    };
+                }
+            });
+            
+            setTimeout(() => {
+                if (!assetsLoaded) {
+                    console.log("Menggunakan fallback graphics...");
+                    assetsLoaded = true;
+                    loadingScreen.style.display = 'none';
+                    if (callback) callback();
+                }
+            }, 3000);
+        }
+        
+        // ============= EVENT LISTENERS =============
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning || isShocked || isDead) return;
+            
+            e.preventDefault();
+            
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    if (currentDirection !== 'down') nextDirection = 'up';
+                    break;
+                case 'arrowdown':
+                case 's':
+                    if (currentDirection !== 'up') nextDirection = 'down';
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    if (currentDirection !== 'right') nextDirection = 'left';
+                    break;
+                case 'arrowright':
+                case 'd':
+                    if (currentDirection !== 'left') nextDirection = 'right';
+                    break;
+                case 'escape':
+                case 'b':
+                case 'o':
+                    // Tombol ESC/B/O untuk kembali ke menu
+                    goBackToMenu();
+                    break;
+            }
+        });
+        
+        document.getElementById('wButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'down') nextDirection = 'up';
+        });
+        
+        document.getElementById('aButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'right') nextDirection = 'left';
+        });
+        
+        document.getElementById('sButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'up') nextDirection = 'down';
+        });
+        
+        document.getElementById('dButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'left') nextDirection = 'right';
+        });
+        
+        document.getElementById('wButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'down') nextDirection = 'up';
+        });
+        
+        document.getElementById('aButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'right') nextDirection = 'left';
+        });
+        
+        document.getElementById('sButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'up') nextDirection = 'down';
+        });
+        
+        document.getElementById('dButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isShocked || isDead) return;
+            if (currentDirection !== 'left') nextDirection = 'right';
+        });
+        
+        joystickStick.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleJoystickStart(touch.clientX, touch.clientY);
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (joystickActive) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                handleJoystickMove(touch.clientX, touch.clientY);
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (joystickActive) {
+                handleJoystickEnd();
+            }
+        });
+        
+        joystickStick.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            handleJoystickStart(e.clientX, e.clientY);
+            
+            const mouseMoveHandler = (e) => {
+                handleJoystickMove(e.clientX, e.clientY);
+            };
+            
+            const mouseUpHandler = () => {
+                handleJoystickEnd();
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+            
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        });
+        
+        // Event listener untuk tombol kembali (mouse)
+        document.getElementById('backButton').addEventListener('click', goBackToMenu);
+        
+        document.getElementById('playAgainButton').addEventListener('click', () => {
+            gameOverSound.pause();
+            gameOverSound.currentTime = 0;
+            
+            initGame();
+            startGameLoop();
+            
+            if (!gamepadPollingInterval && 'getGamepads' in navigator) {
+                gamepadPollingInterval = setInterval(pollGamepad, 50);
+            }
+        });
+        
+        document.getElementById('menuButton').addEventListener('click', goBackToMenu);
+        
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            calculateGridDimensions();
+            updateJoystickBaseRect();
+            if (gameRunning) {
+                initializeDecorations();
+            }
+            drawGame();
+        });
+        
+        // ============= INITIALIZE GAME =============
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            calculateGridDimensions();
+            
+            loadAssets(() => {
+                console.log('Semua assets berhasil dimuat!');
+                
+                initGame();
+                startGameLoop();
+                
+                function animationLoop() {
+                    if (gameRunning || isDead) {
+                        drawGame();
+                    }
+                    requestAnimationFrame(animationLoop);
+                }
+                animationLoop();
+            });
+        });
+        
+        window.addEventListener('load', updateJoystickBaseRect);
+        window.addEventListener('resize', updateJoystickBaseRect);
+        
+        console.log('🎮 Sistem game KUCING + GAMEPAD siap digunakan!');
+        console.log('🎮 Kontrol Gamepad:');
+        console.log('   - D-pad/Analog Stick: Kontrol Kucing');
+        console.log('   - START: Pause/Resume');
+        console.log('   - A: Main Lagi (di Game Over)');
+        console.log('   - B: Kembali ke Menu Utama (kapan saja)');
+        console.log('🎮 Kontrol Keyboard:');
+        console.log('   - WASD/Arrow Keys: Kontrol Kucing');
+        console.log('   - ESC/B/O: Kembali ke Menu Utama');
+        console.log('🎯 Sistem Level Dinamis (4 Level):');
+        console.log('   • 0-49 poin: MUDAH (Kecepatan normal 1.0x)');
+        console.log('   • 50-99 poin: NORMAL (40% lebih cepat 1.4x)');
+        console.log('   • 100-149 poin: SEDANG (60% lebih cepat 1.6x)');
+        console.log('   • 150+ poin: SULIT (100% lebih cepat 2.0x)');
+    </script>
+</body>
+</html>

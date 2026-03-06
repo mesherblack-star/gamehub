@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Search Kuliner Nusantara</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="nusa.css">
+</head>
+<body>
+<div class="home-container">
+        <h1>Pencari Kata Nusantara</h1>
+        <div class="subtitle">Teka Teki pencari kata Nusantara</div>
+
+        <div class="buttons-container">
+            <button class="btn btn-start" id="start-btn">
+                <i class="fas fa-play"></i>
+                <span>▶ Mulai Game</span>
+            </button>
+            <button class="btn back-btn" onclick="window.location.href='home.html'">
+                <i class="fas fa-arrow-left"></i>
+                <span>← Kembali</span>
+            </button>
+        </div>
+    </div>
+
+<button id="backBtn">⟵</button>
+
+<div id="audioToggle">
+  <div class="knob">🔊</div>
+</div>
+
+<audio id="bgMusic" src="assets/musik.mp3" loop></audio>
+
+<div id="levelSelect" class="level-page">
+  <h1>Pilih Level</h1>
+   <button class="btn-back-to-home">
+    <i class="fas fa-arrow-left"></i>
+    <span>⟵</span>
+  </button>
+  <br>
+
+  <div class="level-list">
+    <div class="level-card" data-level="1">
+      <div class="level-number">1</div>
+    </div>
+    <div class="level-card" data-level="2">
+      <div class="level-number">2</div>
+    </div>
+    <div class="level-card" data-level="3">
+      <div class="level-number">3</div>
+    </div>
+    <div class="level-card" data-level="4">
+      <div class="level-number">4</div>
+    </div>
+    <div class="level-card" data-level="5">
+      <div class="level-number">5</div>
+    </div>
+    <div class="level-card" data-level="6">
+      <div class="level-number">6</div>
+    </div>
+    <div class="level-card" data-level="7">
+      <div class="level-number">7</div>
+    </div>
+    <div class="level-card" data-level="8">
+      <div class="level-number">8</div>
+    </div>
+    <div class="level-card" data-level="9">
+      <div class="level-number">9</div>
+    </div>
+    <div class="level-card" data-level="10">
+      <div class="level-number">10</div>
+    </div>
+    <div class="level-card" data-level="11">
+      <div class="level-number">11</div>
+    </div>
+    <div class="level-card" data-level="12">
+      <div class="level-number">12</div>
+    </div>
+    <div class="level-card" data-level="13">
+      <div class="level-number">13</div>
+    </div>
+    <div class="level-card" data-level="14">
+      <div class="level-number">14</div>
+    </div>
+    <div class="level-card" data-level="15">
+      <div class="level-number">15</div>
+    </div>
+    <div class="level-card" data-level="16">
+      <div class="level-number">16</div>
+    </div>
+    <div class="level-card" data-level="17">
+      <div class="level-number">17</div>
+    </div>
+    <div class="level-card" data-level="18">
+      <div class="level-number">18</div>
+    </div>
+    <div class="level-card" data-level="19">
+      <div class="level-number">19</div>
+    </div>
+    <div class="level-card" data-level="20">
+      <div class="level-number">20</div>
+    </div>
+  </div>
+  <div class="chart-placeholder"></div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen">
+  <div class="loading-center">
+    <!-- LOGO GAME -->
+    <img src="images/Nusaword Putih.jpeg" alt="NUSAWORD Logo" class="loading-logo-img">
+
+    <!-- TEXT -->
+    <div class="loading-text">Memuat...</div>
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-wrapper">
+      <div id="progress"></div>
+    </div>
+  </div>
+</div>
+
+<div class="game-panel">
+  <h1>Kuliner Nusantara</h1>
+  <h3 id="levelText">Level 1</h3>
+
+  <!-- Container utama untuk menyelaraskan lebar -->
+<div id="gameContent">
+  <div id="topBar">
+  <div id="score">Skor: 0</div>
+  <div id="timer">Waktu: 00:00</div> 
+  <div id="hearts"></div>
+</div>
+  <div id="wordList"></div>
+  <div id="grid"></div>
+</div>
+</div>
+
+<div id="popup" class="popup-card-container">
+  <div class="popup-card">
+    <div class="popup-card-header">
+      <div class="popup-emoji">🎉</div>
+      <h2>LEVEL SELESAI!</h2>
+    </div>
+    <div class="popup-card-body">
+      <p class="level-complete-text">Selamat! Kamu telah menyelesaikan level ini dengan sempurna!</p>
+    </div>
+    <div class="popup-buttons">
+      <button id="nextLevelBtn" class="btn-next-level">Lanjut Level</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME OVER POPUP ===== -->
+<div id="gameOverPopup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h2>GAME OVER</h2>
+    </div>
+    <div class="popup-message">
+      Kamu kehabisan nyawa!
+    </div>
+    <div class="popup-buttons">
+      <button id="retryBtn" class="btn-primary">Main Lagi</button>
+      <button id="quitBtn" class="btn-secondary">Menyerah</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME COMPLETED POPUP ===== -->
+<div id="gameCompletedPopup" class="popup-overlay">
+  <div class="popup-content">
+    <div class="popup-header">
+      <h2>🎉 SELAMAT! 🎉</h2>
+    </div>
+    <div class="popup-message">
+      Kamu telah berhasil menyelesaikan game ini!<br><br>
+      Skor Akhir: <span id="finalScore">0</span>
+    </div>
+    <div class="popup-buttons">
+      <button id="playAgainBtn" class="btn-primary">Main Lagi</button>
+      <button id="backToMenuBtn" class="btn-secondary">Kembali ke Menu</button>
+    </div>
+  </div>
+</div>
+
+<script src="nusa.js"></script>
+</body>
+</html>

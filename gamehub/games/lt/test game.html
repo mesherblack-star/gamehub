@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teka-Teki Nusantara</title>
+
+    
+    <!-- External Resources -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== CSS VARIABLES =====  */
+        :root {
+            --primary-red: #ff0000;
+            --dark-red: #ff0000;
+            --light-red: #FF5252;
+            --accent-gold: #FFD700;
+            --accent-yellow: #FFC107;
+            --accent-blue: #7c1010;
+            --accent-green: #4CAF50;
+            --accent-purple: #9C27B0;
+            --xbox-green: #107C10;
+            --playstation-blue: #0066CC;
+            --white: #FFFFFF;
+            --dark-gray: #0a0a0a;
+            --light-gray: #1a1a1a;
+            --glass-bg: rgba(15, 15, 15, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glow-red: 0 0 30px rgba(255, 82, 82, 0.3);
+            --glow-yellow: 0 0 30px rgba(255, 215, 0, 0.3);
+            --glow-blue: 0 0 30px rgba(16, 124, 16, 0.3);
+            --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            --transition-fast: all 0.2s ease;
+            --blur-effect: blur(20px);
+        }
+
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: radial-gradient(circle at 20% 50%, #1a0f0f 0%, #0a0a0a 70%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(211, 47, 47, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(156, 39, 176, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        /* ===== FLOATING ELEMENTS ===== */
+        .floating-element {
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 82, 82, 0.05);
+            z-index: -1;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 200px;
+            height: 200px;
+            bottom: 15%;
+            right: 10%;
+            animation-delay: 5s;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .floating-element:nth-child(3) {
+            width: 150px;
+            height: 150px;
+            top: 50%;
+            left: 85%;
+            animation-delay: 10s;
+            background: rgba(156, 39, 176, 0.05);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+
+        /* ===== GAME CONTAINER ===== */
+        .game-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--glass-bg);
+            border-radius: 28px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: var(--blur-effect);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            z-index: 1;
+            overflow: hidden;
+            min-height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--primary-red) 20%, 
+                var(--accent-gold) 50%, 
+                var(--primary-red) 80%, 
+                transparent 100%);
+            border-radius: 28px 28px 0 0;
+        }
+
+        .game-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.03),
+                transparent
+            );
+            animation: shine 8s infinite;
+            z-index: -1;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            position: relative;
+            display: inline-block;
+        }
+
+        h1::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 1px;
+            left: 1px;
+            background: linear-gradient(135deg, var(--primary-red), var(--accent-gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-red), transparent);
+            border-radius: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: none;
+            margin-top: 15px;
+        }
+
+        /* ===== GAME INFO BAR ===== */
+        .game-info-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.02) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .info-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .info-card:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+            box-shadow: var(--glow-red);
+        }
+
+        .info-card i {
+            font-size: 1rem;
+            margin-bottom: 1px;
+        }
+
+        .lives-container i {
+            color: var(--light-red);
+        }
+
+        .timer-container i {
+            color: var(--accent-gold);
+        }
+
+        .controller-status i {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .controller-status.connected i {
+            color: var(--xbox-green);
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            line-height: 1;
+        }
+
+        .lives-count {
+            color: var(--light-red);
+        }
+
+        .timer {
+            color: var(--accent-gold);
+        }
+
+        .info-label {
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* ===== PROGRESS SECTION ===== */
+        .progress-container {
+            margin: 20px 0 30px 0;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-bar {
+            height: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.1), 
+                transparent);
+            animation: progressGlow 2s infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                var(--primary-red), 
+                var(--light-red),
+                var(--primary-red));
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            border-radius: 3px;
+        }
+
+        .progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 20px;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3));
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* ===== QUESTION SECTION ===== */
+        .question-container {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 20px 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            line-height: 1.6;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .question-container:hover {
+            border-color: var(--primary-red);
+            box-shadow: var(--glow-red);
+        }
+
+        .question-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.02) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .question-container:hover::before {
+            transform: translateX(100%);
+        }
+
+        .question-number {
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            background: linear-gradient(135deg, var(--accent-gold), var(--primary-red));
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);
+        }
+
+        /* ===== OPTIONS SECTION ===== */
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px 15px 15px 50px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            overflow: hidden;
+            text-align: left;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+        }
+
+        .option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.02) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .option:hover::before {
+            transform: translateX(100%);
+        }
+
+        .option:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--glow-red);
+        }
+
+        .option::after {
+            content: attr(data-letter);
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+        }
+
+        .option:hover::after {
+            background: var(--primary-red);
+            border-color: var(--primary-red);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .option.selected {
+            background: rgba(16, 124, 16, 0.08);
+            border-color: var(--accent-blue);
+            box-shadow: var(--glow-blue);
+        }
+
+        .option.selected::after {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, 
+                rgba(76, 175, 80, 0.15), 
+                rgba(76, 175, 80, 0.05));
+            border-color: var(--accent-green);
+            color: white;
+        }
+
+        .option.correct::after {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: white;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, 
+                rgba(244, 67, 54, 0.15), 
+                rgba(244, 67, 54, 0.05));
+            border-color: #F44336;
+            color: white;
+        }
+
+        .option.incorrect::after {
+            background: #F44336;
+            border-color: #F44336;
+            color: white;
+        }
+
+        /* ===== FEEDBACK SECTION ===== */
+        .feedback {
+            min-height: 50px;
+            margin: 15px 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feedback::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.02) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .feedback:hover::before {
+            transform: translateX(100%);
+        }
+
+        .correct-feedback {
+            color: var(--accent-green);
+            border-color: rgba(76, 175, 80, 0.3);
+            background: rgba(76, 175, 80, 0.08);
+            box-shadow: 0 0 30px rgba(76, 175, 80, 0.2);
+        }
+
+        .incorrect-feedback {
+            color: #FF6B6B;
+            border-color: rgba(244, 67, 54, 0.3);
+            background: rgba(244, 67, 54, 0.08);
+            box-shadow: 0 0 30px rgba(244, 67, 54, 0.2);
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.1) 50%, 
+                transparent 100%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn:hover::before {
+            transform: translateX(100%);
+        }
+
+        /* Tombol utama (berikutnya, selesaikan, lihat hasil) - tetap merah */
+        .btn-next {
+            background: linear-gradient(135deg, var(--primary-red), var(--light-red));
+            border: none;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(211, 47, 47, 0.3);
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(211, 47, 47, 0.5);
+            background: linear-gradient(135deg, var(--light-red), var(--primary-red));
+        }
+
+        /* Tombol khusus untuk Lewati - warna kuning cerah */
+        .btn-skip {
+            background: linear-gradient(135deg, var(--accent-yellow), #FFD740);
+            border: none;
+            color: #333;
+            font-weight: 700;
+            box-shadow: 0 10px 20px rgba(255, 193, 7, 0.3);
+        }
+
+        .btn-skip:hover:not(:disabled) {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(255, 193, 7, 0.5);
+            background: linear-gradient(135deg, #FFD740, var(--accent-yellow));
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* ===== FLOATING CONTROLS ===== */
+        .floating-controls {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .floating-btn {
+            position: relative;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--white);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: var(--blur-effect);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-red);
+            box-shadow: var(--glow-red);
+        }
+
+        .floating-btn-left {
+            left: 0;
+        }
+
+        .floating-btn-right {
+            left: 0;
+        }
+
+        /* Untuk tombol pause khusus, beri margin atas lebih banyak */
+        #pause-btn {
+            margin-top: 10px;
+        }
+
+        /* Responsive untuk mobile */
+        @media (max-width: 768px) {
+            .floating-controls {
+                top: 15px;
+                left: 15px;
+                gap: 8px;
+            }
+            
+            .floating-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .floating-controls {
+                top: 10px;
+                left: 10px;
+                gap: 6px;
+            }
+            
+            .floating-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+
+        /* ===== CONTROLLER GUIDE ===== */
+        .controller-guide {
+            margin-top: 25px;
+            padding: 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .controller-guide.active {
+            padding: 40px;
+            max-height: 1000px;
+            opacity: 1;
+        }
+
+        .controller-guide h3 {
+            margin-bottom: 30px;
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .controller-sections {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .controller-section {
+            text-align: left;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+        }
+
+        .controller-section:hover {
+            border-color: var(--primary-red);
+            transform: translateY(-5px);
+            box-shadow: var(--glow-red);
+        }
+
+        .controller-section h4 {
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary-red);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .controller-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .controller-button {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .controller-button:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateX(5px);
+            border-color: var(--glass-border);
+        }
+
+        .controller-button .button-icons {
+            display: flex;
+            gap: 10px;
+            min-width: 110px;
+        }
+
+        .controller-button .button-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .xbox-button {
+            background: linear-gradient(135deg, var(--xbox-green), #0d6a0d);
+            color: white;
+            box-shadow: 0 5px 15px rgba(16, 124, 16, 0.3);
+        }
+
+        .playstation-button {
+            background: linear-gradient(135deg, var(--playstation-blue), #0055aa);
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 102, 204, 0.3);
+        }
+
+        .controller-button .button-description {
+            flex: 1;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.5;
+        }
+
+        /* ===== VIBRATION EFFECT ===== */
+        .vibration-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            background: rgba(255, 82, 82, 0.1);
+            transition: opacity 0.3s;
+        }
+
+        .vibration-effect.active {
+            animation: vibrate 0.3s linear;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        @keyframes vibrate {
+            0% { transform: translate(0); }
+            10% { transform: translate(-2px, -2px); }
+            20% { transform: translate(2px, -2px); }
+            30% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, -2px); }
+            70% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, 2px); }
+            90% { transform: translate(-2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes buttonPress {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes timerShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ===== MODAL STYLES ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .close-btn {
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--white);
+            transition: var(--transition);
+        }
+
+        .close-btn:hover {
+            color: var(--primary-red);
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+            color: var(--white);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .results-summary {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .results-summary h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+            color: var(--accent-gold);
+        }
+
+        .results-summary p {
+            margin: 5px 0;
+            font-size: 1rem;
+        }
+
+        .question-result {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .question-result.correct {
+            border-color: var(--accent-green);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .question-result.incorrect {
+            border-color: var(--primary-red);
+            background: rgba(211, 47, 47, 0.05);
+        }
+
+        .question-result h4 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .question-result .answer {
+            font-size: 0.9rem;
+            margin: 5px 0;
+        }
+
+        .question-result .correct-answer {
+            color: var(--accent-green);
+        }
+
+        .question-result .wrong-answer {
+            color: var(--primary-red);
+        }
+
+        /* ===== AUDIO CONTROLS ===== */
+        .audio-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .audio-control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .audio-control-group label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .volume-slider:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .volume-slider:hover::-webkit-slider-thumb {
+            background: var(--primary-red);
+        }
+
+        .volume-slider:hover::-moz-range-thumb {
+            background: var(--primary-red);
+        }
+
+        /* ===== CONTROLLER GUIDE MODAL ===== */
+        .controller-guide-content h3 {
+            margin-bottom: 30px;
+            color: var(--accent-gold);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-red), var(--light-red));
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 15px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(211, 47, 47, 0.3);
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                border-radius: 24px;
+                min-height: calc(100vh - 20px);
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .options-container {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .question-container {
+                font-size: 1.2rem;
+                padding: 15px 20px;
+                min-height: 50px;
+            }
+
+            .option {
+                padding: 12px 12px 12px 45px;
+                font-size: 0.95rem;
+                min-height: 60px;
+            }
+
+            .option::after {
+                left: 12px;
+                width: 25px;
+                height: 25px;
+                font-size: 0.9rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                margin-top: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 15px 25px;
+                font-size: 1rem;
+            }
+
+            .controller-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .controller-button {
+                padding: 10px;
+                gap: 12px;
+            }
+
+            .controller-button .button-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 0.8rem;
+            }
+
+            .feedback {
+                padding: 12px 15px;
+                font-size: 1rem;
+                min-height: 40px;
+                margin: 10px 0;
+            }
+
+            .controller-guide-toggle {
+                margin-top: 15px;
+            }
+
+            .toggle-btn {
+                padding: 12px 30px;
+                font-size: 0.9rem;
+            }
+
+            .controller-guide.active {
+                padding: 15px;
+            }
+
+            .controller-section {
+                padding: 15px;
+            }
+
+            .info-card {
+                padding: 8px;
+                gap: 1px;
+            }
+
+            .info-card i {
+                font-size: 0.9rem;
+                margin-bottom: 0;
+            }
+
+            .info-value {
+                font-size: 1.1rem;
+            }
+
+            .info-label {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 10px;
+                border-radius: 20px;
+                min-height: calc(100vh - 20px);
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .question-container {
+                font-size: 1.1rem;
+                padding: 12px 15px;
+                min-height: 40px;
+            }
+
+            .option {
+                padding: 10px 10px 10px 40px;
+                font-size: 0.9rem;
+                min-height: 50px;
+            }
+
+            .option::after {
+                left: 10px;
+                width: 20px;
+                height: 20px;
+                font-size: 0.8rem;
+            }
+
+            .feedback {
+                padding: 10px 12px;
+                font-size: 0.95rem;
+                min-height: 35px;
+                margin: 8px 0;
+            }
+
+            .controller-guide.active {
+                padding: 15px;
+            }
+
+            .toggle-btn {
+                padding: 10px 25px;
+                font-size: 0.85rem;
+            }
+
+            .controller-section {
+                padding: 15px;
+            }
+
+            .controller-button .button-icon {
+                width: 30px;
+                height: 30px;
+                font-size: 0.7rem;
+            }
+
+            .info-card {
+                padding: 6px;
+                gap: 0px;
+            }
+
+            .info-card i {
+                font-size: 0.8rem;
+            }
+
+            .info-value {
+                font-size: 1rem;
+            }
+
+            .info-label {
+                font-size: 0.55rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <!-- Floating Control Buttons -->
+    <div class="floating-controls">
+        <button class="floating-btn floating-btn-left" id="controller-settings-btn" title="Pengaturan Kontroller">
+            <i class="fas fa-gamepad"></i>
+        </button>
+        <button class="floating-btn floating-btn-right" id="sound-settings-btn" title="Pengaturan Suara">
+            <i class="fas fa-volume-up"></i>
+        </button>
+        <!-- Tombol Pause Baru -->
+        <button class="floating-btn" id="pause-btn" title="Jeda Game" style="left: 50%; transform: translateX(-50%);">
+            <i class="fas fa-pause"></i>
+        </button>
+    </div>
+
+    <!-- Game Container -->
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <h1 data-text=>TEKA-TEKI NUSANTARA</h1>
+            <div class="subtitle">Uji Pengetahuan Budaya Indonesia-mu!</div>
+        </div>
+
+        <!-- Game Info Bar -->
+        <div class="game-info-bar">
+            <div class="info-card lives-container">
+                <i class="fas fa-heart"></i>
+                <div class="info-value lives-count" id="lives">3</div>
+                <div class="info-label">Nyawa</div>
+            </div>
+            <div class="info-card timer-container">
+                <i class="fas fa-clock"></i>
+                <div class="info-value timer" id="timer">10</div>
+                <div class="info-label">Sisa Waktu</div>
+            </div>
+            <div class="info-card controller-status disconnected" id="controller-status">
+                <i class="fas fa-gamepad"></i>
+                <div class="info-value">-</div>
+                <div class="info-label">Kontroller</div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="progress-container">
+            <div class="progress-label">
+                <span>Pertanyaan</span>
+                <span id="question-counter">1/10</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+
+        <!-- Question Section -->
+        <div class="question-container">
+            <div class="question-number" id="question-number">Pertanyaan 1</div>
+            <div id="question-text"></div>
+        </div>
+
+        <!-- Options Section -->
+        <div class="options-container" id="options">
+            <!-- Options will be populated by JavaScript -->
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback" id="feedback">
+            Pilih salah satu jawaban di atas
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-next" id="next-btn">
+                <span>Berikutnya</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Results Modal -->
+    <div class="modal" id="results-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-trophy"></i> Hasil Permainan</h2>
+                <span class="close-btn" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be populated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="play-again-btn">Main Lagi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Modal -->
+    <div class="modal" id="game-over-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-skull-crossbones"></i> Game Over</h2>
+                <span class="close-btn" id="close-game-over">&times;</span>
+            </div>
+            <div class="modal-body" id="game-over-body">
+                <!-- Content will be populated by JS -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="try-again-btn">Coba Lagi</button>
+                <button class="btn" id="back-to-home-btn">Kembali ke Home</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-cog"></i> Pengaturan Suara</h2>
+                <span class="close-btn" id="close-settings">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="audio-controls">
+                    <div class="audio-control-group">
+                        <label for="bg-volume">
+                            <i class="fas fa-music"></i> Musik Latar: <span id="bg-volume-value">50</span>%
+                        </label>
+                        <input type="range" id="bg-volume" min="0" max="100" value="50" class="volume-slider">
+                    </div>
+                    <div class="audio-control-group">
+                        <label for="sfx-volume">
+                            <i class="fas fa-volume-up"></i> Efek Suara: <span id="sfx-volume-value">70</span>%
+                        </label>
+                        <input type="range" id="sfx-volume" min="0" max="100" value="70" class="volume-slider">
+                    </div>
+                    <div class="audio-control-group">
+                        <button class="btn btn-primary" id="mute-btn">
+                            <i class="fas fa-volume-mute"></i> <span>Mute Semua</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="save-settings-btn">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Controller Settings Modal -->
+    <div class="modal" id="controller-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-gamepad"></i> Pengaturan Kontroller</h2>
+                <span class="close-btn" id="close-controller">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="controller-guide-content">
+                    <h3>Pengaturan Kontroller</h3>
+                    <div class="controller-sections">
+                        <!-- Xbox Controller Section -->
+                        <div class="controller-section">
+                            <h4><i class="fab fa-xbox"></i> Xbox Controller</h4>
+                            <div class="controller-buttons">
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">A</div>
+                                    </div>
+                                    <div class="button-description">Pilih Jawaban / Konfirmasi</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">X</div>
+                                    </div>
+                                    <div class="button-description">Tampilkan Petunjuk</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">Y</div>
+                                    </div>
+                                    <div class="button-description">Reset Pilihan</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">D-Pad</div>
+                                    </div>
+                                    <div class="button-description">Navigasi Pilihan</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">LT/RT</div>
+                                    </div>
+                                    <div class="button-description">Navigasi Soal</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon xbox-button">Start</div>
+                                    </div>
+                                    <div class="button-description">Mulai Ulang Game</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PlayStation Controller Section -->
+                        <div class="controller-section">
+                            <h4><i class="fab fa-playstation"></i> PlayStation Controller</h4>
+                            <div class="controller-buttons">
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">X</div>
+                                    </div>
+                                    <div class="button-description">Pilih Jawaban / Konfirmasi</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">□</div>
+                                    </div>
+                                    <div class="button-description">Tampilkan Petunjuk</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">△</div>
+                                    </div>
+                                    <div class="button-description">Reset Pilihan</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">D-Pad</div>
+                                    </div>
+                                    <div class="button-description">Navigasi Pilihan</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">L1/R1</div>
+                                    </div>
+                                    <div class="button-description">Navigasi Soal</div>
+                                </div>
+                                <div class="controller-button">
+                                    <div class="button-icons">
+                                        <div class="button-icon playstation-button">Start</div>
+                                    </div>
+                                    <div class="button-description">Mulai Ulang Game</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pause Modal -->
+    <div class="modal" id="pause-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-pause"></i> Game Dijeda</h2>
+                <span class="close-btn" id="close-pause">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="results-summary">
+                    <h3>⏸️ Game Dijeda</h3>
+                    <p>Game saat ini dalam keadaan dijeda.</p>
+                    <p>Pilih aksi yang ingin Anda lakukan:</p>
+                </div>
+                
+                <div class="pause-options" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+                    <button class="btn btn-primary" id="resume-btn" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-play"></i> Lanjutkan Permainan
+                    </button>
+                    
+                    <button class="btn" id="settings-from-pause-btn" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-cog"></i> Pengaturan
+                    </button>
+                    
+                    <button class="btn" id="quit-from-pause-btn" style="width: 100%; justify-content: center; background: rgba(211, 47, 47, 0.1);">
+                        <i class="fas fa-sign-out-alt"></i> Keluar ke Home
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vibration Effect Layer -->
+    <div class="vibration-effect" id="vibration-effect"></div>
+
+    <!-- Audio Elements -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="audio/background.mp3" type="audio/mpeg">
+        <source src="audio/background.ogg" type="audio/ogg">
+    </audio>
+    <audio id="correct-sound" preload="auto">
+        <source src="audio/correct.mp3" type="audio/mpeg">
+        <source src="audio/correct.ogg" type="audio/ogg">
+    </audio>
+    <audio id="incorrect-sound" preload="auto">
+        <source src="audio/incorrect.mp3" type="audio/mpeg">
+        <source src="audio/incorrect.ogg" type="audio/ogg">
+    </audio>
+    <audio id="game-over-sound" preload="auto">
+        <source src="audio/gameover.mp3" type="audio/mpeg">
+        <source src="audio/game-over.ogg" type="audio/ogg">
+    </audio>
+
+    <script>
+        // ===== QUESTION BANK =====
+        const questionBank = [
+            {
+                question: "Wayang Kulit adalah seni pertunjukan tradisional yang berasal dari?",
+                options: ["Jawa", "Bali", "Sumatera", "Kalimantan"],
+                answer: 0,
+                fact: "Wayang Kulit berasal dari Jawa dan telah diakui UNESCO sebagai Warisan Budaya Takbenda Dunia."
+            },
+            {
+                question: "Alat musik tradisional Gamelan berasal dari daerah?",
+                options: ["Jawa", "Bali", "Sumatera", "Sulawesi"],
+                answer: 0,
+                fact: "Gamelan adalah ansambel musik tradisional Jawa dan Bali yang terdiri dari berbagai alat perkusi."
+            },
+            {
+                question: "Keraton Yogyakarta didirikan oleh?",
+                options: ["Sri Sultan Hamengkubuwono I", "Pakubuwono I", "Mangkunegara I", "Sultan Agung"],
+                answer: 0,
+                fact: "Keraton Yogyakarta didirikan oleh Sri Sultan Hamengkubuwono I pada tahun 1755."
+            },
+            {
+                question: "Batik Parang berasal dari daerah?",
+                options: ["Yogyakarta", "Solo", "Pekalongan", "Cirebon"],
+                answer: 1,
+                fact: "Batik Parang adalah motif batik klasik yang berasal dari Surakarta (Solo)."
+            },
+            {
+                question: "Tari Bedhaya Ketawang merupakan tarian sakral dari?",
+                options: ["Keraton Yogyakarta", "Keraton Surakarta", "Keraton Cirebon", "Keraton Sumenep"],
+                answer: 1,
+                fact: "Tari Bedhaya Ketawang adalah tarian sakral dari Keraton Surakarta yang hanya dipentaskan pada acara khusus."
+            },
+            {
+                question: "Upacara Ngaben adalah ritual kremasi masyarakat?",
+                options: ["Bali", "Jawa", "Toraja", "Batak"],
+                answer: 0,
+                fact: "Ngaben adalah upacara kremasi dalam agama Hindu Bali untuk mengantarkan roh ke alam baka."
+            },
+            {
+                question: "Pura Besakih terletak di lereng gunung?",
+                options: ["Gunung Agung", "Gunung Batur", "Gunung Rinjani", "Gunung Merapi"],
+                answer: 0,
+                fact: "Pura Besakih terletak di lereng Gunung Agung, Bali, dan merupakan pura terbesar di Bali."
+            },
+            {
+                question: "Tari Kecak berasal dari daerah?",
+                options: ["Bali", "Jawa", "Sumatera", "Nusa Tenggara"],
+                answer: 0,
+                fact: "Tari Kecak berasal dari Bali dan dikenal sebagai 'Tari Monkey Chant' karena diiringi oleh suara 'cak' dari penari laki-laki."
+            },
+            {
+                question: "Hari Raya Nyepi dirayakan oleh masyarakat?",
+                options: ["Hindu Bali", "Hindu Jawa", "Budha", "Konghucu"],
+                answer: 0,
+                fact: "Nyepi adalah hari raya umat Hindu Bali yang dirayakan dengan hari keheningan."
+            },
+            {
+                question: "Ogoh-ogoh adalah patung raksasa yang dibuat untuk menyambut?",
+                options: ["Hari Raya Nyepi", "Galungan", "Kuningan", "Saraswati"],
+                answer: 0,
+                fact: "Ogoh-ogoh dibuat sebagai simbol kejahatan dan akan diarak sebelum Hari Raya Nyepi."
+            },
+            {
+                question: "Siapakah presiden pertama Indonesia?",
+                options: ["Soekarno", "Suharto", "BJ Habibie", "Abdurrahman Wahid"],
+                answer: 0,
+                fact: "Soekarno adalah presiden pertama Indonesia yang memproklamasikan kemerdekaan pada 17 Agustus 1945."
+            },
+            {
+                question: "Kapan Indonesia memproklamasikan kemerdekaannya?",
+                options: ["17 Agustus 1945", "17 Agustus 1946", "17 Agustus 1947", "17 Agustus 1948"],
+                answer: 0,
+                fact: "Proklamasi Kemerdekaan Indonesia dibacakan oleh Soekarno pada 17 Agustus 1945 di Jakarta."
+            },
+            {
+                question: "Apa semboyan negara Indonesia?",
+                options: ["Bhinneka Tunggal Ika", "Satya Bhakti Praja", "Bhakti Praja Satya", "Satya Praja Bhakti"],
+                answer: 0,
+                fact: "Bhinneka Tunggal Ika berarti 'Berbeda-beda tetapi tetap satu' dari Kakawin Sutasoma karya Mpu Tantular."
+            },
+            {
+                question: "Rumah adat suku Toraja disebut?",
+                options: ["Tongkonan", "Honai", "Joglo", "Limas"],
+                answer: 0,
+                fact: "Tongkonan adalah rumah adat suku Toraja yang berbentuk perahu terbalik dan memiliki atap melengkung."
+            },
+            {
+                question: "Candi Borobudur terletak di daerah?",
+                options: ["Magelang", "Yogyakarta", "Solo", "Semarang"],
+                answer: 0,
+                fact: "Borobudur adalah candi Buddha terbesar di dunia yang dibangun pada abad ke-9 oleh dinasti Syailendra."
+            },
+            {
+                question: "Siapa pencipta lagu Indonesia Raya?",
+                options: ["WR Supratman", "Cornel Simanjuntak", "Ismail Marzuki", "Sudharnoto"],
+                answer: 0,
+                fact: "WR Supratman menciptakan lagu Indonesia Raya pada 1924 dan pertama kali dinyanyikan pada 1928."
+            },
+            {
+                question: "Senjata tradisional suku Minangkabau adalah?",
+                options: ["Karambit", "Kris", "Golok", "Parang"],
+                answer: 0,
+                fact: "Karambit adalah senjata tradisional Minangkabau yang berbentuk seperti kuku harimau."
+            },
+            {
+                question: "Istana Keraton Yogyakarta dikenal dengan nama?",
+                options: ["Keraton Ngayogyakarta Hadiningrat", "Keraton Surakarta", "Keraton Cirebon", "Keraton Sumenep"],
+                answer: 0,
+                fact: "Keraton Yogyakarta adalah istana resmi Sultan Yogyakarta yang dibangun pada 1755."
+            },
+            {
+                question: "Tari Kecak menceritakan kisah?",
+                options: ["Ramayana", "Mahabharata", "Pandawa Lima", "Arjuna Wiwaha"],
+                answer: 0,
+                fact: "Tari Kecak dari Bali menggambarkan pertempuran antara Rama dan Rahwana dalam epos Ramayana."
+            },
+            {
+                question: "Kerajaan Majapahit mencapai puncak kejayaannya pada abad?",
+                options: ["XIV", "XV", "XIII", "XII"],
+                answer: 0,
+                fact: "Kerajaan Majapahit mencapai puncak kejayaannya pada abad ke-14 di bawah pimpinan Hayam Wuruk."
+            },
+            {
+                question: "Motif batik khas Cirebon adalah?",
+                options: ["Mega Mendung", "Parang", "Kawung", "Truntum"],
+                answer: 0,
+                fact: "Mega Mendung adalah motif batik Cirebon yang menggambarkan awan dan gelombang laut."
+            },
+            {
+                question: "Siapa pendiri Kerajaan Mataram Islam?",
+                options: ["Panembahan Senopati", "Sultan Agung", "Amangkurat I", "Pakubuwono I"],
+                answer: 0,
+                fact: "Panembahan Senopati adalah pendiri Kerajaan Mataram Islam pada tahun 1586."
+            },
+            {
+                question: "Kalender tradisional Bali disebut?",
+                options: ["Saka", "Jawa", "Hijriah", "Masehi"],
+                answer: 0,
+                fact: "Kalender Saka adalah kalender Hindu yang digunakan di Bali sejak abad ke-8."
+            },
+            {
+                question: "Bunga nasional Indonesia adalah?",
+                options: ["Melati", "Anggrek", "Mawar", "Tulip"],
+                answer: 0,
+                fact: "Melati putih dipilih sebagai bunga nasional karena keharumannya dan kesederhanaannya."
+            },
+            {
+                question: "Rumah adat Sunda disebut?",
+                options: ["Joglo", "Limas", "Tongkonan", "Honai"],
+                answer: 0,
+                fact: "Joglo adalah rumah adat Jawa yang juga populer di daerah Sunda dengan atap limasan."
+            },
+            {
+                question: "Satelit pertama Indonesia bernama?",
+                options: ["Palapa", "Telkom", "Indosat", "Garuda"],
+                answer: 0,
+                fact: "Satelit Palapa A1 diluncurkan pada 1976 dan merupakan satelit komunikasi pertama Indonesia."
+            },
+            {
+                question: "Senjata tradisional suku Dayak adalah?",
+                options: ["Mandau", "Kris", "Karambit", "Golok"],
+                answer: 0,
+                fact: "Mandau adalah parang panjang yang menjadi senjata tradisional suku Dayak di Kalimantan."
+            },
+            {
+                question: "Gunung berapi yang meletus dahsyat pada 1883 adalah?",
+                options: ["Krakatau", "Merapi", "Bromo", "Rinjani"],
+                answer: 0,
+                fact: "Letusan Krakatau pada 1883 adalah salah satu letusan gunung berapi terbesar dalam sejarah."
+            },
+            {
+                question: "Falsafah hidup masyarakat Minangkabau adalah?",
+                options: ["Adat Basandi Syarak, Syarak Basandi Kitabullah", "Bhinneka Tunggal Ika", "Satya Bhakti Praja", "Bhakti Praja Satya"],
+                answer: 0,
+                fact: "Adat Basandi Syarak berarti adat bersendikan syariat, dan syariat bersendikan Al-Quran."
+            }
+        ];
+
+        // ===== GAME VARIABLES =====
+        let currentQuestion = 0;
+        let lives = 3;
+        let selectedOption = null;
+        let answered = false;
+        const TOTAL_QUESTIONS = 10;
+        const TIME_PER_QUESTION = 10;
+        let timeLeft = TIME_PER_QUESTION;
+        let timerInterval = null;
+        let selectedQuestions = [];
+        let questionResults = [];
+        let controllerType = null;
+        let gamepadIndex = null;
+        let isPaused = false;
+        let remainingTimeBeforePause = 0;
+
+        // ===== DOM ELEMENTS =====
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const questionCounter = document.getElementById('question-counter');
+        const optionsEl = document.getElementById('options');
+        const livesEl = document.getElementById('lives');
+        const timerEl = document.getElementById('timer');
+        const feedbackEl = document.getElementById('feedback');
+        const progressEl = document.getElementById('progress');
+        const nextBtn = document.getElementById('next-btn');
+        const controllerStatus = document.getElementById('controller-status');
+        const vibrationEffect = document.getElementById('vibration-effect');
+        const resultsModal = document.getElementById('results-modal');
+        const modalBody = document.getElementById('modal-body');
+        const closeModal = document.getElementById('close-modal');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const gameOverBody = document.getElementById('game-over-body');
+        const closeGameOver = document.getElementById('close-game-over');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const backToHomeBtn = document.getElementById('back-to-home-btn');
+
+        // Settings elements
+        const settingsModal = document.getElementById('settings-modal');
+        const controllerModal = document.getElementById('controller-modal');
+        const pauseModal = document.getElementById('pause-modal');
+        const soundSettingsBtn = document.getElementById('sound-settings-btn');
+        const controllerSettingsBtn = document.getElementById('controller-settings-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const closeSettings = document.getElementById('close-settings');
+        const closeController = document.getElementById('close-controller');
+        const closePause = document.getElementById('close-pause');
+        const bgVolumeSlider = document.getElementById('bg-volume');
+        const sfxVolumeSlider = document.getElementById('sfx-volume');
+        const bgVolumeValue = document.getElementById('bg-volume-value');
+        const sfxVolumeValue = document.getElementById('sfx-volume-value');
+        const muteBtn = document.getElementById('mute-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const resumeBtn = document.getElementById('resume-btn');
+        const settingsFromPauseBtn = document.getElementById('settings-from-pause-btn');
+        const quitFromPauseBtn = document.getElementById('quit-from-pause-btn');
+
+        // Audio elements
+        const bgMusic = document.getElementById('bg-music');
+        const correctSound = document.getElementById('correct-sound');
+        const incorrectSound = document.getElementById('incorrect-sound');
+        const gameOverSound = document.getElementById('game-over-sound');
+
+        // Audio settings
+        let bgVolume = 50;
+        let sfxVolume = 70;
+        let isMuted = false;
+        let previousBgVolume = 50;
+        let previousSfxVolume = 70;
+
+        // ===== UTILITY FUNCTIONS =====
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function selectRandomQuestions() {
+            const shuffledBank = shuffleArray([...questionBank]);
+            const selected = shuffledBank.slice(0, TOTAL_QUESTIONS);
+            selected.forEach(q => {
+                const originalCorrect = q.options[q.answer];
+                shuffleArray(q.options);
+                q.answer = q.options.indexOf(originalCorrect);
+            });
+            return selected;
+        }
+
+        function triggerVibration(duration = 200) {
+            vibrationEffect.classList.add('active');
+            setTimeout(() => {
+                vibrationEffect.classList.remove('active');
+            }, duration);
+        }
+
+        function triggerButtonPressAnimation(buttonIndex) {
+            const option = document.querySelector(`.option[data-index="${buttonIndex}"]`);
+            if (option) {
+                option.style.animation = 'buttonPress 0.2s';
+                setTimeout(() => {
+                    option.style.animation = '';
+                }, 200);
+            }
+        }
+
+        // ===== AUDIO CONTROL FUNCTIONS =====
+        function updateAudioVolumes() {
+            const bgVol = isMuted ? 0 : bgVolume / 100;
+            const sfxVol = isMuted ? 0 : sfxVolume / 100;
+
+            bgMusic.volume = bgVol;
+            correctSound.volume = sfxVol;
+            incorrectSound.volume = sfxVol;
+            gameOverSound.volume = sfxVol;
+
+            // Pause background music if volume is 0
+            if (bgVol === 0) {
+                bgMusic.pause();
+            } else if (musicStarted && bgMusic.paused) {
+                bgMusic.play().catch(e => console.log('Background music play failed:', e));
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            updateAudioVolumes();
+
+            if (isMuted) {
+                previousBgVolume = bgVolume;
+                previousSfxVolume = sfxVolume;
+                bgVolume = 0;
+                sfxVolume = 0;
+            } else {
+                bgVolume = previousBgVolume;
+                sfxVolume = previousSfxVolume;
+            }
+
+            updateMuteButtonDisplay();
+            updateVolumeDisplays();
+        }
+
+        function updateVolumeDisplays() {
+            bgVolumeValue.textContent = bgVolume;
+            sfxVolumeValue.textContent = sfxVolume;
+            bgVolumeSlider.value = bgVolume;
+            sfxVolumeSlider.value = sfxVolume;
+        }
+
+        function toggleSettings() {
+            settingsModal.style.display = settingsModal.style.display === 'block' ? 'none' : 'block';
+            updateVolumeDisplays();
+        }
+
+        function updateMuteButtonDisplay() {
+            const icon = muteBtn.querySelector('i');
+            const text = muteBtn.querySelector('span');
+
+            if (isMuted) {
+                icon.className = 'fas fa-volume-off';
+                text.textContent = 'Unmute Semua';
+            } else {
+                icon.className = 'fas fa-volume-mute';
+                text.textContent = 'Mute Semua';
+            }
+        }
+
+        // ===== PAUSE FUNCTIONS =====
+        function togglePause() {
+            if (isPaused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        }
+
+        function pauseGame() {
+            if (answered || isPaused) return;
+            
+            isPaused = true;
+            remainingTimeBeforePause = timeLeft;
+            stopTimer();
+            
+            // Pause background music
+            if (!bgMusic.paused) {
+                bgMusic.pause();
+            }
+            
+            // Show pause modal
+            pauseModal.style.display = 'block';
+            
+            // Update pause button icon
+            pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            pauseBtn.title = 'Lanjutkan Game';
+            
+            triggerVibration(100);
+        }
+
+        function resumeGame() {
+            if (!isPaused) return;
+            
+            isPaused = false;
+            timeLeft = remainingTimeBeforePause;
+            updateTimerDisplay();
+            
+            // Resume background music if not muted
+            if (!isMuted && bgMusic.paused) {
+                bgMusic.play().catch(e => console.log('Audio play failed:', e));
+            }
+            
+            // Hide pause modal
+            pauseModal.style.display = 'none';
+            
+            // Update pause button icon
+            pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            pauseBtn.title = 'Jeda Game';
+            
+            // Restart timer
+            startTimer();
+            
+            triggerVibration(100);
+        }
+
+        function quitToHome() {
+            if (confirm("Apakah Anda yakin ingin keluar dari game? Semua progress akan hilang.")) {
+                window.location.href = 'home test game.html';
+            }
+        }
+
+        // ===== TIMER FUNCTIONS =====
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timeLeft = isPaused ? remainingTimeBeforePause : TIME_PER_QUESTION;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        timeUp();
+                    }
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            timerEl.textContent = timeLeft;
+            
+            // Update visual timer
+            timerEl.classList.remove('warning', 'danger');
+            
+            if (timeLeft <= 10) {
+                timerEl.classList.add('danger');
+                if (timeLeft <= 5) {
+                    timerEl.style.animation = 'timerShake 0.5s';
+                    timerEl.parentElement.parentElement.style.boxShadow = '0 0 30px rgba(211, 47, 47, 0.5)';
+                }
+            } else if (timeLeft <= 15) {
+                timerEl.classList.add('warning');
+                timerEl.parentElement.parentElement.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.3)';
+            } else {
+                timerEl.parentElement.parentElement.style.boxShadow = '';
+            }
+        }
+
+        function timeUp() {
+            if (answered || isPaused) return;
+            
+            answered = true;
+            feedbackEl.textContent = "⏰ Waktu habis! Pertanyaan dilewati.";
+            feedbackEl.className = 'feedback';
+            
+            // Reduce lives
+            loseLife();
+            
+            // Show correct answer
+            const q = selectedQuestions[currentQuestion];
+            const correctOption = document.querySelector(`.option[data-index="${q.answer}"]`);
+            if (correctOption) {
+                correctOption.classList.add('correct');
+            }
+            
+            updateControls();
+            
+            // Auto proceed to next question after 2 seconds
+            setTimeout(() => {
+                if (lives > 0 && currentQuestion < TOTAL_QUESTIONS - 1) {
+                    nextQuestion();
+                } else if (lives <= 0) {
+                    gameOver();
+                } else {
+                    showResults();
+                }
+            }, 2000);
+        }
+
+        // ===== LIVES FUNCTIONS =====
+        function updateLivesDisplay() {
+            livesEl.textContent = lives;
+            
+            // Update color and visual effects
+            const livesContainer = livesEl.parentElement.parentElement;
+            
+            if (lives === 3) {
+                livesEl.style.color = "var(--accent-green)";
+                livesContainer.style.boxShadow = '0 0 30px rgba(76, 175, 80, 0.3)';
+            } else if (lives === 2) {
+                livesEl.style.color = "var(--accent-gold)";
+                livesContainer.style.boxShadow = '0 0 30px rgba(255, 215, 0, 0.3)';
+            } else if (lives === 1) {
+                livesEl.style.color = "var(--light-red)";
+                livesContainer.style.boxShadow = '0 0 30px rgba(255, 82, 82, 0.5)';
+                livesEl.style.animation = "pulse-fast 1s infinite";
+            } else {
+                livesEl.style.color = "var(--primary-red)";
+                livesContainer.style.boxShadow = '';
+            }
+        }
+
+        function addLife() {
+            if (lives < 5) {
+                lives++;
+                updateLivesDisplay();
+                feedbackEl.textContent = "✓ +1 Nyawa!";
+                feedbackEl.className = 'feedback correct-feedback';
+                triggerVibration(100);
+                
+                // Reset animation if any
+                livesEl.style.animation = "";
+            }
+        }
+
+        function loseLife() {
+            lives--;
+            updateLivesDisplay();
+            feedbackEl.textContent = "✗ -1 Nyawa!";
+            feedbackEl.className = 'feedback incorrect-feedback';
+            triggerVibration(300);
+            
+            if (lives <= 0) {
+                setTimeout(() => gameOver(), 1500);
+            }
+        }
+
+        function gameOver() {
+            stopTimer();
+
+            const completedQuestions = currentQuestion + 1;
+            const content = `
+                <div class="results-summary">
+                    <h3>😢 GAME OVER</h3>
+                    <p>Nyawa Anda telah habis!</p>
+                    <p>Anda berhasil menyelesaikan ${completedQuestions} dari ${TOTAL_QUESTIONS} soal.</p>
+                    <p>Ingin mencoba lagi atau kembali ke home?</p>
+                </div>
+            `;
+
+            gameOverBody.innerHTML = content;
+            gameOverModal.style.display = 'block';
+
+            // Stop background music and play game over sound
+            bgMusic.pause();
+            gameOverSound.currentTime = 0;
+            gameOverSound.play().catch(e => console.log('Audio play failed:', e));
+
+            triggerVibration(500);
+        }
+
+        // ===== CONTROLLER DETECTION =====
+        function updateControllerStatus() {
+            const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+            const connectedGamepad = gamepads.find(gp => gp && gp.connected);
+            
+            if (connectedGamepad) {
+                gamepadIndex = connectedGamepad.index;
+                
+                // Detect controller type based on ID
+                const id = connectedGamepad.id.toLowerCase();
+                
+                if (id.includes('xbox') || id.includes('microsoft') || id.includes('045e')) {
+                    controllerType = 'xbox';
+                    controllerStatus.className = 'info-card controller-status connected';
+                    controllerStatus.innerHTML = '<i class="fab fa-xbox"></i><div class="info-value">Xbox</div><div class="info-label">Terhubung</div>';
+                    controllerStatus.style.boxShadow = '0 0 30px rgba(16, 124, 16, 0.3)';
+                } else if (id.includes('playstation') || id.includes('sony') || id.includes('054c')) {
+                    controllerType = 'playstation';
+                    controllerStatus.className = 'info-card controller-status connected';
+                    controllerStatus.innerHTML = '<i class="fab fa-playstation"></i><div class="info-value">PlayStation</div><div class="info-label">Terhubung</div>';
+                    controllerStatus.style.boxShadow = '0 0 30px rgba(0, 102, 204, 0.3)';
+                } else {
+                    controllerType = 'generic';
+                    controllerStatus.className = 'info-card controller-status connected';
+                    controllerStatus.innerHTML = '<i class="fas fa-gamepad"></i><div class="info-value">Gamepad</div><div class="info-label">Terhubung</div>';
+                    controllerStatus.style.boxShadow = '0 0 30px rgba(211, 47, 47, 0.3)';
+                }
+            } else {
+                controllerType = null;
+                gamepadIndex = null;
+                controllerStatus.className = 'info-card controller-status disconnected';
+                controllerStatus.innerHTML = '<i class="fas fa-gamepad"></i><div class="info-value">-</div><div class="info-label">Tidak Terdeteksi</div>';
+                controllerStatus.style.boxShadow = '';
+            }
+        }
+
+        // ===== CONTROLLER BUTTON MAPPINGS =====
+        const controllerMappings = {
+            xbox: {
+                confirm: 0,    // A button
+                special1: 2,   // X button
+                special2: 3,   // Y button
+                shoulderLeft: 4,  // LB
+                shoulderRight: 5, // RB
+                triggerLeft: 6,   // LT
+                triggerRight: 7,  // RT
+                select: 8,     // View button
+                start: 9,      // Menu button
+                leftStick: 10, // Left stick button
+                rightStick: 11 // Right stick button
+            },
+            playstation: {
+                confirm: 0,    // X button
+                special1: 2,   // Square button
+                special2: 3,   // Triangle button
+                shoulderLeft: 4,  // L1
+                shoulderRight: 5, // R1
+                triggerLeft: 6,   // L2
+                triggerRight: 7,  // R2
+                select: 8,     // Share button
+                start: 9,      // Options button
+                leftStick: 10, // L3 button
+                rightStick: 11 // R3 button
+            },
+            generic: {
+                confirm: 0,
+                special1: 2,
+                special2: 3,
+                shoulderLeft: 4,
+                shoulderRight: 5,
+                triggerLeft: 6,
+                triggerRight: 7,
+                select: 8,
+                start: 9,
+                leftStick: 10,
+                rightStick: 11
+            }
+        };
+
+        // ===== CONTROLLER INPUT PROCESSING =====
+        let lastButtonStates = {};
+        let dpadState = { up: false, down: false, left: false, right: false };
+        let lastDpadState = { up: false, down: false, left: false, right: false };
+
+        function processControllerInput() {
+            if (gamepadIndex === null) return;
+
+            const gamepad = navigator.getGamepads()[gamepadIndex];
+            if (!gamepad) return;
+
+            const mapping = controllerMappings[controllerType || 'generic'];
+
+            // Process regular buttons
+            for (const [action, buttonIndex] of Object.entries(mapping)) {
+                if (gamepad.buttons[buttonIndex]) {
+                    const pressed = gamepad.buttons[buttonIndex].pressed;
+                    const wasPressed = lastButtonStates[action] || false;
+
+                    if (pressed && !wasPressed) {
+                        handleControllerButtonPress(action);
+                    }
+
+                    lastButtonStates[action] = pressed;
+                }
+            }
+
+            // Process D-Pad
+            const axes = gamepad.axes;
+            
+            let dpadUp = false, dpadDown = false, dpadLeft = false, dpadRight = false;
+            
+            if (gamepad.buttons[12]) dpadUp = gamepad.buttons[12].pressed;
+            if (gamepad.buttons[13]) dpadDown = gamepad.buttons[13].pressed;
+            if (gamepad.buttons[14]) dpadLeft = gamepad.buttons[14].pressed;
+            if (gamepad.buttons[15]) dpadRight = gamepad.buttons[15].pressed;
+            
+            if (axes.length >= 2) {
+                const hatX = axes[0];
+                const hatY = axes[1];
+                
+                if (hatY < -0.5) dpadUp = true;
+                if (hatY > 0.5) dpadDown = true;
+                if (hatX < -0.5) dpadLeft = true;
+                if (hatX > 0.5) dpadRight = true;
+            }
+
+            if (dpadUp && !lastDpadState.up) handleDpadNavigation('up');
+            if (dpadDown && !lastDpadState.down) handleDpadNavigation('down');
+            if (dpadLeft && !lastDpadState.left) handleDpadNavigation('left');
+            if (dpadRight && !lastDpadState.right) handleDpadNavigation('right');
+
+            lastDpadState = { up: dpadUp, down: dpadDown, left: dpadLeft, right: dpadRight };
+        }
+
+        function handleControllerButtonPress(action) {
+            triggerVibration(100);
+            
+            switch(action) {
+                case 'confirm':
+                    if (selectedOption !== null && !answered && !isPaused) {
+                        triggerButtonPressAnimation(selectedOption);
+                        setTimeout(() => checkAnswer(), 100);
+                    } else if (answered && !isPaused) {
+                        nextQuestion();
+                    }
+                    break;
+
+                case 'special1':
+                    if (!isPaused) showHint();
+                    break;
+                    
+                case 'special2':
+                    if (!answered && !isPaused) {
+                        document.querySelectorAll('.option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        selectedOption = null;
+                        feedbackEl.textContent = "Pilihan telah direset";
+                        feedbackEl.className = 'feedback';
+                        triggerVibration(50);
+                    }
+                    break;
+
+                case 'shoulderRight':
+                case 'triggerRight':
+                    if (!isPaused) nextQuestion();
+                    break;
+                    
+                case 'start':
+                    togglePause();
+                    break;
+                    
+            }
+        }
+
+        function handleDpadNavigation(direction) {
+            const options = document.querySelectorAll('.option');
+            if (options.length === 0 || answered || isPaused) return;
+            
+            let currentIndex = selectedOption !== null ? selectedOption : -1;
+            let newIndex = currentIndex;
+            
+            switch(direction) {
+                case 'up':
+                    newIndex = currentIndex >= 2 ? currentIndex - 2 : currentIndex + 2;
+                    if (newIndex >= options.length) newIndex = currentIndex;
+                    break;
+                case 'down':
+                    newIndex = currentIndex <= 1 ? currentIndex + 2 : currentIndex - 2;
+                    if (newIndex >= options.length) newIndex = currentIndex;
+                    break;
+                case 'left':
+                    newIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+                    break;
+                case 'right':
+                    newIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+                    break;
+            }
+            
+            if (newIndex >= 0 && newIndex < options.length) {
+                document.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                
+                options[newIndex].classList.add('selected');
+                selectedOption = newIndex;
+                triggerVibration(30);
+            }
+        }
+
+        function nextQuestion() {
+            stopTimer();
+            
+            if (currentQuestion < TOTAL_QUESTIONS - 1) {
+                currentQuestion++;
+                showQuestion();
+                updateProgress();
+                triggerVibration(50);
+            } else {
+                showResults();
+            }
+        }
+
+        // ===== HINT FUNCTION =====
+        function showHint() {
+            const q = selectedQuestions[currentQuestion];
+            const hints = [
+                `💡 Petunjuk: Ini tentang budaya ${q.options[q.answer]}`,
+                `💡 Coba pikirkan tentang ${q.fact.split('.')[0]}`,
+                `💡 Jawaban yang benar adalah salah satu dari 4 pilihan`,
+                `💡 Perhatikan kata kunci dalam pertanyaan`
+            ];
+            
+            const randomHint = hints[Math.floor(Math.random() * hints.length)];
+            feedbackEl.textContent = randomHint;
+            feedbackEl.className = 'feedback';
+            triggerVibration(50);
+        }
+
+        // ===== MAIN GAME FUNCTIONS =====
+        function initGame() {
+            // Load audio settings
+            bgVolume = parseInt(localStorage.getItem('bgVolume')) || 50;
+            sfxVolume = parseInt(localStorage.getItem('sfxVolume')) || 70;
+            isMuted = localStorage.getItem('isMuted') === 'true';
+            updateAudioVolumes();
+            updateMuteButtonDisplay();
+
+            selectedQuestions = selectRandomQuestions();
+            questionResults = [];
+            currentQuestion = 0;
+            lives = 3;
+            updateLivesDisplay();
+            showQuestion();
+            updateProgress();
+            updateControls();
+            updateControllerStatus();
+
+            // Reset pause state
+            isPaused = false;
+            pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            pauseBtn.title = 'Jeda Game';
+
+            // Start background music (will try on load, retry on interaction if failed)
+            startBackgroundMusic();
+
+            if (!window.controllerPollInterval) {
+                window.controllerPollInterval = setInterval(() => {
+                    updateControllerStatus();
+                    processControllerInput();
+                }, 50);
+            }
+        }
+
+        function showQuestion() {
+            stopTimer();
+            
+            const q = selectedQuestions[currentQuestion];
+            questionText.textContent = q.question;
+            questionNumber.textContent = `Pertanyaan ${currentQuestion + 1}`;
+            questionCounter.textContent = `${currentQuestion + 1}/${TOTAL_QUESTIONS}`;
+
+            optionsEl.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+            q.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.dataset.index = index;
+                optionEl.dataset.letter = letters[index];
+                optionEl.innerHTML = `<div class="option-text">${option}</div>`;
+                optionEl.addEventListener('click', () => {
+                    if (!isPaused) selectOption(index);
+                });
+                optionsEl.appendChild(optionEl);
+            });
+
+            selectedOption = null;
+            answered = false;
+            feedbackEl.textContent = `⏳ Anda memiliki ${TIME_PER_QUESTION} detik untuk menjawab!`;
+            feedbackEl.className = 'feedback';
+            
+            timerEl.style.animation = '';
+            
+            updateControls();
+            startTimer();
+        }
+
+        function selectOption(index) {
+            if (answered || isPaused) return;
+            
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            const optionEl = document.querySelector(`.option[data-index="${index}"]`);
+            optionEl.classList.add('selected');
+            selectedOption = index;
+            checkAnswer();
+        }
+
+        function checkAnswer() {
+            stopTimer();
+            answered = true;
+            const q = selectedQuestions[currentQuestion];
+
+            const isCorrect = selectedOption === q.answer;
+
+            if (isCorrect) {
+                addLife();
+                feedbackEl.textContent = `✓ Benar! ${q.fact}`;
+                feedbackEl.classList.add('correct-feedback');
+                document.querySelector(`.option[data-index="${q.answer}"]`).classList.add('correct');
+                correctSound.currentTime = 0;
+                correctSound.play().catch(e => console.log('Audio play failed:', e));
+                triggerVibration(150);
+            } else {
+                loseLife();
+                feedbackEl.textContent = `✗ Salah! Jawaban benar: ${q.options[q.answer]}. ${q.fact}`;
+                feedbackEl.classList.add('incorrect-feedback');
+                document.querySelector(`.option[data-index="${selectedOption}"]`).classList.add('incorrect');
+                document.querySelector(`.option[data-index="${q.answer}"]`).classList.add('correct');
+                incorrectSound.currentTime = 0;
+                incorrectSound.play().catch(e => console.log('Audio play failed:', e));
+                triggerVibration(300);
+            }
+
+            // Record result
+            questionResults.push({
+                question: q.question,
+                correct: isCorrect,
+                selected: selectedOption !== null ? q.options[selectedOption] : 'Tidak dijawab',
+                correctAnswer: q.options[q.answer],
+                fact: q.fact
+            });
+
+            updateControls();
+
+            if (lives > 0 && currentQuestion < TOTAL_QUESTIONS - 1) {
+                setTimeout(() => {
+                    nextQuestion();
+                }, 3000);
+            } else if (lives <= 0) {
+                setTimeout(() => gameOver(), 1500);
+            }
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / TOTAL_QUESTIONS) * 100;
+            progressEl.style.width = `${progress}%`;
+        }
+
+        function updateControls() {
+            if (currentQuestion === TOTAL_QUESTIONS - 1) {
+                nextBtn.innerHTML = answered ? '<span>Lihat Hasil</span><i class="fas fa-trophy"></i>' : '<span>Selesaikan</span><i class="fas fa-flag-checkered"></i>';
+                nextBtn.className = 'btn btn-next';
+            } else {
+                if (answered) {
+                    nextBtn.innerHTML = '<span>Lanjut</span><i class="fas fa-arrow-right"></i>';
+                    nextBtn.className = 'btn btn-next';
+                } else {
+                    nextBtn.innerHTML = '<span>Lewati</span><i class="fas fa-forward"></i>';
+                    nextBtn.className = 'btn btn-skip';
+                }
+            }
+            
+            nextBtn.disabled = answered && currentQuestion < TOTAL_QUESTIONS - 1;
+        }
+
+        function showResults() {
+            stopTimer();
+
+            // Stop background music
+            bgMusic.pause();
+
+            const completedQuestions = currentQuestion + 1;
+            let correctCount = questionResults.filter(r => r.correct).length;
+            let incorrectCount = questionResults.filter(r => !r.correct).length;
+            let score = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+
+            let content = `
+                <div class="results-summary">
+                    <h3>🎮 PERMAINAN SELESAI!</h3>
+                    <p>Anda menyelesaikan ${completedQuestions} dari ${TOTAL_QUESTIONS} soal</p>
+                    <p>Jawaban Benar: ${correctCount} | Jawaban Salah: ${incorrectCount}</p>
+                    <p>Nyawa Tersisa: ${lives}</p>
+                    <p><strong>Skor Akhir: ${score}/100</strong></p>
+                </div>
+                <h4 style="margin-bottom: 20px; color: var(--accent-gold);">Detail Jawaban:</h4>
+            `;
+
+            questionResults.forEach((result, index) => {
+                const status = result.correct ? 'correct' : 'incorrect';
+                const icon = result.correct ? '✓' : '✗';
+                content += `
+                    <div class="question-result ${status}">
+                        <h4>${icon} Pertanyaan ${index + 1}</h4>
+                        <p><strong>Pertanyaan:</strong> ${result.question}</p>
+                        <p class="answer ${result.correct ? 'correct-answer' : 'wrong-answer'}">
+                            <strong>Jawaban Anda:</strong> ${result.selected}
+                        </p>
+                        ${!result.correct ? `<p class="answer correct-answer"><strong>Jawaban Benar:</strong> ${result.correctAnswer}</p>` : ''}
+                        <p><strong>Fakta:</strong> ${result.fact}</p>
+                    </div>
+                `;
+            });
+
+            modalBody.innerHTML = content;
+            resultsModal.style.display = 'block';
+
+            triggerVibration(500);
+        }
+
+        // ===== EVENT LISTENERS =====
+        nextBtn.addEventListener('click', () => {
+            if (!answered && currentQuestion < TOTAL_QUESTIONS - 1 && !isPaused) {
+                stopTimer();
+                answered = true;
+                feedbackEl.textContent = "⏭️ Soal dilewati!";
+                feedbackEl.className = 'feedback';
+
+                loseLife();
+
+                const q = selectedQuestions[currentQuestion];
+                const correctOption = document.querySelector(`.option[data-index="${q.answer}"]`);
+                if (correctOption) {
+                    correctOption.classList.add('correct');
+                }
+
+                // Record as incorrect
+                questionResults.push({
+                    question: q.question,
+                    correct: false,
+                    selected: 'Dilewati',
+                    correctAnswer: q.options[q.answer],
+                    fact: q.fact
+                });
+
+                updateControls();
+
+                setTimeout(() => {
+                    if (lives > 0 && currentQuestion < TOTAL_QUESTIONS - 1) {
+                        nextQuestion();
+                    } else if (lives <= 0) {
+                        gameOver();
+                    }
+                }, 2000);
+            } else if (currentQuestion < TOTAL_QUESTIONS - 1 && !isPaused) {
+                nextQuestion();
+            } else if (!isPaused) {
+                showResults();
+            }
+        });
+
+        // Pause button event listener
+        pauseBtn.addEventListener('click', togglePause);
+
+        // Pause modal event listeners
+        resumeBtn.addEventListener('click', resumeGame);
+        settingsFromPauseBtn.addEventListener('click', () => {
+            pauseModal.style.display = 'none';
+            settingsModal.style.display = 'block';
+        });
+        quitFromPauseBtn.addEventListener('click', quitToHome);
+        closePause.addEventListener('click', resumeGame);
+
+        // ===== MODAL EVENT LISTENERS =====
+        closeModal.addEventListener('click', () => {
+            resultsModal.style.display = 'none';
+        });
+
+        playAgainBtn.addEventListener('click', () => {
+            resultsModal.style.display = 'none';
+            initGame();
+        });
+
+        closeGameOver.addEventListener('click', () => {
+            gameOverModal.style.display = 'none';
+            // Reset UI
+            feedbackEl.textContent = "Game Selesai. Klik untuk memulai ulang.";
+            feedbackEl.className = 'feedback';
+            nextBtn.innerHTML = '<span>Mulai Ulang</span><i class="fas fa-redo"></i>';
+            nextBtn.className = 'btn btn-next';
+            nextBtn.disabled = false;
+        });
+
+        tryAgainBtn.addEventListener('click', () => {
+            gameOverModal.style.display = 'none';
+            initGame();
+        });
+
+        backToHomeBtn.addEventListener('click', () => {
+            gameOverModal.style.display = 'none';
+            window.location.href = 'home test game.html';
+        });
+
+        // ===== SETTINGS EVENT LISTENERS =====
+        soundSettingsBtn.addEventListener('click', toggleSettings);
+        controllerSettingsBtn.addEventListener('click', () => {
+            controllerModal.style.display = 'block';
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+
+        closeController.addEventListener('click', () => {
+            controllerModal.style.display = 'none';
+        });
+
+        bgVolumeSlider.addEventListener('input', (e) => {
+            bgVolume = parseInt(e.target.value);
+            bgVolumeValue.textContent = bgVolume;
+            updateAudioVolumes();
+        });
+
+        sfxVolumeSlider.addEventListener('input', (e) => {
+            sfxVolume = parseInt(e.target.value);
+            sfxVolumeValue.textContent = sfxVolume;
+            updateAudioVolumes();
+        });
+
+        muteBtn.addEventListener('click', toggleMute);
+
+        saveSettingsBtn.addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+            // Save settings to localStorage if needed
+            localStorage.setItem('bgVolume', bgVolume);
+            localStorage.setItem('sfxVolume', sfxVolume);
+            localStorage.setItem('isMuted', isMuted);
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === resultsModal) {
+                resultsModal.style.display = 'none';
+            }
+            if (e.target === gameOverModal) {
+                gameOverModal.style.display = 'none';
+                // Reset UI
+                feedbackEl.textContent = "Game Selesai. Klik untuk memulai ulang.";
+                feedbackEl.className = 'feedback';
+                nextBtn.innerHTML = '<span>Mulai Ulang</span><i class="fas fa-redo"></i>';
+                nextBtn.className = 'btn btn-next';
+                nextBtn.disabled = false;
+            }
+            if (e.target === settingsModal) {
+                settingsModal.style.display = 'none';
+            }
+            if (e.target === controllerModal) {
+                controllerModal.style.display = 'none';
+            }
+            if (e.target === pauseModal) {
+                pauseModal.style.display = 'none';
+                resumeGame();
+            }
+        });
+
+        // ===== KEYBOARD FALLBACK =====
+        document.addEventListener('keydown', (e) => {
+            // Escape key for pause
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                togglePause();
+                return;
+            }
+            
+            // Skip if game is paused
+            if (isPaused) return;
+            
+            const options = document.querySelectorAll('.option');
+            
+            if (e.key.startsWith('Arrow') && options.length > 0 && !answered) {
+                e.preventDefault();
+                
+                let currentIndex = selectedOption !== null ? selectedOption : -1;
+                let newIndex = currentIndex;
+                
+                if (e.key === 'ArrowUp') newIndex = currentIndex >= 2 ? currentIndex - 2 : currentIndex + 2;
+                if (e.key === 'ArrowDown') newIndex = currentIndex <= 1 ? currentIndex + 2 : currentIndex - 2;
+                if (e.key === 'ArrowLeft') newIndex = currentIndex > 0 ? currentIndex - 1 : options.length - 1;
+                if (e.key === 'ArrowRight') newIndex = currentIndex < options.length - 1 ? currentIndex + 1 : 0;
+                
+                if (newIndex >= 0 && newIndex < options.length) {
+                    document.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    options[newIndex].classList.add('selected');
+                    selectedOption = newIndex;
+                }
+            }
+            
+            if (e.key === 'Enter') {
+                if (selectedOption !== null && !answered) {
+                    checkAnswer();
+                } else if (answered && currentQuestion < TOTAL_QUESTIONS - 1) {
+                    nextQuestion();
+                }
+            }
+
+            if (e.key >= '1' && e.key <= '4' && !answered) {
+                const index = parseInt(e.key) - 1;
+                if (index < options.length) {
+                    selectOption(index);
+                }
+            }
+            
+            if (e.key === ' ' && !answered && currentQuestion < TOTAL_QUESTIONS - 1) {
+                e.preventDefault();
+                stopTimer();
+                answered = true;
+                feedbackEl.textContent = "⏭️ Soal dilewati!";
+                feedbackEl.className = 'feedback';
+                
+                loseLife();
+                
+                const q = selectedQuestions[currentQuestion];
+                const correctOption = document.querySelector(`.option[data-index="${q.answer}"]`);
+                if (correctOption) {
+                    correctOption.classList.add('correct');
+                }
+                
+                updateControls();
+                
+                setTimeout(() => {
+                    if (lives > 0 && currentQuestion < TOTAL_QUESTIONS - 1) {
+                        nextQuestion();
+                    } else if (lives <= 0) {
+                        gameOver();
+                    }
+                }, 2000);
+            }
+            
+            if (e.key === 'r' || e.key === 'R') {
+                if (confirm("Mulai ulang game?")) {
+                    initGame();
+                }
+            }
+        });
+
+        // ===== AUDIO START FUNCTION =====
+        let musicStarted = false;
+
+        function startBackgroundMusic() {
+            if (musicStarted) return;
+            musicStarted = true;
+            bgMusic.currentTime = 0;
+            updateAudioVolumes();
+            bgMusic.play().catch(e => {
+                console.log('Background music play failed:', e);
+                musicStarted = false; // Reset if failed, so it can try again on next interaction
+            });
+        }
+
+        // Start music on user interaction
+        document.addEventListener('click', startBackgroundMusic);
+        document.addEventListener('keydown', startBackgroundMusic);
+        window.addEventListener('gamepadconnected', startBackgroundMusic);
+
+        // ===== GAME INITIALIZATION =====
+        window.onload = initGame;
+
+        window.addEventListener("gamepadconnected", (e) => {
+            console.log("Gamepad connected:", e.gamepad.id);
+            updateControllerStatus();
+            triggerVibration(200);
+        });
+
+        window.addEventListener("gamepaddisconnected", (e) => {
+            console.log("Gamepad disconnected:", e.gamepad.id);
+            updateControllerStatus();
+        });
+    </script>
+</body>
+</html>

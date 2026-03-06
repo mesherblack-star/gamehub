@@ -1,0 +1,2539 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelinci Lucu - Game Play (Gamepad Support)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .game-container {
+            width: 100%;
+            height: 100%;
+            max-width: 800px;
+            max-height: 600px;
+            position: relative;
+        }
+
+        .game-board {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #4d96ff;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .hud-item {
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            min-width: 120px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .score-value {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        .level-value {
+            color: #4d96ff;
+            font-weight: bold;
+        }
+
+        .lives-value {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        /* MENU PAUSE */
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 150;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .pause-content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            border: 3px solid #4d96ff;
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        .pause-content h2 {
+            font-size: 3rem;
+            color: #ffd93d;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #4d96ff;
+        }
+
+        .pause-instruction {
+            font-size: 1.2rem;
+            color: #4d96ff;
+            margin-bottom: 30px;
+        }
+
+        .pause-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .pause-button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .pause-button:hover {
+            background-color: #6aabff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(77, 150, 255, 0.4);
+        }
+
+        /* GAME OVER OVERLAY */
+        .game-over-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .game-over-content {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            border: 3px solid #4d96ff;
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.5s ease;
+        }
+
+        .game-over-content h2 {
+            font-size: 3rem;
+            color: #ffd93d;
+            margin-bottom: 20px;
+            text-shadow: 3px 3px 0 #ff6b6b;
+        }
+
+        .final-score {
+            font-size: 1.8rem;
+            color: #ffd93d;
+            margin-bottom: 10px;
+        }
+
+        .high-score {
+            font-size: 1.5rem;
+            color: #4d96ff;
+            margin-bottom: 30px;
+        }
+
+        .game-over-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .game-over-button {
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            background-color: #4d96ff;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            min-width: 150px;
+        }
+
+        .game-over-button:hover {
+            background-color: #6aabff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(77, 150, 255, 0.4);
+        }
+
+        /* Virtual Joystick */
+        .joystick-container {
+            position: absolute;
+            bottom: 80px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            display: none;
+            z-index: 10;
+        }
+
+        .joystick-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .joystick-stick {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(77, 150, 255, 0.9);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+            touch-action: none;
+        }
+
+        .joystick-stick.active {
+            background: rgba(107, 171, 255, 0.9);
+        }
+
+        /* Button Controls */
+        .button-controls {
+            position: absolute;
+            bottom: 80px;
+            right: 30px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .control-button {
+            width: 60px;
+            height: 60px;
+            font-size: 1.3rem;
+            background-color: rgba(255, 107, 107, 0.8);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.1s;
+            touch-action: none;
+        }
+
+        .control-button:active {
+            transform: scale(0.95);
+            background-color: rgba(255, 107, 107, 1);
+        }
+
+        .control-button.wasd {
+            background-color: rgba(77, 150, 255, 0.8);
+        }
+
+        .control-button.wasd:active {
+            background-color: rgba(77, 150, 255, 1);
+        }
+
+        .control-info {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            text-align: center;
+            z-index: 10;
+            font-family: Arial, sans-serif;
+            display: none;
+        }
+
+        .back-button {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 10;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+        }
+
+        .shock-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.3);
+            display: none;
+            z-index: 50;
+            animation: shockFlash 0.5s infinite alternate;
+        }
+
+        /* Gamepad Indicator */
+        #gamepadIndicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 204, 68, 0.3);
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+            font-family: Arial, sans-serif;
+        }
+
+        /* LEVEL UP NOTIFICATION */
+        .level-up-notification {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 15px;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 200;
+            text-align: center;
+            animation: levelUpAnimation 2s ease-in-out;
+            pointer-events: none;
+            display: none;
+        }
+
+        @keyframes levelUpAnimation {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            40% { transform: translate(-50%, -50%) scale(1); }
+            60% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 204, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 204, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 204, 68, 0); }
+        }
+
+        @keyframes gamepadConnect {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes gamepadDisconnect {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        @keyframes shockFlash {
+            0% { background-color: rgba(255, 255, 255, 0.3); }
+            100% { background-color: rgba(255, 107, 107, 0.3); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                max-width: 100%;
+                max-height: 100%;
+                border: none;
+            }
+            
+            .game-board {
+                border: none;
+                border-radius: 0;
+            }
+            
+            .joystick-container {
+                display: block;
+                bottom: 85px;
+                left: 25px;
+                width: 110px;
+                height: 110px;
+            }
+            
+            .button-controls {
+                display: flex;
+                bottom: 85px;
+                right: 25px;
+            }
+            
+            .control-info {
+                display: block;
+                bottom: 15px;
+                width: 90%;
+                font-size: 0.8rem;
+            }
+            
+            .hud-item {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+                min-width: 100px;
+            }
+            
+            .pause-content h2,
+            .game-over-content h2 {
+                font-size: 2.2rem;
+            }
+            
+            .pause-instruction {
+                font-size: 1rem;
+            }
+            
+            .final-score {
+                font-size: 1.4rem;
+            }
+            
+            .high-score {
+                font-size: 1.2rem;
+            }
+            
+            .pause-buttons,
+            .game-over-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .pause-button,
+            .game-over-button {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .back-button {
+                bottom: 15px;
+                left: 15px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+            
+            .level-up-notification {
+                font-size: 1.5rem;
+                padding: 20px 30px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hud {
+                flex-direction: column;
+                align-items: center;
+                gap: 5px;
+            }
+            
+            .hud-item {
+                width: 90%;
+                min-width: unset;
+            }
+            
+            .pause-content,
+            .game-over-content {
+                padding: 20px;
+            }
+            
+            .joystick-container {
+                bottom: 80px;
+                left: 20px;
+                width: 100px;
+                height: 100px;
+            }
+            
+            .button-controls {
+                bottom: 80px;
+                right: 20px;
+            }
+            
+            .control-button {
+                width: 55px;
+                height: 55px;
+                font-size: 1.1rem;
+            }
+            
+            .control-info {
+                bottom: 10px;
+                font-size: 0.7rem;
+                padding: 6px 10px;
+            }
+            
+            .back-button {
+                bottom: 10px;
+                left: 10px;
+            }
+            
+            .level-up-notification {
+                font-size: 1.3rem;
+                padding: 15px 25px;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .joystick-container {
+                bottom: 65px;
+            }
+            
+            .button-controls {
+                bottom: 65px;
+            }
+            
+            .control-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-board">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- Loading Screen -->
+            <div class="loading" id="loadingScreen">
+                <p>Memuat gambar kelinci...</p>
+            </div>
+            
+            <!-- Shock Effect -->
+            <div class="shock-effect" id="shockEffect"></div>
+            
+            <!-- Level Up Notification -->
+            <div class="level-up-notification" id="levelUpNotification"></div>
+            
+            <!-- HUD -->
+            <div class="hud">
+                <div class="hud-item">
+                    Skor: <span class="score-value" id="scoreDisplay">0</span>
+                </div>
+                <div class="hud-item">
+                    Level: <span class="level-value" id="levelDisplay">MUDAH</span>
+                </div>
+                <div class="hud-item">
+                    Nyawa: <span class="lives-value" id="livesDisplay">2</span>
+                </div>
+            </div>
+            
+            <!-- PAUSE MENU -->
+            <div class="pause-overlay" id="pauseScreen">
+                <div class="pause-content">
+                    <h2>PAUSE</h2>
+                    <div class="pause-instruction">
+                        🎮 Tekan <span style="color:#ffd93d">START</span> untuk melanjutkan
+                    </div>
+                    <div class="pause-buttons">
+                        <button class="pause-button" id="continueButton">LANJUTKAN</button>
+                        <button class="pause-button" id="menuButtonPause">MENU UTAMA</button>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 0.9rem; color: #aaa;">
+                        🎮 Gamepad: A untuk Lanjutkan, B untuk Menu
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Virtual Joystick -->
+            <div class="joystick-container" id="joystickContainer">
+                <div class="joystick-base"></div>
+                <div class="joystick-stick" id="joystickStick"></div>
+            </div>
+            
+            <!-- Button Controls -->
+            <div class="button-controls" id="buttonControls">
+                <div class="button-row">
+                    <button class="control-button wasd" id="wButton">W</button>
+                </div>
+                <div class="button-row">
+                    <button class="control-button wasd" id="aButton">A</button>
+                    <button class="control-button wasd" id="sButton">S</button>
+                    <button class="control-button wasd" id="dButton">D</button>
+                </div>
+            </div>
+            
+            <!-- Control Info -->
+            <div class="control-info" id="controlInfo">
+                Gunakan Joystick atau tombol WASD untuk mengontrol kelinci
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div class="game-over-overlay" id="gameOverScreen">
+                <div class="game-over-content">
+                    <h2>GAME OVER</h2>
+                    <div class="final-score" id="finalScoreText">Skor Akhir: 0</div>
+                    <div class="high-score" id="highScoreText">Skor Tertinggi: 0</div>
+                    <div class="game-over-buttons">
+                        <button class="game-over-button" id="playAgainButton">MAIN LAGI</button>
+                        <button class="game-over-button" id="menuButton">MENU UTAMA</button>
+                    </div>
+                    <div style="margin-top: 20px; font-size: 0.9rem; color: #aaa;">
+                        🎮 Gamepad: A untuk Main Lagi, B untuk Menu
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Back Button -->
+            <button class="back-button" id="backButton">← Kembali</button>
+        </div>
+    </div>
+
+    <!-- AUDIO ELEMENTS -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/backsound/playgame.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+    
+    <audio id="gameOverSound">
+        <source src="assets/backsound/game_over.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="eatSound">
+        <source src="assets/backsound/eat.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="shockSound">
+        <source src="assets/backsound/shock.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="kelinciEatSound">
+        <source src="assets/backsound/makan.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <!-- GAMEPAD INDICATOR -->
+    <div id="gamepadIndicator"></div>
+
+    <script>
+        // ============= SISTEM LEVEL DINAMIS 4 LEVEL =============
+        let currentLevel = 'mudah';
+        let baseSpeed = 180; // Kecepatan dasar
+
+        // Fungsi untuk menentukan level berdasarkan skor (4 LEVEL)
+        function getLevelBasedOnScore(score) {
+            if (score < 50) { // 0-49 poin
+                return {
+                    level: 'mudah',
+                    name: 'MUDAH',
+                    speedMultiplier: 1.0, // Kecepatan normal
+                    color: '#b5ffb0',
+                    description: 'Kecepatan: Lambat',
+                    minScore: 0,
+                    maxScore: 49
+                };
+            } else if (score >= 50 && score < 100) { // 50-99 poin
+                return {
+                    level: 'normal',
+                    name: 'NORMAL',
+                    speedMultiplier: 1.4, // 40% lebih cepat
+                    color: '#4d96ff',
+                    description: 'Kecepatan: Standar',
+                    minScore: 50,
+                    maxScore: 99
+                };
+            } else if (score >= 100 && score < 150) { // 100-149 poin
+                return {
+                    level: 'sedang',
+                    name: 'SEDANG',
+                    speedMultiplier: 1.6, // 60% lebih cepat
+                    color: '#ffd93d',
+                    description: 'Kecepatan: Cepat',
+                    minScore: 100,
+                    maxScore: 149
+                };
+            } else if (score >= 150) { // 150+ poin
+                return {
+                    level: 'sulit',
+                    name: 'SULIT',
+                    speedMultiplier: 2.0, // 100% lebih cepat
+                    color: '#ff6b6b',
+                    description: 'Kecepatan: Sangat Cepat',
+                    minScore: 150,
+                    maxScore: Infinity
+                };
+            }
+        }
+
+        // Fungsi untuk update level berdasarkan skor
+        function updateLevelBasedOnScore() {
+            const newLevel = getLevelBasedOnScore(score);
+            
+            // Hanya update jika level berubah
+            if (newLevel.level !== currentLevel) {
+                currentLevel = newLevel.level;
+                
+                // Update kecepatan game
+                gameSpeed = Math.round(baseSpeed / newLevel.speedMultiplier);
+                
+                // Update tampilan level
+                document.getElementById('levelDisplay').textContent = newLevel.name;
+                document.getElementById('levelDisplay').style.color = newLevel.color;
+                
+                // Update interval game loop
+                if (gameLoopInterval) {
+                    clearInterval(gameLoopInterval);
+                    startGameLoop();
+                }
+                
+                console.log(`📊 Skor: ${score} → Level: ${newLevel.name}`);
+                console.log(`⚡ Multiplier: ${newLevel.speedMultiplier}x`);
+                console.log(`⏱️  Kecepatan baru: ${gameSpeed}ms per gerakan`);
+                
+                // Beri feedback visual
+                showLevelUpNotification(newLevel.name);
+            }
+        }
+        
+        // Fungsi untuk menampilkan notifikasi level up
+        function showLevelUpNotification(levelName) {
+            const notification = document.getElementById('levelUpNotification');
+            
+            // Tentukan warna dan ikon berdasarkan level
+            let levelColor;
+            let levelIcon;
+            let levelMessage;
+            
+            switch(levelName) {
+                case 'MUDAH':
+                    levelColor = '#b5ffb0';
+                    levelIcon = '🐰';
+                    levelMessage = 'Kecepatan lambat, nikmati permainan!';
+                    break;
+                case 'NORMAL':
+                    levelColor = '#4d96ff';
+                    levelIcon = '🐇';
+                    levelMessage = 'Kecepatan meningkat, tetap fokus!';
+                    break;
+                case 'SEDANG':
+                    levelColor = '#ffd93d';
+                    levelIcon = '🔥';
+                    levelMessage = 'Kecepatan cepat, hati-hati!';
+                    break;
+                case 'SULIT':
+                    levelColor = '#ff6b6b';
+                    levelIcon = '💀';
+                    levelMessage = 'Kecepatan maksimal, siap-siap!';
+                    break;
+                default:
+                    levelColor = '#4d96ff';
+                    levelIcon = '🎮';
+                    levelMessage = 'Kecepatan meningkat!';
+            }
+            
+            notification.innerHTML = `
+                <div style="margin-bottom: 10px; color: ${levelColor}; font-size: 2.2rem;">${levelIcon} LEVEL UP!</div>
+                <div style="font-size: 2.5rem; color: ${levelColor}; font-weight: bold; text-shadow: 2px 2px 0 rgba(0,0,0,0.3);">${levelName}</div>
+                <div style="font-size: 1rem; margin-top: 10px; opacity: 0.8;">${levelMessage}</div>
+            `;
+            notification.style.border = `3px solid ${levelColor}`;
+            notification.style.display = 'block';
+            
+            // Hapus notifikasi setelah 2 detik
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 2000);
+            
+            // Mainkan suara level up
+            playLevelUpSound();
+        }
+        
+        function playLevelUpSound() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Nada naik untuk level up
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                oscillator.frequency.exponentialRampToValueAtTime(1046.50, audioContext.currentTime + 0.2); // C6
+                
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (error) {
+                console.log('Audio context tidak didukung:', error);
+            }
+        }
+
+        // Inisialisasi canvas dan konteks
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Audio elements
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const gameOverSound = document.getElementById('gameOverSound');
+        const eatSound = document.getElementById('eatSound');
+        const shockSound = document.getElementById('shockSound');
+        const kelinciEatSound = document.getElementById('kelinciEatSound');
+        
+        // UI Elements
+        const pauseScreen = document.getElementById('pauseScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const continueButton = document.getElementById('continueButton');
+        const menuButtonPause = document.getElementById('menuButtonPause');
+        const playAgainButton = document.getElementById('playAgainButton');
+        const menuButton = document.getElementById('menuButton');
+        const backButton = document.getElementById('backButton');
+        const levelUpNotification = document.getElementById('levelUpNotification');
+        
+        // Virtual Joystick elements
+        const joystickContainer = document.getElementById('joystickContainer');
+        const joystickStick = document.getElementById('joystickStick');
+        const buttonControls = document.getElementById('buttonControls');
+        const controlInfo = document.getElementById('controlInfo');
+        const gamepadIndicator = document.getElementById('gamepadIndicator');
+        
+        // Set ukuran canvas
+        function resizeCanvas() {
+            const container = document.querySelector('.game-board');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        // Game variables
+        let gameRunning = false;
+        let isPaused = false;
+        let score = 0;
+        let lives = 2;
+        let gameSpeed = 180;
+        let assetsLoaded = false;
+        let isShocked = false;
+        let isDead = false;
+        let deathAnimationFrame = 0;
+        let deathStartTime = 0;
+        let safeAreaPadding = 2;
+        let animationTime = 0;
+        let foodAnimationTime = 0;
+        let decorationAnimationTime = 0;
+        
+        // High score
+        let highScore = localStorage.getItem('kelinciSnakeHighScore') || 0;
+        
+        // Ukuran grid
+        let gridSize = 40;
+        let gridWidth, gridHeight;
+        
+        // ============= JOYSTICK VARIABLES =============
+        let joystickActive = false;
+        let joystickDirection = { x: 0, y: 0 };
+        let joystickStartX = 0;
+        let joystickStartY = 0;
+        let joystickMaxDistance = 40;
+        let joystickCurrentX = 0;
+        let joystickCurrentY = 0;
+        let joystickBaseRect = null;
+        
+        // ============= GAMEPAD VARIABLES =============
+        let gamepadConnected = false;
+        let gamepadIndex = null;
+        let currentGamepadType = 'standard';
+        let gamepadPollingInterval = null;
+        let gamepadVibrationSupported = false;
+        let lastButtonState = {};
+        
+        // ============= GAMEPAD MAPPING =============
+        const gamepadMappings = {
+            'xbox': {
+                A: 0,       // A button (bottom)
+                B: 1,       // B button (right)
+                X: 2,       // X button (left)
+                Y: 3,       // Y button (top)
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                SELECT: 8,
+                START: 9,
+                LS: 10,
+                RS: 11,
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                AXIS_LEFT_X: 0,
+                AXIS_LEFT_Y: 1,
+                AXIS_RIGHT_X: 2,
+                AXIS_RIGHT_Y: 3
+            },
+            
+            'playstation': {
+                CROSS: 0,     // Cross button (bottom)
+                CIRCLE: 1,    // Circle button (right)
+                SQUARE: 2,    // Square button (left)
+                TRIANGLE: 3,  // Triangle button (top)
+                L1: 4,
+                R1: 5,
+                L2: 6,
+                R2: 7,
+                SHARE: 8,
+                OPTIONS: 9,
+                L3: 10,
+                R3: 11,
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                AXIS_LEFT_X: 0,
+                AXIS_LEFT_Y: 1,
+                AXIS_RIGHT_X: 2,
+                AXIS_RIGHT_Y: 3
+            },
+            
+            'standard': {
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                SELECT: 8,
+                START: 9,
+                LS: 10,
+                RS: 11,
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                AXIS_LEFT_X: 0,
+                AXIS_LEFT_Y: 1,
+                AXIS_RIGHT_X: 2,
+                AXIS_RIGHT_Y: 3
+            }
+        };
+        
+        // ============= FUNGSI DETEKSI GAMEPAD =============
+        function detectGamepadType(gamepadId) {
+            const id = gamepadId.toLowerCase();
+            
+            if (id.includes('xbox') || id.includes('microsoft') || id.includes('045e')) {
+                return 'xbox';
+            } else if (id.includes('playstation') || id.includes('ps') || id.includes('sony') || 
+                       id.includes('054c') || id.includes('dualshock') || id.includes('dualsense')) {
+                return 'playstation';
+            } else {
+                return 'standard';
+            }
+        }
+        
+        function showGamepadConnected(name, type) {
+            const typeName = type === 'xbox' ? 'Xbox' : 
+                            type === 'playstation' ? 'PlayStation' : 'Gamepad';
+            
+            gamepadIndicator.textContent = `🎮 ${typeName} TERHUBUNG`;
+            gamepadIndicator.style.display = 'block';
+            gamepadIndicator.style.animation = 'gamepadConnect 0.5s ease-out';
+            
+            if (controlInfo) {
+                controlInfo.innerHTML = `🎮 ${typeName} Terdeteksi - Gunakan D-Pad/Analog Stick`;
+                controlInfo.style.display = 'block';
+            }
+            
+            // Sembunyikan kontrol virtual jika gamepad terdeteksi
+            if (joystickContainer) joystickContainer.style.display = 'none';
+            if (buttonControls) buttonControls.style.display = 'none';
+            
+            console.log(`🎮 Gamepad terhubung: ${name} (${typeName})`);
+            
+            // Cek dukungan getaran
+            if (navigator.vibrate) {
+                gamepadVibrationSupported = true;
+                // Getar pendek untuk konfirmasi koneksi
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+        
+        function showGamepadDisconnected() {
+            gamepadIndicator.style.animation = 'gamepadDisconnect 0.5s ease-out';
+            setTimeout(() => {
+                gamepadIndicator.style.display = 'none';
+                gamepadIndicator.style.animation = 'pulse 2s infinite';
+            }, 500);
+            
+            if (controlInfo) {
+                controlInfo.innerHTML = 'Gunakan Joystick atau tombol WASD untuk mengontrol kelinci';
+            }
+            
+            // Tampilkan kembali kontrol virtual untuk perangkat mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                            ('ontouchstart' in window) || 
+                            (navigator.maxTouchPoints > 0);
+            
+            if (isMobile) {
+                if (joystickContainer) joystickContainer.style.display = 'block';
+                if (buttonControls) buttonControls.style.display = 'flex';
+            }
+            
+            console.log('🎮 Gamepad terputus');
+        }
+        
+        // ============= FUNGSI POLLING GAMEPAD =============
+        function pollGamepad() {
+            if (!gamepadConnected || gamepadIndex === null) return;
+            
+            try {
+                const gamepads = navigator.getGamepads();
+                if (!gamepads || !gamepads[gamepadIndex]) {
+                    gamepadConnected = false;
+                    gamepadIndex = null;
+                    showGamepadDisconnected();
+                    if (gamepadPollingInterval) {
+                        clearInterval(gamepadPollingInterval);
+                        gamepadPollingInterval = null;
+                    }
+                    return;
+                }
+                
+                const gamepad = gamepads[gamepadIndex];
+                const mapping = gamepadMappings[currentGamepadType] || gamepadMappings.standard;
+                
+                // === KONTROL GERAKAN ===
+                if (gameRunning && !isPaused && !isShocked && !isDead) {
+                    let moveX = 0;
+                    let moveY = 0;
+                    
+                    // Gunakan analog stick kiri untuk kontrol utama
+                    if (gamepad.axes && gamepad.axes.length >= 2) {
+                        moveX = gamepad.axes[mapping.AXIS_LEFT_X];
+                        moveY = gamepad.axes[mapping.AXIS_LEFT_Y];
+                        
+                        // Deadzone untuk menghindari drift
+                        const deadzone = 0.2;
+                        if (Math.abs(moveX) < deadzone) moveX = 0;
+                        if (Math.abs(moveY) < deadzone) moveY = 0;
+                    }
+                    
+                    // Gunakan D-Pad sebagai fallback jika analog stick tidak digunakan
+                    if (Math.abs(moveX) < 0.3 && Math.abs(moveY) < 0.3) {
+                        if (gamepad.buttons[mapping.UP]?.pressed) {
+                            moveY = -1;
+                        } else if (gamepad.buttons[mapping.DOWN]?.pressed) {
+                            moveY = 1;
+                        }
+                        if (gamepad.buttons[mapping.LEFT]?.pressed) {
+                            moveX = -1;
+                        } else if (gamepad.buttons[mapping.RIGHT]?.pressed) {
+                            moveX = 1;
+                        }
+                    }
+                    
+                    // Update arah kelinci berdasarkan input gamepad
+                    if (Math.abs(moveX) > 0.3 || Math.abs(moveY) > 0.3) {
+                        if (Math.abs(moveX) > Math.abs(moveY)) {
+                            if (moveX > 0.3 && currentDirection !== 'left') {
+                                nextDirection = 'right';
+                            } else if (moveX < -0.3 && currentDirection !== 'right') {
+                                nextDirection = 'left';
+                            }
+                        } else {
+                            if (moveY > 0.3 && currentDirection !== 'up') {
+                                nextDirection = 'down';
+                            } else if (moveY < -0.3 && currentDirection !== 'down') {
+                                nextDirection = 'up';
+                            }
+                        }
+                    }
+                }
+                
+                // === KONTROL TOMBOL AKSI ===
+                const currentButtonState = {};
+                
+                // Tombol A (Xbox) / Cross (PlayStation) - Untuk Lanjutkan/Main Lagi
+                if (gamepad.buttons[mapping.A]?.pressed) {
+                    currentButtonState.A = true;
+                    if (!lastButtonState.A) {
+                        handleGamepadButtonA();
+                    }
+                } else {
+                    currentButtonState.A = false;
+                }
+                
+                // Tombol B (Xbox) / Circle (PlayStation) - Untuk Menu Utama
+                if (gamepad.buttons[mapping.B]?.pressed) {
+                    currentButtonState.B = true;
+                    if (!lastButtonState.B) {
+                        handleGamepadButtonB();
+                    }
+                } else {
+                    currentButtonState.B = false;
+                }
+                
+                // Tombol START/MENU - Untuk pause/restart
+                if (gamepad.buttons[mapping.START]?.pressed || gamepad.buttons[mapping.OPTIONS]?.pressed) {
+                    currentButtonState.START = true;
+                    if (!lastButtonState.START) {
+                        handleGamepadButtonStart();
+                    }
+                } else {
+                    currentButtonState.START = false;
+                }
+                
+                // Update state tombol
+                lastButtonState = { ...currentButtonState };
+                
+            } catch (error) {
+                console.error('Error polling gamepad:', error);
+            }
+        }
+        
+        // ============= HANDLER TOMBOL GAMEPAD =============
+        function handleGamepadButtonA() {
+            console.log('🎮 Tombol A/Cross ditekan');
+            
+            if (isPaused) {
+                // Di menu pause, tombol A untuk continue
+                hidePauseMenu();
+                triggerGamepadVibration([30, 0.2, 0.4]);
+                return true;
+            }
+            
+            if (!gameRunning) {
+                // Jika di game over screen
+                const gameOverScreen = document.getElementById('gameOverScreen');
+                if (gameOverScreen && gameOverScreen.style.display === 'flex') {
+                    console.log('🎮 Game Over → Tombol A: Main Lagi');
+                    
+                    // Getar untuk feedback
+                    if (gamepadVibrationSupported) {
+                        navigator.vibrate([50, 30, 50]);
+                    }
+                    
+                    // Klik tombol Main Lagi
+                    const playAgainButton = document.getElementById('playAgainButton');
+                    if (playAgainButton) {
+                        playAgainButton.click();
+                    }
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function handleGamepadButtonB() {
+            console.log('🎮 Tombol B/Circle ditekan - Menu Utama');
+            
+            if (isPaused) {
+                // Di menu pause, tombol B untuk kembali ke menu utama
+                console.log('🎮 Pause → Tombol B: Menu Utama');
+                triggerGamepadVibration([30, 0.2, 0.3]);
+                
+                const menuButtonPause = document.getElementById('menuButtonPause');
+                if (menuButtonPause) {
+                    menuButtonPause.click();
+                }
+                return true;
+            }
+            
+            if (!gameRunning) {
+                const gameOverScreen = document.getElementById('gameOverScreen');
+                if (gameOverScreen && gameOverScreen.style.display === 'flex') {
+                    console.log('🎮 Game Over → Tombol B: Menu Utama');
+                    triggerGamepadVibration([30, 0.2, 0.3]);
+                    
+                    const menuButton = document.getElementById('menuButton');
+                    if (menuButton) {
+                        menuButton.click();
+                    }
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function handleGamepadButtonStart() {
+            console.log('🎮 Tombol START/Menu ditekan');
+            
+            // Jika dalam game, toggle pause
+            if (gameRunning && !isShocked && !isDead) {
+                if (isPaused) {
+                    hidePauseMenu();
+                } else {
+                    showPauseMenu();
+                }
+                
+                // Getar untuk feedback
+                if (gamepadVibrationSupported) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                
+                return true;
+            }
+            
+            return false;
+        }
+        
+        // ============= FUNGSI GETARAN GAMEPAD =============
+        function triggerGamepadVibration(pattern) {
+            if (!gamepadVibrationSupported || !gamepadConnected) return;
+            
+            try {
+                if (navigator.vibrate) {
+                    navigator.vibrate(pattern);
+                }
+            } catch (error) {
+                console.log('Vibration error:', error);
+            }
+        }
+        
+        // ============= EVENT LISTENER GAMEPAD =============
+        window.addEventListener("gamepadconnected", function(e) {
+            console.log(`🎮 Gamepad terhubung: ${e.gamepad.id} (Index: ${e.gamepad.index})`);
+            
+            gamepadConnected = true;
+            gamepadIndex = e.gamepad.index;
+            currentGamepadType = detectGamepadType(e.gamepad.id);
+            
+            showGamepadConnected(e.gamepad.id, currentGamepadType);
+            
+            // Mulai polling gamepad
+            if (!gamepadPollingInterval) {
+                gamepadPollingInterval = setInterval(pollGamepad, 16); // ~60 FPS
+            }
+            
+            // Getar untuk konfirmasi koneksi
+            triggerGamepadVibration([100, 50, 100]);
+        });
+        
+        window.addEventListener("gamepaddisconnected", function(e) {
+            console.log(`🎮 Gamepad terputus: ${e.gamepad.id}`);
+            
+            gamepadConnected = false;
+            gamepadIndex = null;
+            showGamepadDisconnected();
+            
+            // Hentikan polling gamepad
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+        });
+        
+        // ============= INISIALISASI GAMEPAD SAAT LOAD =============
+        function initializeGamepadSupport() {
+            if ('getGamepads' in navigator) {
+                console.log('🎮 Gamepad API didukung');
+                
+                // Cek apakah sudah ada gamepad yang terhubung
+                const gamepads = navigator.getGamepads();
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        console.log(`🎮 Gamepad sudah terhubung: ${gamepads[i].id}`);
+                        
+                        gamepadConnected = true;
+                        gamepadIndex = i;
+                        currentGamepadType = detectGamepadType(gamepads[i].id);
+                        showGamepadConnected(gamepads[i].id, currentGamepadType);
+                        
+                        // Mulai polling gamepad
+                        if (!gamepadPollingInterval) {
+                            gamepadPollingInterval = setInterval(pollGamepad, 16);
+                        }
+                        
+                        break;
+                    }
+                }
+                
+                return true;
+            } else {
+                console.log('⚠️ Gamepad API tidak didukung');
+                return false;
+            }
+        }
+        
+        // ============= ASET KELINCI =============
+        const kelinciAssets = {
+            headRight: new Image(),
+            headLeft: new Image(),
+            headUp: new Image(),
+            headDown: new Image(),
+            headRightShock: new Image(),
+            headLeftShock: new Image(),
+            headUpShock: new Image(),
+            headDownShock: new Image(),
+            headRightDead: new Image(),
+            headLeftDead: new Image(),
+            headUpDead: new Image(),
+            headDownDead: new Image(),
+            childRight: new Image(),
+            childLeft: new Image(),
+            childUp: new Image(),
+            childDown: new Image(),
+            foodWortel: new Image()
+        };
+        
+        const basePath = 'assets/kelinci/';
+        
+        // Set source untuk setiap aset KELINCI UTAMA
+        kelinciAssets.headRight.src = basePath + 'kelinci_dewasa_hadap_kanan.png';
+        kelinciAssets.headLeft.src = basePath + 'kelinci_dewasa_hadap_kiri.png';
+        kelinciAssets.headUp.src = basePath + 'kelinci_dewasa_hadap_belakang.png';
+        kelinciAssets.headDown.src = basePath + 'kelinci_dewasa_hadap_depan.png';
+        
+        kelinciAssets.headRightShock.src = basePath + 'kelinci_dewasa_hadap_kanan_kaget.png';
+        kelinciAssets.headLeftShock.src = basePath + 'kelinci_dewasa_hadap_kiri_kaget.png';
+        kelinciAssets.headUpShock.src = basePath + 'kelinci_dewasa_hadap_belakang_kaget.png';
+        kelinciAssets.headDownShock.src = basePath + 'kelinci_dewasa_hadap_depan_kaget.png';
+        
+        kelinciAssets.headRightDead.src = basePath + 'kelinci_dewasa_hadap_kanan_mati.png';
+        kelinciAssets.headLeftDead.src = basePath + 'kelinci_dewasa_hadap_kiri_mati.png';
+        kelinciAssets.headUpDead.src = basePath + 'kelinci_dewasa_hadap_belakang_mati.png';
+        kelinciAssets.headDownDead.src = basePath + 'kelinci_dewasa_hadap_depan_mati.png';
+        
+        kelinciAssets.childRight.src = basePath + 'anak_kelinci_hadap_kanan.png';
+        kelinciAssets.childLeft.src = basePath + 'anak_kelinci_hadap_kiri.png';
+        kelinciAssets.childUp.src = basePath + 'anak_kelinci_hadap_belakang.png';
+        kelinciAssets.childDown.src = basePath + 'anak_kelinci_hadap_depan.png';
+        
+        kelinciAssets.foodWortel.src = basePath + 'makanan/wortel.png';
+        
+        // ============= VARIABEL GAME =============
+        let kelinci = [];
+        let food = {};
+        let currentDirection = 'right';
+        let nextDirection = 'right';
+        let collisionPosition = {x: 0, y: 0, direction: 'right'};
+        let smoothMoveProgress = 0;
+        let smoothMoveStart = null;
+        let smoothMoveTarget = null;
+        let isAnimatingMove = false;
+        let lastFrameTime = 0;
+        let moveAnimationSpeed = 0.08;
+        let kelinciHistory = [];
+        let historyLength = 50;
+        
+        // ============= FUNGSI MENU PAUSE =============
+        function showPauseMenu() {
+            if (gameRunning && !isDead && !isShocked) {
+                isPaused = true;
+                gameRunning = false;
+                pauseScreen.style.display = 'flex';
+                
+                // Pause background music
+                backgroundMusic.pause();
+                
+                console.log('⏸️ Game di-pause');
+            }
+        }
+        
+        function hidePauseMenu() {
+            isPaused = false;
+            gameRunning = true;
+            pauseScreen.style.display = 'none';
+            
+            // Lanjutkan background music
+            if (backgroundMusic.paused) {
+                backgroundMusic.play().catch(e => console.log('Audio error:', e));
+            }
+            
+            console.log('▶️ Game dilanjutkan');
+        }
+        
+        // ============= GAME LOGIC =============
+        function calculateGridDimensions() {
+            const minGridSize = 35;
+            const maxGridSize = 45;
+            const calculatedSize = Math.floor(Math.min(canvas.width, canvas.height) / 14);
+            gridSize = Math.max(minGridSize, Math.min(maxGridSize, calculatedSize));
+            gridWidth = Math.floor(canvas.width / gridSize);
+            gridHeight = Math.floor(canvas.height / gridSize);
+        }
+        
+        function initGame() {
+            // Mulai dari level mudah
+            currentLevel = 'mudah';
+            const initialLevel = getLevelBasedOnScore(0);
+            gameSpeed = Math.round(baseSpeed / initialLevel.speedMultiplier);
+            lives = 2;
+            isPaused = false;
+            
+            document.getElementById('levelDisplay').textContent = initialLevel.name;
+            document.getElementById('livesDisplay').textContent = lives;
+            document.getElementById('levelDisplay').style.color = initialLevel.color;
+            
+            console.log(`🐰 Game dimulai dengan level: ${initialLevel.name}`);
+            console.log(`🎯 Sistem level dinamis aktif! (4 Level)`);
+            console.log(`📊 Level akan naik otomatis berdasarkan skor:`);
+            console.log(`   • 0-49 poin: MUDAH (1.0x)`);
+            console.log(`   • 50-99 poin: NORMAL (1.4x)`);
+            console.log(`   • 100-149 poin: SEDANG (1.6x)`);
+            console.log(`   • 150+ poin: SULIT (2.0x)`);
+            
+            gameRunning = true;
+            isShocked = false;
+            isDead = false;
+            deathAnimationFrame = 0;
+            score = 0;
+            animationTime = 0;
+            foodAnimationTime = 0;
+            decorationAnimationTime = 0;
+            smoothMoveProgress = 0;
+            isAnimatingMove = false;
+            lastFrameTime = performance.now();
+            kelinciHistory = [];
+            
+            calculateGridDimensions();
+            const startX = Math.floor(gridWidth / 2);
+            const startY = Math.floor(gridHeight / 2);
+            
+            kelinci = [{x: startX, y: startY, direction: 'right'}];
+            currentDirection = 'right';
+            nextDirection = 'right';
+            
+            kelinciHistory.push({x: startX, y: startY, direction: 'right'});
+            
+            document.getElementById('scoreDisplay').textContent = score;
+            pauseScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            document.getElementById('shockEffect').style.display = 'none';
+            levelUpNotification.style.display = 'none';
+            
+            generateFood();
+            drawGame();
+            
+            playBackgroundMusic();
+            updateJoystickBaseRect();
+            initializeGamepadSupport();
+        }
+        
+        function generateFood() {
+            calculateGridDimensions();
+            
+            let newFoodPosition;
+            let foodOnKelinci;
+            
+            do {
+                foodOnKelinci = false;
+                newFoodPosition = {
+                    x: Math.floor(Math.random() * (gridWidth - (safeAreaPadding * 2))) + safeAreaPadding,
+                    y: Math.floor(Math.random() * (gridHeight - (safeAreaPadding * 2))) + safeAreaPadding
+                };
+                
+                for (let segment of kelinci) {
+                    if (segment.x === newFoodPosition.x && segment.y === newFoodPosition.y) {
+                        foodOnKelinci = true;
+                        break;
+                    }
+                }
+            } while (foodOnKelinci);
+            
+            food = newFoodPosition;
+        }
+        
+        // ============= SOUND FUNCTIONS =============
+        function playBackgroundMusic() {
+            backgroundMusic.volume = 0.3;
+            backgroundMusic.loop = true;
+            
+            const playPromise = backgroundMusic.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log('Autoplay blocked, music will play after user interaction');
+                });
+            }
+        }
+        
+        function playKelinciEatSound() {
+            kelinciEatSound.currentTime = 0;
+            kelinciEatSound.volume = 0.6;
+            kelinciEatSound.play().catch(e => console.log('Kelinci eat sound error:', e));
+        }
+        
+        function playShockSound() {
+            shockSound.currentTime = 0;
+            shockSound.volume = 0.7;
+            shockSound.play().catch(e => console.log('Shock sound error:', e));
+        }
+        
+        function playGameOverSound() {
+            backgroundMusic.pause();
+            gameOverSound.currentTime = 0;
+            gameOverSound.volume = 0.6;
+            gameOverSound.play().catch(e => console.log('Game over sound error:', e));
+        }
+        
+        // ============= DRAW FUNCTIONS =============
+        function drawGame() {
+            const currentTime = performance.now();
+            const deltaTime = Math.min(currentTime - lastFrameTime, 100) / 1000;
+            lastFrameTime = currentTime;
+            
+            animationTime += deltaTime * 1.5;
+            foodAnimationTime += deltaTime * 1.2;
+            decorationAnimationTime += deltaTime * 0.8;
+            
+            if (isAnimatingMove) {
+                smoothMoveProgress += moveAnimationSpeed * (deltaTime * 60);
+                if (smoothMoveProgress >= 1) {
+                    smoothMoveProgress = 1;
+                    isAnimatingMove = false;
+                }
+            }
+            
+            // Background warna kelinci (hijau muda)
+            ctx.fillStyle = '#e8f5e9';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawBackgroundPattern();
+            drawChessboard();
+            drawFood();
+            drawKelinci();
+            drawArenaBorder();
+            
+            if (isDead) {
+                drawDeathInPlace();
+            }
+        }
+        
+        function drawBackgroundPattern() {
+            ctx.save();
+            ctx.globalAlpha = 0.1;
+            
+            const dotSize = 2;
+            const spacing = 25;
+            
+            for (let x = 15; x < canvas.width; x += spacing) {
+                for (let y = 15; y < canvas.height; y += spacing) {
+                    if ((x + y) % (spacing * 2) === 0) {
+                        ctx.fillStyle = '#4db6ac';
+                        ctx.beginPath();
+                        ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            ctx.restore();
+        }
+        
+        function drawChessboard() {
+            const boardPadding = safeAreaPadding * gridSize;
+            const boardWidth = (gridWidth - (safeAreaPadding * 2)) * gridSize;
+            const boardHeight = (gridHeight - (safeAreaPadding * 2)) * gridSize;
+            
+            // Latar belakang putih untuk kontras
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fillRect(boardPadding, boardPadding, boardWidth, boardHeight);
+            
+            const cols = gridWidth - (safeAreaPadding * 2);
+            const rows = gridHeight - (safeAreaPadding * 2);
+            
+            const darkColor = '#4db6ac';   // Biru gelap
+            const lightColor = '#b2dfdb';  // Biru terang
+            
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const rectX = boardPadding + x * gridSize;
+                    const rectY = boardPadding + y * gridSize;
+                    
+                    if ((x + y) % 2 === 0) {
+                        ctx.fillStyle = lightColor;
+                    } else {
+                        ctx.fillStyle = darkColor;
+                    }
+                    
+                    ctx.fillRect(rectX, rectY, gridSize, gridSize);
+                    
+                    ctx.strokeStyle = 'rgba(77, 182, 172, 0.1)';
+                    ctx.lineWidth = 0.5;
+                    ctx.strokeRect(rectX, rectY, gridSize, gridSize);
+                }
+            }
+        }
+        
+        function drawArenaBorder() {
+            const boardPadding = safeAreaPadding * gridSize;
+            const boardWidth = (gridWidth - (safeAreaPadding * 2)) * gridSize;
+            const boardHeight = (gridHeight - (safeAreaPadding * 2)) * gridSize;
+            
+            ctx.strokeStyle = '#4db6ac';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(boardPadding, boardPadding, boardWidth, boardHeight);
+            
+            ctx.strokeStyle = '#00897b';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boardPadding - 1, boardPadding - 1, boardWidth + 2, boardHeight + 2);
+        }
+        
+        function drawDeathInPlace() {
+            const elapsedTime = Date.now() - deathStartTime;
+            const deathDuration = 2000;
+            const progress = Math.min(elapsedTime / deathDuration, 1);
+            
+            const deadImg = getHeadImage(collisionPosition.direction, 'dead');
+            const x = collisionPosition.x * gridSize;
+            const y = collisionPosition.y * gridSize;
+            
+            if (deadImg.complete && deadImg.naturalWidth > 0) {
+                const opacity = 0.7 + 0.3 * Math.sin(progress * Math.PI * 4);
+                const scale = 1 + 0.1 * Math.sin(progress * Math.PI * 2);
+                
+                ctx.save();
+                ctx.globalAlpha = opacity;
+                ctx.translate(x + gridSize/2, y + gridSize/2);
+                ctx.scale(scale, scale);
+                ctx.drawImage(
+                    deadImg,
+                    -gridSize/2,
+                    -gridSize/2,
+                    gridSize,
+                    gridSize
+                );
+                ctx.restore();
+            }
+            
+            if (progress >= 1) {
+                showGameOver();
+            }
+        }
+        
+        function getHeadImage(direction, state) {
+            if (state === 'dead') {
+                switch(direction) {
+                    case 'right': return kelinciAssets.headRightDead;
+                    case 'left': return kelinciAssets.headLeftDead;
+                    case 'up': return kelinciAssets.headUpDead;
+                    case 'down': return kelinciAssets.headDownDead;
+                    default: return kelinciAssets.headDownDead;
+                }
+            } else if (state === 'shock') {
+                switch(direction) {
+                    case 'right': return kelinciAssets.headRightShock;
+                    case 'left': return kelinciAssets.headLeftShock;
+                    case 'up': return kelinciAssets.headUpShock;
+                    case 'down': return kelinciAssets.headDownShock;
+                    default: return kelinciAssets.headRightShock;
+                }
+            } else {
+                switch(direction) {
+                    case 'right': return kelinciAssets.headRight;
+                    case 'left': return kelinciAssets.headLeft;
+                    case 'up': return kelinciAssets.headUp;
+                    case 'down': return kelinciAssets.headDown;
+                    default: return kelinciAssets.headRight;
+                }
+            }
+        }
+        
+        function getChildImage(direction) {
+            switch(direction) {
+                case 'right': return kelinciAssets.childRight;
+                case 'left': return kelinciAssets.childLeft;
+                case 'up': return kelinciAssets.childUp;
+                case 'down': return kelinciAssets.childDown;
+                default: return kelinciAssets.childDown;
+            }
+        }
+        
+        function drawKelinci() {
+            if (isDead) return;
+            
+            for (let i = 0; i < kelinci.length; i++) {
+                const segment = kelinci[i];
+                
+                let drawX, drawY;
+                
+                if (i === 0 && isAnimatingMove && smoothMoveStart && smoothMoveTarget) {
+                    const easeProgress = easeOutCubic(smoothMoveProgress);
+                    drawX = smoothMoveStart.x + (smoothMoveTarget.x - smoothMoveStart.x) * easeProgress;
+                    drawY = smoothMoveStart.y + (smoothMoveTarget.y - smoothMoveStart.y) * easeProgress;
+                } else {
+                    drawX = segment.x;
+                    drawY = segment.y;
+                }
+                
+                const x = drawX * gridSize;
+                const y = drawY * gridSize;
+                
+                if (drawX < safeAreaPadding || drawX >= gridWidth - safeAreaPadding || 
+                    drawY < safeAreaPadding || drawY >= gridHeight - safeAreaPadding) {
+                    continue;
+                }
+                
+                if (i === 0) {
+                    let state = 'normal';
+                    if (isShocked) state = 'shock';
+                    
+                    const headImg = getHeadImage(segment.direction, state);
+                    if (headImg.complete && headImg.naturalWidth > 0) {
+                        const walkOffset = Math.sin(animationTime * 2) * 2;
+                        const bodySway = Math.sin(animationTime * 1.5) * 0.03;
+                        const headBob = Math.sin(animationTime * 3) * 1;
+                        
+                        ctx.save();
+                        ctx.translate(x + gridSize/2, y + gridSize/2 + walkOffset);
+                        ctx.rotate(bodySway);
+                        
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                        ctx.shadowBlur = 8;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                        
+                        if (isAnimatingMove) {
+                            ctx.globalAlpha = 0.9 + 0.1 * Math.sin(animationTime * 10);
+                        }
+                        
+                        ctx.save();
+                        ctx.translate(0, headBob);
+                        
+                        const kelinciSize = gridSize * 1.2;
+                        ctx.drawImage(
+                            headImg,
+                            -kelinciSize/2,
+                            -kelinciSize/2,
+                            kelinciSize,
+                            kelinciSize
+                        );
+                        ctx.restore();
+                        
+                        ctx.restore();
+                        ctx.globalAlpha = 1;
+                    }
+                } else {
+                    const childImg = getChildImage(segment.direction);
+                    if (childImg.complete && childImg.naturalWidth > 0) {
+                        const walkOffset = Math.sin(animationTime * 2 - i * 0.3) * 1.5;
+                        const bob = Math.sin(animationTime * 3 - i * 0.5) * 0.5;
+                        
+                        ctx.save();
+                        ctx.translate(x + gridSize/2, y + gridSize/2 + walkOffset + bob);
+                        
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                        ctx.shadowBlur = 6;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        
+                        const flash = 0.9 + 0.1 * Math.sin(animationTime * 6 - i * 0.8);
+                        ctx.globalAlpha = flash;
+                        
+                        const childSize = gridSize * 1.0;
+                        ctx.drawImage(
+                            childImg,
+                            -childSize/2,
+                            -childSize/2,
+                            childSize,
+                            childSize
+                        );
+                        
+                        ctx.restore();
+                        ctx.globalAlpha = 1;
+                    }
+                }
+                
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+            }
+        }
+        
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+        
+        function drawFood() {
+            const x = food.x * gridSize;
+            const y = food.y * gridSize;
+            
+            if (kelinciAssets.foodWortel.complete && kelinciAssets.foodWortel.naturalWidth > 0) {
+                const bounceOffset = Math.sin(foodAnimationTime * 1.5) * 5;
+                const pulse = 0.9 + 0.1 * Math.sin(foodAnimationTime * 3);
+                
+                const drawSize = gridSize * 1.1 * pulse;
+                
+                ctx.save();
+                const centerX = x + gridSize/2;
+                const centerY = y + gridSize/2 + bounceOffset;
+                
+                ctx.shadowColor = '#FFD700';
+                ctx.shadowBlur = 15 + 5 * Math.sin(foodAnimationTime * 2);
+                ctx.globalAlpha = 0.95 + 0.05 * Math.sin(foodAnimationTime * 4);
+                
+                ctx.drawImage(
+                    kelinciAssets.foodWortel,
+                    centerX - drawSize/2,
+                    centerY - drawSize/2,
+                    drawSize,
+                    drawSize
+                );
+                
+                ctx.restore();
+                ctx.globalAlpha = 1;
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+            }
+        }
+        
+        function moveKelinci() {
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            
+            if (isAnimatingMove) {
+                drawGame();
+                return;
+            }
+            
+            currentDirection = nextDirection;
+            const head = {x: kelinci[0].x, y: kelinci[0].y, direction: currentDirection};
+            
+            switch(currentDirection) {
+                case 'right': head.x++; break;
+                case 'left': head.x--; break;
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+            }
+            
+            smoothMoveStart = {x: kelinci[0].x, y: kelinci[0].y};
+            smoothMoveTarget = {x: head.x, y: head.y};
+            smoothMoveProgress = 0;
+            isAnimatingMove = true;
+            
+            kelinciHistory.unshift({x: head.x, y: head.y, direction: currentDirection});
+            
+            if (kelinciHistory.length > historyLength) {
+                kelinciHistory.pop();
+            }
+            
+            kelinci[0] = head;
+            
+            for (let i = 1; i < kelinci.length; i++) {
+                if (i < kelinciHistory.length) {
+                    const historyPos = kelinciHistory[i];
+                    kelinci[i].x = historyPos.x;
+                    kelinci[i].y = historyPos.y;
+                    kelinci[i].direction = historyPos.direction;
+                } else {
+                    kelinci[i].x = kelinci[i-1].x;
+                    kelinci[i].y = kelinci[i-1].y;
+                    kelinci[i].direction = kelinci[i-1].direction;
+                }
+            }
+            
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                document.getElementById('scoreDisplay').textContent = score;
+                
+                // Update level berdasarkan skor
+                updateLevelBasedOnScore();
+                
+                playKelinciEatSound();
+                triggerGamepadVibration([50, 0.2, 0.3]);
+                
+                let newChildX, newChildY;
+                
+                if (kelinci.length === 1) {
+                    switch(currentDirection) {
+                        case 'right':
+                            newChildX = head.x - 1;
+                            newChildY = head.y;
+                            break;
+                        case 'left':
+                            newChildX = head.x + 1;
+                            newChildY = head.y;
+                            break;
+                        case 'up':
+                            newChildX = head.x;
+                            newChildY = head.y + 1;
+                            break;
+                        case 'down':
+                            newChildX = head.x;
+                            newChildY = head.y - 1;
+                            break;
+                    }
+                } else {
+                    const lastSegment = kelinci[kelinci.length - 1];
+                    newChildX = lastSegment.x;
+                    newChildY = lastSegment.y;
+                }
+                
+                const newChild = {
+                    x: newChildX,
+                    y: newChildY,
+                    direction: kelinci[kelinci.length - 1]?.direction || currentDirection
+                };
+                kelinci.push(newChild);
+                
+                kelinciHistory.push({...newChild});
+                
+                generateFood();
+            }
+            
+            if (checkCollisions()) {
+                handleCollision();
+                return;
+            }
+            
+            drawGame();
+        }
+        
+        function checkCollisions() {
+            const head = kelinci[0];
+            
+            if (head.x < safeAreaPadding || 
+                head.x >= gridWidth - safeAreaPadding || 
+                head.y < safeAreaPadding || 
+                head.y >= gridHeight - safeAreaPadding) {
+                return true;
+            }
+            
+            for (let i = 1; i < kelinci.length; i++) {
+                if (head.x === kelinci[i].x && head.y === kelinci[i].y) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function resetToCenter() {
+            calculateGridDimensions();
+            const centerX = Math.floor(gridWidth / 2);
+            const centerY = Math.floor(gridHeight / 2);
+            
+            kelinci[0] = {x: centerX, y: centerY, direction: 'right'};
+            currentDirection = 'right';
+            nextDirection = 'right';
+            
+            const newKelinci = [kelinci[0]];
+            
+            for (let i = 1; i < kelinci.length; i++) {
+                let safeX = centerX;
+                let safeY = centerY;
+                
+                if (i === 1) {
+                    safeX = Math.max(safeAreaPadding, centerX - 1);
+                } else if (i === 2) {
+                    safeX = Math.max(safeAreaPadding, centerX - 2);
+                } else {
+                    const prevSegment = newKelinci[newKelinci.length - 1];
+                    safeX = Math.max(safeAreaPadding, prevSegment.x - 1);
+                    safeY = prevSegment.y;
+                }
+                
+                newKelinci.push({x: safeX, y: safeY, direction: 'right'});
+            }
+            
+            kelinci = newKelinci;
+            
+            kelinciHistory = [];
+            for (let i = 0; i < kelinci.length; i++) {
+                kelinciHistory.push({x: kelinci[i].x, y: kelinci[i].y, direction: kelinci[i].direction});
+            }
+            
+            smoothMoveProgress = 0;
+            isAnimatingMove = false;
+            
+            for (let i = 0; i < kelinci.length; i++) {
+                kelinci[i].x = Math.max(safeAreaPadding, Math.min(gridWidth - safeAreaPadding - 1, kelinci[i].x));
+                kelinci[i].y = Math.max(safeAreaPadding, Math.min(gridHeight - safeAreaPadding - 1, kelinci[i].y));
+            }
+            
+            let foodOnKelinci = false;
+            for (let segment of kelinci) {
+                if (segment.x === food.x && segment.y === food.y) {
+                    foodOnKelinci = true;
+                    break;
+                }
+            }
+            
+            if (foodOnKelinci) {
+                generateFood();
+            }
+            
+            drawGame();
+        }
+        
+        function showShockEffectBrief() {
+            isShocked = true;
+            document.getElementById('shockEffect').style.display = 'block';
+            playShockSound();
+            drawGame();
+            
+            setTimeout(() => {
+                document.getElementById('shockEffect').style.display = 'none';
+                isShocked = false;
+                drawGame();
+            }, 1000);
+        }
+        
+        function showDeathAnimation() {
+            isDead = true;
+            deathStartTime = Date.now();
+            collisionPosition = {
+                x: kelinci[0].x,
+                y: kelinci[0].y,
+                direction: currentDirection
+            };
+            
+            playGameOverSound();
+            triggerGamepadVibration([200, 0.5, 0.7]);
+            
+            function animateDeath() {
+                if (!isDead) return;
+                
+                drawGame();
+                requestAnimationFrame(animateDeath);
+            }
+            
+            animateDeath();
+        }
+        
+        function handleCollision() {
+            if (isShocked || isDead) return;
+            
+            lives--;
+            document.getElementById('livesDisplay').textContent = lives;
+            
+            // Getar gamepad untuk efek tabrakan
+            if (gamepadConnected) {
+                if (lives === 1) {
+                    triggerGamepadVibration([150, 0.3, 0.5]);
+                } else if (lives === 0) {
+                    triggerGamepadVibration([200, 0.5, 0.7]);
+                } else {
+                    triggerGamepadVibration([100, 0.2, 0.4]);
+                }
+            }
+            
+            if (lives <= 0) {
+                showDeathAnimation();
+            } else {
+                resetToCenter();
+                showShockEffectBrief();
+            }
+        }
+        
+        function showGameOver() {
+            gameRunning = false;
+            isDead = false;
+            isPaused = false;
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('kelinciSnakeHighScore', highScore);
+            }
+            
+            saveHighScore();
+            
+            document.getElementById('finalScoreText').textContent = `Skor Akhir: ${score}`;
+            document.getElementById('highScoreText').textContent = `Skor Tertinggi: ${highScore}`;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+                gameLoopInterval = null;
+            }
+            
+            console.log(`📊 Skor akhir: ${score} | Level akhir: ${currentLevel}`);
+        }
+        
+        function saveHighScore() {
+            const highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+            
+            const playerName = localStorage.getItem('playerName') || 'Pemain';
+            const levelName = getLevelBasedOnScore(score).name;
+            
+            highScores.push({
+                name: playerName,
+                score: score,
+                level: levelName,
+                date: new Date().toLocaleDateString('id-ID'),
+                character: 'Kelinci'
+            });
+            
+            highScores.sort((a, b) => b.score - a.score);
+            
+            const topScores = highScores.slice(0, 10);
+            
+            localStorage.setItem('highScores', JSON.stringify(topScores));
+        }
+        
+        // ============= GAME LOOP =============
+        let gameLoopInterval;
+        function startGameLoop() {
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+            }
+            
+            gameLoopInterval = setInterval(() => {
+                if (gameRunning && !isPaused && !isShocked && !isDead) {
+                    moveKelinci();
+                } else {
+                    drawGame();
+                }
+            }, gameSpeed);
+        }
+        
+        // ============= JOYSTICK FUNCTIONS =============
+        function updateJoystickBaseRect() {
+            if (joystickContainer) {
+                const rect = joystickContainer.getBoundingClientRect();
+                joystickBaseRect = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+        }
+        
+        function handleJoystickStart(x, y) {
+            joystickActive = true;
+            joystickStartX = x;
+            joystickStartY = y;
+            joystickCurrentX = 0;
+            joystickCurrentY = 0;
+            joystickStick.classList.add('active');
+            updateJoystickPosition(x, y);
+        }
+        
+        function handleJoystickMove(x, y) {
+            if (!joystickActive) return;
+            
+            const deltaX = x - joystickStartX;
+            const deltaY = y - joystickStartY;
+            
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > joystickMaxDistance) {
+                const angle = Math.atan2(deltaY, deltaX);
+                joystickCurrentX = Math.cos(angle) * joystickMaxDistance;
+                joystickCurrentY = Math.sin(angle) * joystickMaxDistance;
+            } else {
+                joystickCurrentX = deltaX;
+                joystickCurrentY = deltaY;
+            }
+            
+            updateJoystickVisual();
+            updateDirectionFromJoystick();
+        }
+        
+        function handleJoystickEnd() {
+            joystickActive = false;
+            joystickCurrentX = 0;
+            joystickCurrentY = 0;
+            joystickStick.classList.remove('active');
+            updateJoystickVisual();
+        }
+        
+        function updateJoystickPosition(x, y) {
+            const rect = joystickContainer.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            joystickStartX = x - (x - centerX);
+            joystickStartY = y - (y - centerY);
+        }
+        
+        function updateJoystickVisual() {
+            joystickStick.style.transform = `translate(calc(-50% + ${joystickCurrentX}px), calc(-50% + ${joystickCurrentY}px))`;
+        }
+        
+        function updateDirectionFromJoystick() {
+            if (!joystickActive || (!gameRunning || isPaused || isShocked || isDead)) return;
+            
+            const sensitivity = 0.3;
+            const x = joystickCurrentX / joystickMaxDistance;
+            const y = joystickCurrentY / joystickMaxDistance;
+            
+            if (Math.abs(x) > sensitivity || Math.abs(y) > sensitivity) {
+                if (Math.abs(x) > Math.abs(y)) {
+                    if (x > sensitivity && currentDirection !== 'left') {
+                        nextDirection = 'right';
+                    } else if (x < -sensitivity && currentDirection !== 'right') {
+                        nextDirection = 'left';
+                    }
+                } else {
+                    if (y > sensitivity && currentDirection !== 'up') {
+                        nextDirection = 'down';
+                    } else if (y < -sensitivity && currentDirection !== 'down') {
+                        nextDirection = 'up';
+                    }
+                }
+            }
+        }
+        
+        // ============= LOAD ASSETS =============
+        function loadAssets(callback) {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.display = 'flex';
+            
+            let assetsToLoad = Object.keys(kelinciAssets).length;
+            let assetsLoadedCount = 0;
+            
+            function checkAssetLoaded() {
+                assetsLoadedCount++;
+                
+                if (assetsLoadedCount >= assetsToLoad) {
+                    setTimeout(() => {
+                        assetsLoaded = true;
+                        loadingScreen.style.display = 'none';
+                        if (callback) callback();
+                    }, 500);
+                }
+            }
+            
+            Object.entries(kelinciAssets).forEach(([name, img]) => {
+                if (img.complete) {
+                    checkAssetLoaded();
+                } else {
+                    img.onload = checkAssetLoaded;
+                    img.onerror = () => {
+                        console.warn(`Gagal memuat aset: ${name}`);
+                        checkAssetLoaded();
+                    };
+                }
+            });
+            
+            setTimeout(() => {
+                if (!assetsLoaded) {
+                    console.log("Menggunakan fallback graphics...");
+                    assetsLoaded = true;
+                    loadingScreen.style.display = 'none';
+                    if (callback) callback();
+                }
+            }, 3000);
+        }
+        
+        // ============= EVENT LISTENERS =============
+        
+        // Event listeners untuk menu pause
+        continueButton.addEventListener('click', () => {
+            hidePauseMenu();
+        });
+        
+        function goBackToMenu() {
+            console.log('🔙 Kembali ke Menu Utama');
+            
+            // Hentikan semua audio
+            backgroundMusic.pause();
+            gameOverSound.pause();
+            eatSound.pause();
+            shockSound.pause();
+            kelinciEatSound.pause();
+            
+            // Hentikan polling gamepad
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+            
+            // Hentikan game loop
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+                gameLoopInterval = null;
+            }
+            
+            // Navigasi ke halaman utama
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 300);
+        }
+        
+        menuButtonPause.addEventListener('click', goBackToMenu);
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning || isShocked || isDead) return;
+            
+            e.preventDefault();
+            
+            switch(e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    if (currentDirection !== 'down') nextDirection = 'up';
+                    break;
+                case 'arrowdown':
+                case 's':
+                    if (currentDirection !== 'up') nextDirection = 'down';
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    if (currentDirection !== 'right') nextDirection = 'left';
+                    break;
+                case 'arrowright':
+                case 'd':
+                    if (currentDirection !== 'left') nextDirection = 'right';
+                    break;
+                case 'escape':
+                    if (!isDead && !isShocked) {
+                        showPauseMenu();
+                    }
+                    break;
+                case 'b':
+                case 'o':
+                    // Tombol B/O untuk kembali ke menu
+                    goBackToMenu();
+                    break;
+            }
+        });
+        
+        // WASD Button Controls
+        document.getElementById('wButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'down') nextDirection = 'up';
+        });
+        
+        document.getElementById('aButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'right') nextDirection = 'left';
+        });
+        
+        document.getElementById('sButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'up') nextDirection = 'down';
+        });
+        
+        document.getElementById('dButton').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'left') nextDirection = 'right';
+        });
+        
+        // Mouse events for WASD buttons
+        document.getElementById('wButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'down') nextDirection = 'up';
+        });
+        
+        document.getElementById('aButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'right') nextDirection = 'left';
+        });
+        
+        document.getElementById('sButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'up') nextDirection = 'down';
+        });
+        
+        document.getElementById('dButton').addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            if (!gameRunning || isPaused || isShocked || isDead) return;
+            if (currentDirection !== 'left') nextDirection = 'right';
+        });
+        
+        // Virtual Joystick Touch Events
+        joystickStick.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            handleJoystickStart(touch.clientX, touch.clientY);
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (joystickActive) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                handleJoystickMove(touch.clientX, touch.clientY);
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            if (joystickActive) {
+                handleJoystickEnd();
+            }
+        });
+        
+        // Virtual Joystick Mouse Events
+        joystickStick.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            handleJoystickStart(e.clientX, e.clientY);
+            
+            const mouseMoveHandler = (e) => {
+                handleJoystickMove(e.clientX, e.clientY);
+            };
+            
+            const mouseUpHandler = () => {
+                handleJoystickEnd();
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+            };
+            
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        });
+        
+        // Game control buttons
+        document.getElementById('backButton').addEventListener('click', goBackToMenu);
+        
+        document.getElementById('playAgainButton').addEventListener('click', () => {
+            gameOverSound.pause();
+            gameOverSound.currentTime = 0;
+            
+            initGame();
+            startGameLoop();
+        });
+        
+        document.getElementById('menuButton').addEventListener('click', goBackToMenu);
+        
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            calculateGridDimensions();
+            updateJoystickBaseRect();
+            drawGame();
+        });
+        
+        // ============= INITIALIZE GAME =============
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            calculateGridDimensions();
+            
+            loadAssets(() => {
+                console.log('Semua assets berhasil dimuat!');
+                console.log('🎮 Kontrol Gamepad:');
+                console.log('  • D-Pad/Analog Stick: Gerakkan kelinci');
+                console.log('  • Tombol B/CIRCLE: Kembali ke menu utama');
+                console.log('  • Tombol A/CROSS: Lanjutkan/Main lagi');
+                console.log('  • Tombol START: Pause game');
+                console.log('🎯 Sistem Level Dinamis (4 Level):');
+                console.log('   • 0-49 poin: MUDAH (Kecepatan normal 1.0x)');
+                console.log('   • 50-99 poin: NORMAL (40% lebih cepat 1.4x)');
+                console.log('   • 100-149 poin: SEDANG (60% lebih cepat 1.6x)');
+                console.log('   • 150+ poin: SULIT (100% lebih cepat 2.0x)');
+                
+                initGame();
+                startGameLoop();
+                
+                function animationLoop() {
+                    if ((gameRunning && !isPaused) || isDead) {
+                        drawGame();
+                    }
+                    requestAnimationFrame(animationLoop);
+                }
+                animationLoop();
+            });
+        });
+        
+        window.addEventListener('load', updateJoystickBaseRect);
+        window.addEventListener('resize', updateJoystickBaseRect);
+    </script>
+</body>
+</html>

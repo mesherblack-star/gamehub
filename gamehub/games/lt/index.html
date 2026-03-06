@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flavor Match</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<!-- MENU BUTTON -->
+<button class="menu-btn" onclick="openMenu()">
+  <i class="fas fa-cog"></i>
+</button>
+
+<div class="game-container">
+
+  <!-- ===== HOME ===== -->
+  <div id="homeScreen" class="screen">
+    <div class="home-header">
+      <div class="logo">
+        <i class="fas fa-utensils"></i>
+        <h1>Flavor Match</h1>
+      </div>
+      <p class="subtitle">Temukan pasangan makanan Indonesia</p>
+    </div>
+
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-trophy"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Best</span>
+          <span class="stat-value" id="bestScore">0</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="fas fa-history"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Last</span>
+          <span class="stat-value" id="lastScore">0</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="play-btn" onclick="startGame()">
+      <i class="fas fa-play"></i>
+      <span>PLAY NOW</span>
+    </button>
+    
+            <button class="play-btn" onclick="window.location.href='home.html'">
+                <i class="fas fa-arrow-left"></i>
+                <span>Kembali</span>
+            </button>
+
+   <div class="features">
+      <div class="feature">
+        <i class="fas fa-layer-group"></i>
+        <span>Levels</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-clock"></i>
+        <span>Timer</span>
+      </div>
+      <div class="feature">
+        <i class="fas fa-volume-up"></i>
+        <span>Sound</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GAME ===== -->
+  <div id="gameScreen" class="screen" style="display:none;">
+    <div class="game-header">
+      <div class="game-stats">
+        <div class="game-stat">
+          <i class="fas fa-chart-line"></i>
+          <div>
+            <div class="stat-label">Level</div>
+            <div class="stat-value" id="level">1</div>
+          </div>
+        </div>
+        <div class="game-stat">
+          <i class="fas fa-star"></i>
+          <div>
+            <div class="stat-label">Score</div>
+            <div class="stat-value" id="score">0</div>
+          </div>
+        </div>
+        <div class="game-stat">
+          <i class="fas fa-check-circle"></i>
+          <div>
+            <div class="stat-label">Matched</div>
+            <div class="stat-value" id="matched">0/0</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="timer-container">
+        <div class="timer-label">
+          <i class="fas fa-hourglass-half"></i>
+          <span>Time</span>
+        </div>
+        <div class="timer-bar">
+          <div class="time-fill" id="timeFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="grid" class="grid"></div>
+    
+    <div class="game-hint">
+      <i class="fas fa-lightbulb"></i>
+      <span>Klik dua kartu dengan gambar yang sama!</span>
+    </div>
+  </div>
+
+  <!-- ===== MENU ===== -->
+  <div id="menuOverlay" class="menu-overlay">
+    <div class="menu-box">
+      <div class="menu-header">
+        <i class="fas fa-pause-circle"></i>
+        <h2>Game Menu</h2>
+      </div>
+      
+      <div class="menu-options">
+        <button class="menu-option" onclick="resumeGame()">
+          <i class="fas fa-play-circle"></i>
+          <span>Resume</span>
+        </button>
+        
+        <button class="menu-option" onclick="restartGame()">
+          <i class="fas fa-redo-alt"></i>
+          <span>Restart</span>
+        </button>
+        
+        <button class="menu-option" onclick="toggleSound()">
+          <i class="fas fa-volume-up"></i>
+          <span>Sound: <span id="soundStatus">ON</span></span>
+        </button>
+        
+        <button class="menu-option danger" onclick="exitGame()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Exit</span>
+        </button>
+      </div>
+      
+      <div class="menu-footer">
+        <p>Flavor Match</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

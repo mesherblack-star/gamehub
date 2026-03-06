@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Critters - Beranda</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffe6ee 0%, #e6f2ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        .game-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            gap: 20px;
+            height: 600px;
+        }
+
+        .menu-panel {
+            flex: 3;
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.1);
+            border: 4px solid #ff9ebb;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            /* GLOW EFFECT DIPERKUAT */
+            box-shadow: 
+                0 10px 25px rgba(255, 107, 157, 0.15),
+                inset 0 0 15px rgba(255, 255, 255, 0.8);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .character-panel {
+            flex: 2;
+            background-color: white;
+            border-radius: 20px;
+            padding: 25px;
+            border: 4px solid #5cc5ff;
+            display: flex;
+            flex-direction: column;
+            /* GLOW EFFECT DIPERKUAT */
+            box-shadow: 
+                0 10px 25px rgba(0, 153, 255, 0.15),
+                inset 0 0 15px rgba(255, 255, 255, 0.8);
+            transition: box-shadow 0.3s ease;
+        }
+
+        /* GLOW EFFECT INTENSIF UNTUK GAMEPAD INDICATOR */
+        #gamepadIndicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            border: 2px solid white;
+            animation: pulse 3s infinite;
+            font-family: Arial, sans-serif;
+            /* GLOW EFFECT KUAT */
+            box-shadow: 
+                0 0 15px rgba(0, 204, 68, 0.8),
+                0 3px 10px rgba(0, 204, 68, 0.4),
+                0 0 25px rgba(77, 255, 136, 0.6);
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        /* GLOW EFFECT UNTUK PAUSE OVERLAY */
+        #pauseOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
+            border-radius: 20px;
+            /* GLOW EFFECT */
+            box-shadow: 
+                0 0 40px rgba(255, 209, 102, 0.4),
+                inset 0 0 30px rgba(255, 209, 102, 0.2);
+        }
+
+        /* GLOW EFFECT INTENSIF UNTUK NAME INPUT */
+        #playerNameOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 2000;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .name-input-container {
+            background: linear-gradient(135deg, #5cc5ff 0%, #0099ff 100%);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 4px solid #ffd166;
+            text-align: center;
+            /* GLOW EFFECT KUAT */
+            box-shadow: 
+                0 0 40px rgba(92, 197, 255, 0.7),
+                0 10px 30px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(255, 209, 102, 0.4);
+            animation: nameInputGlow 4s infinite alternate;
+        }
+
+        @keyframes nameInputGlow {
+            0% {
+                box-shadow: 
+                    0 0 30px rgba(92, 197, 255, 0.7),
+                    0 10px 30px rgba(0, 0, 0, 0.6),
+                    0 0 50px rgba(255, 209, 102, 0.4);
+            }
+            100% {
+                box-shadow: 
+                    0 0 50px rgba(92, 197, 255, 0.9),
+                    0 10px 30px rgba(0, 0, 0, 0.6),
+                    0 0 70px rgba(255, 209, 102, 0.6);
+            }
+        }
+
+        .name-input-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 
+                2px 2px 0 rgba(0, 0, 0, 0.2),
+                0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .name-input-desc {
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            line-height: 1.4;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .name-input-field {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #ffd166;
+            color: #333;
+            outline: none;
+            transition: all 0.3s;
+            /* GLOW EFFECT SAAT FOCUS */
+            box-shadow: 0 0 10px rgba(255, 209, 102, 0.3);
+        }
+
+        .name-input-field:focus {
+            background: white;
+            border-color: #ff6b9d;
+            /* GLOW EFFECT INTENSIF SAAT FOCUS */
+            box-shadow: 
+                0 0 15px rgba(255, 107, 157, 0.5),
+                0 0 25px rgba(255, 158, 187, 0.4);
+            transform: scale(1.02);
+        }
+
+        .name-input-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .name-input-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* GLOW EFFECT RINGAN */
+            box-shadow: 0 3px 0;
+        }
+
+        .name-input-button.confirm {
+            background: linear-gradient(135deg, #b5ffb0 0%, #7dff75 100%);
+            color: #226622;
+            border: 3px solid #7dff75;
+            box-shadow: 
+                0 3px 0 #5cc553,
+                0 0 10px rgba(125, 255, 117, 0.5);
+        }
+
+        .name-input-button.cancel {
+            background: linear-gradient(135deg, #ff9ebb 0%, #ff6b9d 100%);
+            color: white;
+            border: 3px solid #ff6b9d;
+            box-shadow: 
+                0 3px 0 #d44a7d,
+                0 0 10px rgba(255, 107, 157, 0.5);
+        }
+
+        .name-input-button:hover {
+            transform: translateY(-2px);
+            /* GLOW EFFECT LEBIH KUAT SAAT HOVER */
+            box-shadow: 
+                0 5px 0,
+                0 0 15px;
+        }
+
+        .name-input-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0;
+        }
+
+        /* GLOW EFFECT UNTUK PLAYER NAME DISPLAY */
+        .player-name-display {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(135deg, #ffd166 0%, #ffb900 100%);
+            color: #664400;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            z-index: 100;
+            border: 2px solid #ffb900;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            /* GLOW EFFECT */
+            box-shadow: 
+                0 3px 0 #d69900,
+                0 0 15px rgba(255, 183, 0, 0.5);
+            text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+            transition: all 0.2s ease;
+        }
+
+        .player-name-display:hover {
+            max-width: none;
+            white-space: normal;
+            /* GLOW EFFECT LEBIH KUAT SAAT HOVER */
+            box-shadow: 
+                0 3px 0 #d69900,
+                0 0 20px rgba(255, 183, 0, 0.7);
+            transform: translateY(-2px);
+        }
+
+        .player-name-display i {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { 
+                box-shadow: 
+                    0 0 0 0 rgba(0, 204, 68, 0.7),
+                    0 0 15px rgba(0, 204, 68, 0.8),
+                    0 3px 10px rgba(0, 204, 68, 0.4);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 0 10px rgba(0, 204, 68, 0),
+                    0 0 20px rgba(0, 204, 68, 0.9),
+                    0 3px 10px rgba(0, 204, 68, 0.4);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 0 0 rgba(0, 204, 68, 0),
+                    0 0 15px rgba(0, 204, 68, 0.8),
+                    0 3px 10px rgba(0, 204, 68, 0.4);
+            }
+        }
+
+        @keyframes gamepadConnect {
+            0% { transform: scale(0.8); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes gamepadDisconnect {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0; }
+        }
+
+        /* SELECTION INDICATOR DENGAN GLOW EFFECT KUAT */
+        .selection-indicator {
+            position: absolute;
+            border: 3px solid #ffd166;
+            border-radius: 15px;
+            pointer-events: none;
+            transition: all 0.3s ease-out;
+            z-index: 50;
+            display: none;
+            /* GLOW EFFECT INTENSIF */
+            box-shadow: 
+                0 0 0 2px rgba(255, 209, 102, 0.3),
+                0 0 20px rgba(255, 209, 102, 0.6),
+                inset 0 0 15px rgba(255, 209, 102, 0.2);
+            animation: selectionGlow 2s infinite alternate;
+        }
+
+        /* PERBAIKAN: Reset untuk selection indicator saat tidak aktif */
+        .selection-indicator.reset-glow {
+            box-shadow: none !important;
+            opacity: 0 !important;
+            transition: opacity 0.3s ease !important;
+            border: none !important;
+        }
+
+        @keyframes selectionGlow {
+            0% {
+                box-shadow: 
+                    0 0 0 2px rgba(255, 209, 102, 0.3),
+                    0 0 15px rgba(255, 209, 102, 0.5),
+                    inset 0 0 10px rgba(255, 209, 102, 0.2);
+            }
+            100% {
+                box-shadow: 
+                    0 0 0 2px rgba(255, 209, 102, 0.3),
+                    0 0 25px rgba(255, 209, 102, 0.8),
+                    inset 0 0 20px rgba(255, 209, 102, 0.3);
+            }
+        }
+
+        .game-title {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .title-main {
+            font-size: 2.2rem;
+            color: #ff6b9d;
+            margin-bottom: 5px;
+            font-weight: 800;
+            /* GLOW EFFECT UNTUK JUDUL */
+            text-shadow: 
+                2px 2px 0 #ffd1dc,
+                0 0 10px rgba(255, 107, 157, 0.5),
+                0 0 20px rgba(255, 107, 157, 0.3);
+            animation: titleGlow 5s infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% {
+                text-shadow: 
+                    2px 2px 0 #ffd1dc,
+                    0 0 10px rgba(255, 107, 157, 0.5),
+                    0 0 20px rgba(255, 107, 157, 0.3);
+            }
+            100% {
+                text-shadow: 
+                    2px 2px 0 #ffd1dc,
+                    0 0 15px rgba(255, 107, 157, 0.7),
+                    0 0 30px rgba(255, 107, 157, 0.5);
+            }
+        }
+
+        .title-subtitle {
+            font-size: 1rem;
+            color: #5cc5ff;
+            font-weight: 600;
+            /* GLOW EFFECT UNTUK SUBTITLE */
+            text-shadow: 
+                0 0 5px rgba(92, 197, 255, 0.5),
+                0 0 10px rgba(92, 197, 255, 0.3);
+            animation: subtitleGlow 4s infinite alternate;
+        }
+
+        @keyframes subtitleGlow {
+            0% {
+                text-shadow: 
+                    0 0 5px rgba(92, 197, 255, 0.5),
+                    0 0 10px rgba(92, 197, 255, 0.3);
+            }
+            100% {
+                text-shadow: 
+                    0 0 8px rgba(92, 197, 255, 0.7),
+                    0 0 15px rgba(92, 197, 255, 0.5);
+            }
+        }
+
+        .menu-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* PERUBAHAN UTAMA: SEMUA MENU ITEM SAMA TINGGI */
+        .menu-item {
+            background: linear-gradient(to bottom, #fff 0%, #f8f8f8 50%, #f0f0f0 100%);
+            border: 3px solid;
+            border-color: #ddd #bbb #999 #bbb;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-radius: 12px;
+            flex: 1;
+            position: relative;
+            /* PERBAIKAN: Reset glow effect ke nilai normal saat tidak di-hover */
+            box-shadow: 
+                0 2px 5px rgba(0, 0, 0, 0.1),
+                0 0 10px rgba(0, 0, 0, 0.05);
+            transform: translateY(0);
+            z-index: 1;
+            /* SEMUA MENU ITEM SAMA TINGGI */
+            min-height: 70px;
+            height: auto;
+        }
+
+        /* GLOW EFEK UNTUK SETIAP JENIS BUTTON - SEMUA SAMA */
+        .menu-item.play {
+            background: linear-gradient(135deg, #ff9ebb 0%, #ff6b9d 100%);
+            border-color: #ff6b9d #d44a7d #b53764 #d44a7d;
+            /* PERBAIKAN: Reset ke nilai normal */
+            box-shadow: 
+                0 2px 0 #d44a7d,
+                0 4px 8px rgba(255, 107, 157, 0.2),
+                0 0 15px rgba(255, 107, 157, 0.3);
+            transform: translateY(0);
+            transition: all 0.2s ease-out;
+        }
+
+        .menu-item.score {
+            background: linear-gradient(135deg, #ffd166 0%, #ffb900 100%);
+            border-color: #ffb900 #d69900 #b37400 #d69900;
+            /* PERBAIKAN: Reset ke nilai normal */
+            box-shadow: 
+                0 2px 0 #d69900,
+                0 4px 8px rgba(255, 183, 0, 0.2),
+                0 0 15px rgba(255, 183, 0, 0.3);
+            transform: translateY(0);
+            transition: all 0.2s ease-out;
+        }
+
+        .menu-item.settings {
+            background: linear-gradient(135deg, #5cc5ff 0%, #0099ff 100%);
+            border-color: #0099ff #0077cc #005599 #0077cc;
+            /* PERBAIKAN: Reset ke nilai normal */
+            box-shadow: 
+                0 2px 0 #0077cc,
+                0 4px 8px rgba(0, 153, 255, 0.2),
+                0 0 15px rgba(0, 153, 255, 0.3);
+            transform: translateY(0);
+            transition: all 0.2s ease-out;
+        }
+
+        .menu-item.characters {
+            background: linear-gradient(135deg, #d9b8ff 0%, #b97dff 100%);
+            border-color: #b97dff #9a5ccc #7b3d99 #9a5ccc;
+            /* PERBAIKAN: Reset ke nilai normal */
+            box-shadow: 
+                0 2px 0 #9a5ccc,
+                0 4px 8px rgba(185, 125, 255, 0.2),
+                0 0 15px rgba(185, 125, 255, 0.3);
+            transform: translateY(0);
+            transition: all 0.2s ease-out;
+        }
+
+        /* PERBAIKAN UTAMA: GLOW EFFECT IKUT NAIK SAAT HOVER/SELECT */
+        .menu-item:hover {
+            transform: translateY(-4px);
+            /* GLOW EFFECT YANG IKUT NAIK DENGAN KOTAK */
+            box-shadow: 
+                0 6px 0,
+                0 10px 20px rgba(0, 0, 0, 0.15),
+                0 0 25px;
+            z-index: 10;
+        }
+
+        /* GLOW EFFECT KHUSUS UNTUK SETIAP BUTTON SAAT HOVER */
+        .menu-item.play:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 6px 0 #d44a7d,
+                0 10px 20px rgba(255, 107, 157, 0.25),
+                0 0 25px rgba(255, 107, 157, 0.6);
+            border-color: #ff6b9d #d44a7d #b53764 #d44a7d;
+        }
+
+        .menu-item.score:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 6px 0 #d69900,
+                0 10px 20px rgba(255, 183, 0, 0.25),
+                0 0 25px rgba(255, 183, 0, 0.6);
+            border-color: #ffb900 #d69900 #b37400 #d69900;
+        }
+
+        .menu-item.settings:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 6px 0 #0077cc,
+                0 10px 20px rgba(0, 153, 255, 0.25),
+                0 0 25px rgba(0, 153, 255, 0.6);
+            border-color: #0099ff #0077cc #005599 #0077cc;
+        }
+
+        .menu-item.characters:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 6px 0 #9a5ccc,
+                0 10px 20px rgba(185, 125, 255, 0.25),
+                0 0 25px rgba(185, 125, 255, 0.6);
+            border-color: #b97dff #9a5ccc #7b3d99 #9a5ccc;
+        }
+
+        .menu-item:active {
+            transform: translateY(-2px);
+        }
+
+        .menu-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 2px solid;
+            border-radius: 50%;
+            font-size: 18px;
+            flex-shrink: 0;
+            /* GLOW EFFECT RINGAN UNTUK ICON */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .menu-item.play .menu-icon {
+            border-color: #ff6b9d;
+            color: #ff6b9d;
+            /* GLOW EFFECT */
+            box-shadow: 0 0 8px rgba(255, 107, 157, 0.5);
+        }
+
+        .menu-item.score .menu-icon {
+            border-color: #ffb900;
+            color: #ffb900;
+            /* GLOW EFFECT */
+            box-shadow: 0 0 8px rgba(255, 183, 0, 0.5);
+        }
+
+        .menu-item.settings .menu-icon {
+            border-color: #0099ff;
+            color: #0099ff;
+            /* GLOW EFFECT */
+            box-shadow: 0 0 8px rgba(0, 153, 255, 0.5);
+        }
+
+        .menu-item.characters .menu-icon {
+            border-color: #b97dff;
+            color: #b97dff;
+            /* GLOW EFFECT */
+            box-shadow: 0 0 8px rgba(185, 125, 255, 0.5);
+        }
+
+        /* GLOW EFFECT UNTUK ICON SAAT HOVER */
+        .menu-item:hover .menu-icon {
+            transform: scale(1.1);
+            box-shadow: 0 0 12px;
+        }
+
+        .menu-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .menu-title {
+            font-size: 1.1rem;
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 3px;
+            /* TEXT GLOW RINGAN */
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .menu-item.play .menu-title,
+        .menu-item.play .menu-desc,
+        .menu-item.score .menu-title,
+        .menu-item.score .menu-desc,
+        .menu-item.settings .menu-title,
+        .menu-item.settings .menu-desc,
+        .menu-item.characters .menu-title,
+        .menu-item.characters .menu-desc {
+            color: white;
+            /* TEXT GLOW UNTUK TEKS PUTIH */
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .menu-desc {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.2;
+            min-height: 1.5em;
+        }
+
+        .menu-arrow {
+            color: white;
+            font-size: 16px;
+            opacity: 0.8;
+            /* GLOW EFFECT UNTUK ARROW */
+            text-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover .menu-arrow {
+            transform: translateX(3px);
+        }
+
+        /* DIHAPUS: .bottom-buttons karena semua tombol sekarang sejajar */
+        .character-display-title {
+            font-size: 1.3rem;
+            color: #ff6b9d;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+            /* GLOW EFFECT UNTUK JUDUL CHARACTER */
+            text-shadow: 
+                0 0 5px rgba(255, 107, 157, 0.5),
+                0 0 10px rgba(255, 107, 157, 0.3);
+            animation: characterTitleGlow 3s infinite alternate;
+        }
+
+        @keyframes characterTitleGlow {
+            0% {
+                text-shadow: 
+                    0 0 5px rgba(255, 107, 157, 0.5),
+                    0 0 10px rgba(255, 107, 157, 0.3);
+            }
+            100% {
+                text-shadow: 
+                    0 0 8px rgba(255, 107, 157, 0.7),
+                    0 0 15px rgba(255, 107, 157, 0.5);
+            }
+        }
+
+        /* PERBAIKAN: CHARACTER CONTAINER DENGAN GLOW YANG IKUT NAIK */
+        .character-container {
+            flex: 1;
+            background-color: #f8f9ff;
+            border-radius: 15px;
+            border: 3px solid #a6e3ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease-out;
+            min-height: 200px;
+            /* GLOW EFFECT AWAL */
+            box-shadow: 
+                0 4px 8px rgba(166, 227, 255, 0.3),
+                inset 0 0 15px rgba(166, 227, 255, 0.2);
+            transform: translateY(0);
+        }
+
+        /* GLOW EFFECT UNTUK CHARACTER ASSET SAAT HOVER - IKUT NAIK */
+        .character-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 8px 16px rgba(166, 227, 255, 0.4),
+                0 0 30px rgba(92, 197, 255, 0.5),
+                0 0 50px rgba(166, 227, 255, 0.3),
+                inset 0 0 20px rgba(166, 227, 255, 0.3);
+            border-color: #5cc5ff;
+        }
+
+        /* UKURAN KARAKTER DIKECILKAN AGAR TIDAK TERPOTONG */
+        .character-asset {
+            width: 180px; /* DIKECILKAN dari 250px */
+            height: 180px; /* DIKECILKAN dari 250px */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            transition: all 0.3s ease;
+            /* GLOW EFFECT RINGAN UNTUK CHARACTER ASSET */
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+        }
+
+        /* GLOW EFFECT UNTUK CHARACTER ASSET SAAT HOVER */
+        .character-container:hover .character-asset {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.25));
+        }
+
+        .character-info {
+            background-color: #f0f8ff;
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid #5cc5ff;
+            /* GLOW EFFECT RINGAN */
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.1),
+                inset 0 0 5px rgba(92, 197, 255, 0.2);
+        }
+
+        .character-name {
+            font-size: 1.2rem;
+            color: #ff6b9d;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            /* GLOW EFFECT UNTUK NAMA KARAKTER */
+            text-shadow: 0 0 5px rgba(255, 107, 157, 0.3);
+        }
+
+        .character-name:hover {
+            /* GLOW EFFECT LEBIH KUAT SAAT HOVER */
+            text-shadow: 
+                0 0 8px rgba(255, 107, 157, 0.5),
+                0 0 15px rgba(255, 107, 157, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .character-description {
+            color: #666;
+            text-align: center;
+            line-height: 1.3;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .game-footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.75rem;
+            padding-top: 10px;
+            border-top: 1px dashed #ffb6c1;
+        }
+
+        /* GLOW EFFECT INTENSIF UNTUK FLOATING ELEMENTS */
+        .floating-element {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .element1 { 
+            top: 10%; 
+            left: 5%; 
+            font-size: 40px; 
+            color: #ff6b9d; 
+            animation: float 8s ease-in-out infinite;
+            filter: drop-shadow(0 0 12px #ff6b9d);
+        }
+        
+        .element2 { 
+            top: 15%; 
+            right: 8%; 
+            font-size: 35px; 
+            color: #5cc5ff; 
+            animation: float 10s ease-in-out infinite 1s;
+            filter: drop-shadow(0 0 10px #5cc5ff);
+        }
+        
+        .element3 { 
+            bottom: 20%; 
+            left: 7%; 
+            font-size: 30px; 
+            color: #b5ffb0; 
+            animation: float 12s ease-in-out infinite 2s;
+            filter: drop-shadow(0 0 8px #b5ffb0);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) scale(1); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px) scale(1.05); }
+            20%, 40%, 60%, 80% { transform: translateX(3px) scale(1.05); }
+        }
+
+        .shaking {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @media (max-width: 850px) {
+            .game-container {
+                flex-direction: column;
+                height: auto;
+                max-height: 700px;
+            }
+            
+            .menu-panel, .character-panel {
+                width: 100%;
+            }
+            
+            .character-container {
+                min-height: 200px;
+            }
+            
+            .character-asset {
+                width: 150px; /* DIKECILKAN untuk mobile */
+                height: 150px; /* DIKECILKAN untuk mobile */
+            }
+            
+            .player-name-display {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                max-width: none;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                gap: 15px;
+            }
+            
+            .character-asset {
+                width: 120px; /* DIKECILKAN untuk mobile kecil */
+                height: 120px; /* DIKECILKAN untuk mobile kecil */
+            }
+            
+            .name-input-container {
+                padding: 20px;
+                margin: 15px;
+            }
+            
+            .name-input-title {
+                font-size: 1.5rem;
+            }
+            
+            .name-input-buttons {
+                flex-direction: column;
+            }
+            
+            .menu-item {
+                min-height: 60px;
+                padding: 12px;
+            }
+            
+            .menu-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .menu-title {
+                font-size: 1rem;
+            }
+            
+            .menu-desc {
+                font-size: 0.7rem;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        .bounce-animation {
+            animation: bounce 3s ease-in-out infinite;
+            /* GLOW EFFECT UNTUK BOUNCING CHARACTER */
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
+        }
+
+        /* TAMBAHAN: GLOW EFFECT UNTUK FLOATING PARTICLES */
+        .glow-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.7;
+            animation: particleFloat 15s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio untuk background music -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/backsound/homepage.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung pemutaran audio.
+    </audio>
+
+    <!-- Audio untuk suara hewan -->
+    <audio id="animalSound"></audio>
+
+    <!-- Player Name Input Overlay -->
+    <div id="playerNameOverlay">
+        <div class="name-input-container">
+            <div class="name-input-title">MASUKKAN NAMA ANDA</div>
+            <div class="name-input-desc">
+                Nama Anda akan ditampilkan di papan skor tertinggi.<br>
+                Maksimal 15 karakter.
+            </div>
+            <input type="text" class="name-input-field" id="playerNameInput" 
+                   maxlength="15" placeholder="Nama Pemain" autofocus>
+            <div class="name-input-buttons">
+                <button class="name-input-button confirm" id="confirmNameBtn">
+                    <i class="fas fa-check"></i> SIMPAN
+                </button>
+                <button class="name-input-button cancel" id="cancelNameBtn">
+                    <i class="fas fa-times"></i> NANTI SAJA
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating elements dengan glow effect -->
+    <div class="floating-element element1">🐱</div>
+    <div class="floating-element element2">🐰</div>
+    <div class="floating-element element3">🐔</div>
+
+    <!-- Glow particles -->
+    <div id="glowParticles"></div>
+
+    <div class="game-container">
+        <!-- Player Name Display -->
+        <div class="player-name-display" id="playerNameDisplay">
+            <i class="fas fa-user"></i>
+            <span id="playerNameText">Belum Masuk</span>
+        </div>
+        
+        <div class="menu-panel">
+            <!-- Gamepad Indicator -->
+            <div id="gamepadIndicator">🎮 GAMEPAD TERHUBUNG</div>
+            
+            <!-- Selection Indicator -->
+            <div class="selection-indicator" id="selectionIndicator"></div>
+            
+            <!-- Menu Content -->
+            <div class="game-title">
+                <div class="title-main">DOODLE CRITTERS</div>
+                <div class="title-subtitle">Petualangan Hewan Lucu</div>
+            </div>
+
+            <div class="menu-container">
+                <div class="menu-item play" id="playBtn">
+                    <div class="menu-icon">
+                        <i class="fas fa-play"></i>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">MULAI BERMAIN</div>
+                        <div class="menu-desc" id="playDesc">Ayo mulai petualangan seru!</div>
+                    </div>
+                    <div class="menu-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="menu-item score" id="scoreBtn">
+                    <div class="menu-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">SKOR TERTINGGI</div>
+                        <div class="menu-desc">Lihat pencapaian terbaik</div>
+                    </div>
+                    <div class="menu-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="menu-item settings" id="settingsBtn">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">PENGATURAN</div>
+                        <div class="menu-desc">Atur suara game</div>
+                    </div>
+                    <div class="menu-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="menu-item characters" id="charactersBtn">
+                    <div class="menu-icon">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <div class="menu-text">
+                        <div class="menu-title">HEWAN</div>
+                        <div class="menu-desc">Pilih karakter</div>
+                    </div>
+                    <div class="menu-arrow">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="game-footer">
+                <p>© 2026 Doodle Critters | Game Kelompok 4</p>
+            </div>
+        </div>
+
+        <div class="character-panel">
+            <div class="character-display-title">HEWAN PILIHANMU</div>
+            
+            <div class="character-container" id="characterImageContainer">
+                <div class="character-asset bounce-animation" id="currentCharacter"></div>
+            </div>
+            
+            <div class="character-info">
+                <div class="character-name" id="characterName">Belum Memilih</div>
+            </div>
+            
+            <div class="game-footer">
+                <p>Pergi ke halaman "Hewan" untuk memilih teman petualanganmu!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============= SISTEM GAMEPAD =============
+        let gamepadConnected = false;
+        let gamepadIndex = null;
+        let currentGamepadType = 'standard';
+        let gamepadPollingInterval = null;
+        let gamepadVibrationSupported = false;
+        let lastButtonState = {};
+        
+        // VARIABEL UNTUK KONTROL ANALOG YANG LEBIH TERATUR
+        let analogCooldown = false;
+        let analogCooldownTime = 200; // ms cooldown antara pergerakan
+        let lastAnalogMove = 0;
+        let selectionDebounce = false;
+        let selectionDebounceTime = 300; // ms debounce untuk seleksi
+        
+        // VARIABEL UNTUK GLOW EFFECT YANG LEBIH SMOOTH
+        let glowIntensity = 0.5;
+        let glowDirection = 1;
+        let glowSpeed = 0.005; // Lebih pelan
+        
+        // GAMEPAD INDICATOR
+        const gamepadIndicator = document.getElementById('gamepadIndicator');
+        
+        // GAMEPAD MAPPING
+        const gamepadMappings = {
+            'standard': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            },
+            'xbox': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            },
+            'playstation': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                CROSS: 0,
+                CIRCLE: 1,
+                SQUARE: 2,
+                TRIANGLE: 3,
+                START: 9,
+                SELECT: 8,
+                L1: 4,
+                R1: 5,
+                L2: 6,
+                R2: 7,
+                L3: 10,
+                R3: 11
+            },
+            'nintendo': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                B: 0,
+                A: 1,
+                Y: 2,
+                X: 3,
+                PLUS: 9,
+                MINUS: 8,
+                L: 4,
+                R: 5,
+                ZL: 6,
+                ZR: 7,
+                LS: 10,
+                RS: 11
+            },
+            'generic': {
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15,
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3,
+                START: 9,
+                SELECT: 8,
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                LS: 10,
+                RS: 11
+            }
+        };
+        
+        // ============= DATA KARAKTER =============
+        const characters = [
+            {
+                id: "cat",
+                name: "Kucing",
+                asset: "assets/kucing/kucing_dewasa_hadap_kanan.png",
+                color: "#FF6B9D",
+                gamePage: "kucing.html",
+                sound: "assets/backsound/kucing.mp3"
+            },
+            {
+                id: "chicken",
+                name: "Ayam",
+                asset: "assets/ayam/ayam_dewasa_hadap_kanan_idle.png",
+                color: "#FFD166",
+                gamePage: "ayam.html",
+                sound: "assets/backsound/ayam.mp3"
+            },
+            {
+                id: "duck",
+                name: "Bebek",
+                asset: "assets/bebek/ibu_hadap_kanan.png",
+                color: "#5CC5FF",
+                gamePage: "bebek.html",
+                sound: "assets/backsound/bebek.mp3"
+            },
+            {
+                id: "sheep",
+                name: "Domba",
+                asset: "assets/domba/ibu_kanan_jalan.png",
+                color: "#B5FFB0",
+                gamePage: "domba.html",
+                sound: "assets/backsound/domba.mp3"
+            },
+            {
+                id: "rabbit",
+                name: "Kelinci",
+                asset: "assets/kelinci/kelinci_dewasa_hadap_kanan.png",
+                color: "#D9B8FF",
+                gamePage: "kelinci.html",
+                sound: "assets/backsound/kelinci.mp3"
+            }
+        ];
+
+        // Inisialisasi audio elements
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const animalSound = document.getElementById('animalSound');
+
+        // ========== VARIABEL JOYSTICK ==========
+        let currentSelection = 0; // 0: Play, 1: Score, 2: Settings, 3: Characters
+        const menuItems = ['playBtn', 'scoreBtn', 'settingsBtn', 'charactersBtn'];
+        let selectionActive = true;
+        
+        // ========== VARIABEL NAMA PEMAIN ==========
+        let playerName = '';
+        let nameInputActive = false;
+
+        // ========== FUNGSI UNTUK GLOW PARTICLES ==========
+        function createGlowParticles() {
+            const particleContainer = document.getElementById('glowParticles');
+            const colors = ['#FF6B9D', '#5CC5FF', '#FFD166', '#B5FFB0', '#D9B8FF'];
+            
+            for (let i = 0; i < 15; i++) { // Kurangi jumlah particles
+                const particle = document.createElement('div');
+                particle.className = 'glow-particle';
+                
+                // Random properties dengan kecepatan lebih lambat
+                const size = Math.random() * 4 + 2;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const left = Math.random() * 100;
+                const duration = Math.random() * 20 + 15; // Lebih lambat
+                const delay = Math.random() * 15;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.background = color;
+                particle.style.boxShadow = `0 0 ${size*2}px ${color}`;
+                particle.style.animationDuration = `${duration}s`;
+                particle.style.animationDelay = `${delay}s`;
+                
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        // ========== FUNGSI NAMA PEMAIN ==========
+        function loadPlayerName() {
+            playerName = localStorage.getItem('playerName') || '';
+            const playerNameText = document.getElementById('playerNameText');
+            
+            if (playerName) {
+                playerNameText.textContent = playerName;
+                console.log(`👤 Nama pemain dimuat: ${playerName}`);
+            } else {
+                playerNameText.textContent = 'Belum Masuk';
+                showNameInput();
+            }
+        }
+
+        function savePlayerName(name) {
+            if (name.trim()) {
+                playerName = name.trim().substring(0, 15);
+                localStorage.setItem('playerName', playerName);
+                
+                const playerNameText = document.getElementById('playerNameText');
+                playerNameText.textContent = playerName;
+                
+                console.log(`👤 Nama pemain disimpan: ${playerName}`);
+                
+                // Update high scores jika ada skor tanpa nama
+                updateAnonymousScores();
+                
+                return true;
+            }
+            return false;
+        }
+
+        function updateAnonymousScores() {
+            const scores = JSON.parse(localStorage.getItem('highScores')) || [];
+            let updated = false;
+            
+            scores.forEach(score => {
+                if (score.name === 'Pemain' || score.name === '' || score.name === 'Anonymous') {
+                    score.name = playerName;
+                    updated = true;
+                }
+            });
+            
+            if (updated) {
+                localStorage.setItem('highScores', JSON.stringify(scores));
+                console.log('🏆 Skor anonim diperbarui dengan nama pemain');
+            }
+        }
+
+        function showNameInput() {
+            const overlay = document.getElementById('playerNameOverlay');
+            const input = document.getElementById('playerNameInput');
+            
+            nameInputActive = true;
+            overlay.style.display = 'flex';
+            
+            // Set nilai default jika ada di localStorage
+            input.value = localStorage.getItem('playerName') || '';
+            input.focus();
+            input.select();
+            
+            console.log('👤 Menampilkan input nama pemain');
+        }
+
+        function hideNameInput() {
+            const overlay = document.getElementById('playerNameOverlay');
+            nameInputActive = false;
+            overlay.style.display = 'none';
+            console.log('👤 Menyembunyikan input nama pemain');
+        }
+
+        // ========== FUNGSI GAMEPAD ==========
+        function detectGamepadType(id) {
+            const idLower = id.toLowerCase();
+            
+            if (idLower.includes('xbox') || idLower.includes('microsoft')) {
+                return 'xbox';
+            } else if (idLower.includes('playstation') || idLower.includes('ps3') || idLower.includes('ps4') || idLower.includes('ps5') || idLower.includes('dualshock') || idLower.includes('dualsense')) {
+                return 'playstation';
+            } else if (idLower.includes('nintendo') || idLower.includes('switch') || idLower.includes('pro controller') || idLower.includes('joy-con')) {
+                return 'nintendo';
+            } else {
+                return 'generic';
+            }
+        }
+
+        function showGamepadConnected(name) {
+            gamepadIndicator.textContent = '🎮 GAMEPAD TERHUBUNG';
+            gamepadIndicator.style.display = 'block';
+            gamepadIndicator.style.animation = 'gamepadConnect 0.8s ease-out';
+            
+            if (navigator.vibrate || (navigator.getGamepads && navigator.getGamepads()[0] && navigator.getGamepads()[0].vibrationActuator)) {
+                gamepadVibrationSupported = true;
+            }
+            
+            console.log(`🎮 Gamepad terhubung: ${name}`);
+            console.log(`🎮 Tipe: ${currentGamepadType}`);
+        }
+
+        function showGamepadDisconnected() {
+            gamepadIndicator.style.animation = 'gamepadDisconnect 0.8s ease-out';
+            setTimeout(() => {
+                gamepadIndicator.style.display = 'none';
+                gamepadIndicator.style.animation = 'pulse 3s infinite';
+            }, 800);
+            
+            console.log('🎮 Gamepad terputus');
+        }
+
+        function triggerGamepadVibration(pattern) {
+            if (!gamepadVibrationSupported) return;
+            
+            try {
+                if (gamepadConnected && gamepadIndex !== null) {
+                    const gamepads = navigator.getGamepads();
+                    const gamepad = gamepads[gamepadIndex];
+                    
+                    if (gamepad && gamepad.vibrationActuator) {
+                        gamepad.vibrationActuator.playEffect("dual-rumble", {
+                            startDelay: 0,
+                            duration: pattern[0] || 100,
+                            weakMagnitude: pattern[1] || 0.5,
+                            strongMagnitude: pattern[2] || 0.5
+                        });
+                        return;
+                    }
+                }
+                
+                if (navigator.vibrate) {
+                    navigator.vibrate(pattern);
+                }
+            } catch (error) {
+                console.log('Vibration not supported:', error);
+            }
+        }
+
+        // FUNGSI BARU: Sistem cooldown untuk analog stick
+        function canMoveAnalog() {
+            const now = Date.now();
+            if (now - lastAnalogMove > analogCooldownTime) {
+                lastAnalogMove = now;
+                return true;
+            }
+            return false;
+        }
+
+        // FUNGSI BARU: Sistem debounce untuk seleksi
+        function canSelect() {
+            if (selectionDebounce) return false;
+            selectionDebounce = true;
+            setTimeout(() => {
+                selectionDebounce = false;
+            }, selectionDebounceTime);
+            return true;
+        }
+
+        function handleGamepadButtonA() {
+            console.log('🎮 Tombol A/CROSS ditekan');
+            
+            // Jika sedang input nama, handle khusus
+            if (nameInputActive) {
+                confirmPlayerName();
+                return true;
+            }
+            
+            // Gunakan debounce untuk mencegah multiple click
+            if (canSelect()) {
+                selectCurrentItem();
+                triggerGamepadVibration([50, 0.2, 0.3]);
+            }
+            return true;
+        }
+
+        function handleGamepadButtonB() {
+            console.log('🎮 Tombol B/CIRCLE ditekan');
+            
+            // Jika sedang input nama, cancel
+            if (nameInputActive) {
+                cancelPlayerName();
+                return true;
+            }
+            
+            // Gunakan debounce
+            if (canSelect()) {
+                triggerGamepadVibration([30, 0.1, 0.2]);
+                
+                const selectedCharacterId = localStorage.getItem('selectedCharacter');
+                if (selectedCharacterId) {
+                    const character = characters.find(c => c.id === selectedCharacterId);
+                    if (character) {
+                        playAnimalSound(character.sound);
+                        triggerGamepadVibration([80, 0.15, 0.25]);
+                    }
+                }
+            }
+            return true;
+        }
+
+        function handleGamepadButtonStart() {
+            console.log('🎮 Tombol START ditekan');
+            
+            // Jangan tampilkan pause jika sedang input nama
+            if (nameInputActive) return true;
+            
+            // Gunakan debounce
+            if (canSelect()) {
+                triggerGamepadVibration([60, 0.2, 0.4]);
+                
+                const pauseOverlay = document.createElement('div');
+                pauseOverlay.id = 'pauseOverlay';
+                pauseOverlay.innerHTML = `
+                    <div style="font-size: 2.5rem; color: #ffd166; margin-bottom: 20px; font-weight: bold; text-shadow: 0 0 15px rgba(255, 209, 102, 0.8);">PAUSE</div>
+                    <div style="font-size: 1.2rem; margin-bottom: 30px; text-align: center;">
+                        Tekan START untuk melanjutkan<br>
+                        <span style="font-size: 0.9rem; opacity: 0.8; text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);">
+                            🎮 Kontrol: D-PAD/Stick untuk navigasi, A pilih, B suara hewan
+                        </span>
+                    </div>
+                `;
+                
+                document.querySelector('.menu-panel').appendChild(pauseOverlay);
+                selectionActive = false;
+            }
+            
+            return true;
+        }
+
+        function pollGamepad() {
+            if (!gamepadConnected || gamepadIndex === null) {
+                // PERBAIKAN: Reset selection visual saat gamepad terputus
+                const indicator = document.getElementById('selectionIndicator');
+                indicator.style.display = 'none';
+                indicator.classList.add('reset-glow');
+                
+                // Reset semua item ke state normal
+                menuItems.forEach((itemId) => {
+                    const item = document.getElementById(itemId);
+                    if (item) {
+                        item.style.transform = 'translateY(0)';
+                        item.style.boxShadow = '';
+                    }
+                });
+                return;
+            }
+            
+            try {
+                const gamepads = navigator.getGamepads();
+                if (!gamepads || !gamepads[gamepadIndex]) {
+                    gamepadConnected = false;
+                    gamepadIndex = null;
+                    showGamepadDisconnected();
+                    if (gamepadPollingInterval) {
+                        clearInterval(gamepadPollingInterval);
+                        gamepadPollingInterval = null;
+                    }
+                    return;
+                }
+                
+                const gamepad = gamepads[gamepadIndex];
+                const mapping = gamepadMappings[currentGamepadType] || gamepadMappings.standard;
+                
+                const currentButtonState = {};
+                
+                // Tombol A - Pilih menu atau konfirmasi nama
+                if (gamepad.buttons[mapping.A]?.pressed) {
+                    currentButtonState.A = true;
+                    if (!lastButtonState.A) {
+                        handleGamepadButtonA();
+                    }
+                } else {
+                    currentButtonState.A = false;
+                }
+                
+                // Tombol B - Suara hewan atau cancel nama
+                if (gamepad.buttons[mapping.B]?.pressed) {
+                    currentButtonState.B = true;
+                    if (!lastButtonState.B) {
+                        handleGamepadButtonB();
+                    }
+                } else {
+                    currentButtonState.B = false;
+                }
+                
+                // Tombol START - Pause (kecuali sedang input nama)
+                if (gamepad.buttons[mapping.START]?.pressed) {
+                    currentButtonState.START = true;
+                    if (!lastButtonState.START) {
+                        handleGamepadButtonStart();
+                    }
+                } else {
+                    currentButtonState.START = false;
+                }
+                
+                // Tombol SELECT - Edit nama
+                if (gamepad.buttons[mapping.SELECT]?.pressed) {
+                    currentButtonState.SELECT = true;
+                    if (!lastButtonState.SELECT && canSelect()) {
+                        showNameInput();
+                        triggerGamepadVibration([30, 0.1, 0.2]);
+                    }
+                } else {
+                    currentButtonState.SELECT = false;
+                }
+                
+                lastButtonState = { ...currentButtonState };
+                
+                // KONTROL NAVIGASI HANYA JIKA TIDAK PAUSE DAN TIDAK INPUT NAMA
+                if (selectionActive && !nameInputActive) {
+                    let moveX = 0;
+                    let moveY = 0;
+                    
+                    // Gunakan analog stick jika tersedia
+                    if (gamepad.axes && gamepad.axes.length >= 2) {
+                        moveX = gamepad.axes[0];
+                        moveY = gamepad.axes[1];
+                    }
+                    
+                    // Gunakan D-pad jika analog stick di deadzone
+                    const deadzone = 0.5; // Deadzone lebih besar untuk kontrol yang lebih stabil
+                    let directionPressed = false;
+                    
+                    if (Math.abs(moveX) < deadzone && Math.abs(moveY) < deadzone) {
+                        if (gamepad.buttons[mapping.UP]?.pressed) {
+                            moveY = -1;
+                            directionPressed = true;
+                        } else if (gamepad.buttons[mapping.DOWN]?.pressed) {
+                            moveY = 1;
+                            directionPressed = true;
+                        }
+                        if (gamepad.buttons[mapping.LEFT]?.pressed) {
+                            moveX = -1;
+                            directionPressed = true;
+                        } else if (gamepad.buttons[mapping.RIGHT]?.pressed) {
+                            moveX = 1;
+                            directionPressed = true;
+                        }
+                    } else {
+                        directionPressed = true;
+                    }
+                    
+                    // Update selection berdasarkan input gamepad dengan cooldown
+                    if (directionPressed && canMoveAnalog()) {
+                        if (Math.abs(moveX) > Math.abs(moveY)) {
+                            if (moveX > deadzone) {
+                                moveSelection('right');
+                            } else if (moveX < -deadzone) {
+                                moveSelection('left');
+                            }
+                        } else {
+                            if (moveY > deadzone) {
+                                moveSelection('down');
+                            } else if (moveY < -deadzone) {
+                                moveSelection('up');
+                            }
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error polling gamepad:', error);
+            }
+        }
+
+        function checkGamepadSupport() {
+            if ('getGamepads' in navigator) {
+                console.log('🎮 Gamepad API didukung');
+                
+                const gamepads = navigator.getGamepads();
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        console.log(`🎮 Gamepad sudah terhubung: ${gamepads[i].id}`);
+                        gamepadConnected = true;
+                        gamepadIndex = i;
+                        currentGamepadType = detectGamepadType(gamepads[i].id);
+                        showGamepadConnected(gamepads[i].id);
+                        
+                        if (!gamepadPollingInterval) {
+                            gamepadPollingInterval = setInterval(pollGamepad, 100); // Polling lebih lambat
+                        }
+                        break;
+                    }
+                }
+                
+                return true;
+            } else {
+                console.log('⚠️ Gamepad API tidak didukung');
+                return false;
+            }
+        }
+
+        // ========== SISTEM AUDIO ==========
+        function updateAudioVolume() {
+            const masterVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            if (isMuted) {
+                backgroundMusic.volume = 0;
+            } else {
+                backgroundMusic.volume = masterVolume;
+            }
+            
+            window.currentVolume = isMuted ? 0 : masterVolume;
+            
+            console.log(`🔊 Volume diatur: ${isMuted ? 'MUTED' : masterVolume * 100}%`);
+        }
+
+        function playBackgroundMusic() {
+            updateAudioVolume();
+            
+            backgroundMusic.play().catch(e => {
+                console.log("Autoplay prevented:", e);
+                document.addEventListener('click', function initAudio() {
+                    backgroundMusic.play();
+                    document.removeEventListener('click', initAudio);
+                }, { once: true });
+            });
+        }
+
+        function playAnimalSound(soundFile) {
+            updateAudioVolume();
+            
+            animalSound.src = soundFile;
+            animalSound.volume = window.currentVolume;
+            
+            animalSound.play().catch(e => {
+                console.log("Error playing animal sound:", e);
+            });
+        }
+
+        function toggleMute() {
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            localStorage.setItem('isMuted', !isMuted);
+            updateAudioVolume();
+            
+            console.log(`🔊 ${!isMuted ? 'MUTED' : 'UNMUTED'}`);
+        }
+
+        // ========== SISTEM SELECTION ==========
+        function updateSelectionIndicator() {
+            const indicator = document.getElementById('selectionIndicator');
+            const selectedElement = document.getElementById(menuItems[currentSelection]);
+            
+            if (selectedElement) {
+                const rect = selectedElement.getBoundingClientRect();
+                const containerRect = document.querySelector('.menu-panel').getBoundingClientRect();
+                
+                indicator.style.width = (rect.width + 10) + 'px';
+                indicator.style.height = (rect.height + 10) + 'px';
+                indicator.style.left = (rect.left - containerRect.left - 5) + 'px';
+                indicator.style.top = (rect.top - containerRect.top - 5) + 'px';
+                indicator.style.display = 'block';
+                indicator.classList.remove('reset-glow');
+            }
+        }
+
+        let currentDirection = null;
+        
+        function moveSelection(direction) {
+            // Jangan update selection jika sedang input nama
+            if (nameInputActive) return;
+            
+            // PERBAIKAN: Reset semua item ke state normal terlebih dahulu
+            menuItems.forEach((itemId, index) => {
+                const item = document.getElementById(itemId);
+                if (item) {
+                    item.style.transform = 'translateY(0)';
+                    item.style.boxShadow = '';
+                }
+            });
+            
+            // Reset selection indicator visual jika tidak ada gamepad
+            if (!gamepadConnected) {
+                const indicator = document.getElementById('selectionIndicator');
+                indicator.style.display = 'none';
+                indicator.classList.add('reset-glow');
+            }
+            
+            // Update selection berdasarkan arah
+            if (direction === 'up') {
+                currentSelection = Math.max(0, currentSelection - 1);
+                triggerGamepadVibration([15, 0.05, 0.1]);
+            } else if (direction === 'down') {
+                currentSelection = Math.min(menuItems.length - 1, currentSelection + 1);
+                triggerGamepadVibration([15, 0.05, 0.1]);
+            } else if (direction === 'left') {
+                triggerGamepadVibration([15, 0.05, 0.1]);
+            } else if (direction === 'right') {
+                triggerGamepadVibration([15, 0.05, 0.1]);
+            }
+            
+            // Highlight item yang dipilih HANYA jika gamepad terhubung
+            if (gamepadConnected) {
+                const currentElement = document.getElementById(menuItems[currentSelection]);
+                if (currentElement) {
+                    // Dapatkan tipe menu untuk menentukan warna glow
+                    const type = Array.from(currentElement.classList).find(cls => 
+                        ['play', 'score', 'settings', 'characters'].includes(cls));
+                    
+                    let glowColor = 'rgba(255, 209, 102, 0.5)'; // Default
+                    let borderBottomColor = '#d69900';
+                    
+                    if (type === 'play') {
+                        glowColor = 'rgba(255, 107, 157, 0.6)';
+                        borderBottomColor = '#d44a7d';
+                    } else if (type === 'score') {
+                        glowColor = 'rgba(255, 183, 0, 0.6)';
+                        borderBottomColor = '#d69900';
+                    } else if (type === 'settings') {
+                        glowColor = 'rgba(0, 153, 255, 0.6)';
+                        borderBottomColor = '#0077cc';
+                    } else if (type === 'characters') {
+                        glowColor = 'rgba(185, 125, 255, 0.6)';
+                        borderBottomColor = '#9a5ccc';
+                    }
+                    
+                    currentElement.style.transform = 'translateY(-4px)';
+                    currentElement.style.boxShadow = 
+                        `0 6px 0 ${borderBottomColor},
+                         0 10px 20px rgba(0, 0, 0, 0.15),
+                         0 0 25px ${glowColor}`;
+                    
+                    // Efek visual
+                    currentElement.style.transition = 'all 0.2s';
+                    setTimeout(() => {
+                        currentElement.style.transition = '';
+                    }, 200);
+                }
+                
+                updateSelectionIndicator();
+            }
+        }
+
+        function selectCurrentItem() {
+            // Jangan select jika sedang input nama
+            if (nameInputActive) return;
+            
+            const currentElement = document.getElementById(menuItems[currentSelection]);
+            if (currentElement) {
+                // Simulasikan klik
+                currentElement.click();
+                
+                // Efek visual dengan glow yang lebih intens
+                const type = Array.from(currentElement.classList).find(cls => 
+                    ['play', 'score', 'settings', 'characters'].includes(cls));
+                
+                let glowColor = 'rgba(255, 209, 102, 0.8)'; // Default
+                let borderBottomColor = '#d69900';
+                
+                if (type === 'play') {
+                    glowColor = 'rgba(255, 107, 157, 0.9)';
+                    borderBottomColor = '#d44a7d';
+                } else if (type === 'score') {
+                    glowColor = 'rgba(255, 183, 0, 0.9)';
+                    borderBottomColor = '#d69900';
+                } else if (type === 'settings') {
+                    glowColor = 'rgba(0, 153, 255, 0.9)';
+                    borderBottomColor = '#0077cc';
+                } else if (type === 'characters') {
+                    glowColor = 'rgba(185, 125, 255, 0.9)';
+                    borderBottomColor = '#9a5ccc';
+                }
+                
+                currentElement.style.transform = 'translateY(-2px) scale(0.98)';
+                currentElement.style.boxShadow = 
+                    `0 3px 0 ${borderBottomColor},
+                     0 15px 30px rgba(0, 0, 0, 0.2),
+                     0 0 40px ${glowColor}`;
+                
+                setTimeout(() => {
+                    currentElement.style.transform = 'translateY(-4px) scale(1)';
+                    currentElement.style.boxShadow = 
+                        `0 6px 0 ${borderBottomColor},
+                         0 10px 20px rgba(0, 0, 0, 0.15),
+                         0 0 25px ${glowColor.replace('0.9', '0.6')}`;
+                }, 150);
+                
+                triggerGamepadVibration([40, 0.2, 0.3]);
+            }
+        }
+
+        // ========== FUNGSI UTAMA ==========
+        function loadSelectedCharacter() {
+            const selectedCharacterId = localStorage.getItem('selectedCharacter');
+            const characterContainer = document.getElementById('characterImageContainer');
+            
+            if (selectedCharacterId) {
+                const character = characters.find(c => c.id === selectedCharacterId);
+                if (character) {
+                    updateCharacterDisplay(character);
+                }
+            }
+        }
+
+        function updateCharacterDisplay(character) {
+            const characterAsset = document.getElementById('currentCharacter');
+            characterAsset.style.backgroundImage = `url('${character.asset}')`;
+            
+            const characterName = document.getElementById('characterName');
+            characterName.textContent = character.name;
+            characterName.style.color = character.color;
+            
+            // Tambahkan glow effect pada container karakter
+            document.querySelector('.character-container').style.borderColor = character.color;
+            document.querySelector('.character-container').style.boxShadow = 
+                `0 4px 8px ${character.color}80, inset 0 0 15px ${character.color}30`;
+        }
+
+        function checkGameReady() {
+            const selectedCharacterId = localStorage.getItem('selectedCharacter');
+            const playBtn = document.getElementById('playBtn');
+            const playDesc = document.getElementById('playDesc');
+            
+            if (selectedCharacterId) {
+                playDesc.textContent = 'Siap untuk memulai petualangan!';
+                playDesc.style.fontWeight = 'bold';
+                playBtn.style.opacity = '1';
+                playBtn.style.cursor = 'pointer';
+                // Tambahkan glow effect untuk play button yang siap
+                playBtn.style.boxShadow = 
+                    '0 2px 0 #d44a7d, 0 4px 8px rgba(255, 107, 157, 0.2), 0 0 20px rgba(255, 107, 157, 0.4)';
+            } else {
+                playDesc.textContent = 'Pilih hewan terlebih dahulu!';
+                playDesc.style.fontWeight = 'normal';
+                playBtn.style.opacity = '0.7';
+                playBtn.style.cursor = 'not-allowed';
+                playBtn.style.boxShadow = '0 2px 0 #d44a7d, 0 4px 8px rgba(255, 107, 157, 0.2), 0 0 15px rgba(255, 107, 157, 0.3)';
+            }
+        }
+
+        // ========== FUNGSI SIMPAN SKOR ==========
+        window.saveHighScoreFromGame = function(score) {
+            const characterId = localStorage.getItem('selectedCharacter');
+            if (!characterId) {
+                console.log('⚠️ Tidak ada karakter yang dipilih');
+                return null;
+            }
+            
+            // Gunakan nama pemain jika ada, jika tidak gunakan "Pemain"
+            const playerName = localStorage.getItem('playerName') || 'Pemain';
+            const characterNames = {
+                'cat': 'Kucing',
+                'chicken': 'Ayam', 
+                'duck': 'Bebek',
+                'sheep': 'Domba',
+                'rabbit': 'Kelinci'
+            };
+            
+            const characterName = characterNames[characterId] || 'Unknown';
+            
+            let highScores = JSON.parse(localStorage.getItem('highScores')) || [];
+            
+            const newScore = {
+                name: playerName,
+                score: score,
+                character: characterName,
+                date: new Date().toLocaleDateString('id-ID'),
+                timestamp: Date.now()
+            };
+            
+            highScores.push(newScore);
+            highScores.sort((a, b) => b.score - a.score);
+            highScores = highScores.slice(0, 20);
+            
+            localStorage.setItem('highScores', JSON.stringify(highScores));
+            
+            console.log('🏆 Skor game disimpan:', newScore);
+            return newScore;
+        };
+
+        window.getPlayerBestScore = function() {
+            const playerName = localStorage.getItem('playerName') || 'Pemain';
+            const scores = JSON.parse(localStorage.getItem('highScores')) || [];
+            const playerScores = scores.filter(score => score.name === playerName);
+            
+            if (playerScores.length === 0) return 0;
+            
+            return Math.max(...playerScores.map(score => score.score));
+        };
+
+        // ========== FUNGSI NAMA PEMAIN ==========
+        function confirmPlayerName() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            
+            if (name.length === 0) {
+                // Tambahkan efek visual untuk error
+                input.style.boxShadow = '0 0 15px rgba(255, 0, 0, 0.5), 0 0 25px rgba(255, 0, 0, 0.3)';
+                setTimeout(() => {
+                    input.style.boxShadow = '0 0 10px rgba(255, 209, 102, 0.3)';
+                }, 500);
+                
+                alert('⚠️ Silakan masukkan nama Anda!');
+                input.focus();
+                return;
+            }
+            
+            if (savePlayerName(name)) {
+                hideNameInput();
+                triggerGamepadVibration([80, 0.3, 0.5]);
+                console.log(`👤 Nama pemain dikonfirmasi: ${name}`);
+                
+                // Tambahkan efek visual untuk konfirmasi
+                const playerNameDisplay = document.getElementById('playerNameDisplay');
+                playerNameDisplay.style.boxShadow = 
+                    '0 3px 0 #d69900, 0 0 25px rgba(255, 183, 0, 0.8)';
+                playerNameDisplay.style.transform = 'translateY(-2px)';
+                
+                setTimeout(() => {
+                    playerNameDisplay.style.boxShadow = 
+                        '0 3px 0 #d69900, 0 0 15px rgba(255, 183, 0, 0.5)';
+                    playerNameDisplay.style.transform = 'translateY(0)';
+                }, 1000);
+            }
+        }
+
+        function cancelPlayerName() {
+            hideNameInput();
+            triggerGamepadVibration([40, 0.1, 0.2]);
+            console.log('👤 Input nama dibatalkan');
+            
+            // Jika belum ada nama, gunakan default
+            if (!localStorage.getItem('playerName')) {
+                savePlayerName('Pemain');
+            }
+        }
+
+        // ========== EVENT LISTENERS ==========
+        // Event untuk player name display
+        document.getElementById('playerNameDisplay').addEventListener('click', function() {
+            showNameInput();
+            triggerGamepadVibration([30, 0.1, 0.2]);
+            
+            // Tambahkan efek visual
+            this.style.boxShadow = '0 3px 0 #d69900, 0 0 20px rgba(255, 183, 0, 0.7)';
+            this.style.transform = 'translateY(-2px)';
+            setTimeout(() => {
+                this.style.boxShadow = '0 3px 0 #d69900, 0 0 15px rgba(255, 183, 0, 0.5)';
+                this.style.transform = 'translateY(0)';
+            }, 300);
+        });
+
+        // Event untuk nama input
+        document.getElementById('confirmNameBtn').addEventListener('click', confirmPlayerName);
+        document.getElementById('cancelNameBtn').addEventListener('click', cancelPlayerName);
+        
+        document.getElementById('playerNameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmPlayerName();
+            }
+        });
+
+        // Event untuk karakter container
+        document.getElementById('characterImageContainer').addEventListener('click', function() {
+            const selectedCharacterId = localStorage.getItem('selectedCharacter');
+            if (selectedCharacterId) {
+                const character = characters.find(c => c.id === selectedCharacterId);
+                if (character) {
+                    const characterAsset = document.getElementById('currentCharacter');
+                    const characterName = document.getElementById('characterName');
+                    
+                    // Tambahkan efek naik dan glow intensif saat diklik
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = 
+                        `0 8px 16px ${character.color}80,
+                         0 0 40px ${character.color},
+                         0 0 60px ${character.color}80,
+                         inset 0 0 30px ${character.color}40`;
+                    
+                    characterAsset.classList.add('shaking');
+                    characterName.classList.add('shaking');
+                    
+                    playAnimalSound(character.sound);
+                    
+                    setTimeout(() => {
+                        characterAsset.classList.remove('shaking');
+                        characterName.classList.remove('shaking');
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = 
+                            `0 4px 8px rgba(166, 227, 255, 0.3),
+                             inset 0 0 15px rgba(166, 227, 255, 0.2)`;
+                    }, 400);
+                } else {
+                    alert('Pilih hewan terlebih dahulu di halaman "Hewan"!');
+                }
+            } else {
+                alert('Belum ada hewan yang dipilih! Pergi ke halaman "Hewan" untuk memilih.');
+            }
+        });
+
+        document.getElementById('characterName').addEventListener('click', function() {
+            const selectedCharacterId = localStorage.getItem('selectedCharacter');
+            if (selectedCharacterId) {
+                const character = characters.find(c => c.id === selectedCharacterId);
+                if (character) {
+                    playAnimalSound(character.sound);
+                    
+                    this.classList.add('shaking');
+                    // Tambahkan text glow saat diklik
+                    this.style.textShadow = 
+                        `0 0 10px ${character.color}, 0 0 20px ${character.color}`;
+                    this.style.transform = 'translateY(-2px)';
+                    
+                    setTimeout(() => {
+                        this.classList.remove('shaking');
+                        this.style.textShadow = '0 0 5px rgba(255, 107, 157, 0.3)';
+                        this.style.transform = 'translateY(0)';
+                    }, 400);
+                }
+            }
+        });
+
+        // Event untuk menu utama dengan efek glow yang ikut naik
+        document.getElementById('playBtn').addEventListener('click', function() {
+            const selectedCharacterId = localStorage.getItem('selectedCharacter');
+            
+            if (!selectedCharacterId) {
+                // Efek visual untuk error dengan naik dan glow merah
+                this.style.transform = 'translateY(-4px)';
+                this.style.boxShadow = 
+                    '0 6px 0 #d44a7d, 0 10px 20px rgba(255, 0, 0, 0.25), 0 0 30px rgba(255, 0, 0, 0.6)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = 
+                        '0 2px 0 #d44a7d, 0 4px 8px rgba(255, 107, 157, 0.2), 0 0 15px rgba(255, 107, 157, 0.3)';
+                }, 500);
+                
+                alert('🎮 Silakan pilih hewan terlebih dahulu di halaman "Hewan"!');
+                return;
+            }
+            
+            if (selectedCharacterId) {
+                // Efek visual dengan naik dan glow intensif
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+                this.style.boxShadow = 
+                    '0 8px 0 #d44a7d, 0 15px 30px rgba(255, 107, 157, 0.35), 0 0 50px rgba(255, 107, 157, 0.8), 0 0 70px rgba(255, 107, 157, 0.6)';
+                
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-4px) scale(1)';
+                    this.style.boxShadow = 
+                        '0 6px 0 #d44a7d, 0 10px 20px rgba(255, 107, 157, 0.25), 0 0 25px rgba(255, 107, 157, 0.6)';
+                }, 150);
+                
+                setTimeout(() => {
+                    const character = characters.find(c => c.id === selectedCharacterId);
+                    if (character) {
+                        window.location.href = character.gamePage;
+                    }
+                }, 300);
+            }
+        });
+
+        document.getElementById('scoreBtn').addEventListener('click', function() {
+            // Efek visual dengan naik dan glow
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+            this.style.boxShadow = 
+                '0 8px 0 #d69900, 0 15px 30px rgba(255, 183, 0, 0.35), 0 0 50px rgba(255, 183, 0, 0.8), 0 0 70px rgba(255, 183, 0, 0.6)';
+            
+            setTimeout(() => {
+                this.style.transform = 'translateY(-4px) scale(1)';
+                this.style.boxShadow = 
+                    '0 6px 0 #d69900, 0 10px 20px rgba(255, 183, 0, 0.25), 0 0 25px rgba(255, 183, 0, 0.6)';
+            }, 150);
+            
+            setTimeout(() => {
+                window.location.href = 'skor_tertinggi.html';
+            }, 200);
+        });
+
+        document.getElementById('settingsBtn').addEventListener('click', function() {
+            // Efek visual dengan naik dan glow
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+            this.style.boxShadow = 
+                '0 8px 0 #0077cc, 0 15px 30px rgba(0, 153, 255, 0.35), 0 0 50px rgba(0, 153, 255, 0.8), 0 0 70px rgba(0, 153, 255, 0.6)';
+            
+            setTimeout(() => {
+                this.style.transform = 'translateY(-4px) scale(1)';
+                this.style.boxShadow = 
+                    '0 6px 0 #0077cc, 0 10px 20px rgba(0, 153, 255, 0.25), 0 0 25px rgba(0, 153, 255, 0.6)';
+            }, 150);
+            
+            setTimeout(() => {
+                window.location.href = 'pengaturan.html';
+            }, 200);
+        });
+
+        document.getElementById('charactersBtn').addEventListener('click', function() {
+            // Efek visual dengan naik dan glow
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+            this.style.boxShadow = 
+                '0 8px 0 #9a5ccc, 0 15px 30px rgba(185, 125, 255, 0.35), 0 0 50px rgba(185, 125, 255, 0.8), 0 0 70px rgba(185, 125, 255, 0.6)';
+            
+            setTimeout(() => {
+                this.style.transform = 'translateY(-4px) scale(1)';
+                this.style.boxShadow = 
+                    '0 6px 0 #9a5ccc, 0 10px 20px rgba(185, 125, 255, 0.25), 0 0 25px rgba(185, 125, 255, 0.6)';
+            }, 150);
+            
+            setTimeout(() => {
+                window.location.href = 'pilih-hewan.html';
+            }, 200);
+        });
+
+        // ========== PERBAIKAN: Event listeners untuk mouse hover ==========
+        // Event untuk reset selection saat mouse hover (hanya jika gamepad tidak terhubung)
+        menuItems.forEach((itemId) => {
+            const item = document.getElementById(itemId);
+            
+            item.addEventListener('mouseenter', function() {
+                // Jika gamepad terhubung, jangan ganggu selection indicator
+                if (!gamepadConnected) {
+                    const indicator = document.getElementById('selectionIndicator');
+                    indicator.style.display = 'none';
+                    indicator.classList.add('reset-glow');
+                    
+                    // Reset semua item lain
+                    menuItems.forEach((otherItemId) => {
+                        if (otherItemId !== itemId) {
+                            const otherItem = document.getElementById(otherItemId);
+                            otherItem.style.transform = 'translateY(0)';
+                            otherItem.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                // Jika gamepad terhubung, kembalikan selection indicator
+                if (gamepadConnected) {
+                    setTimeout(() => {
+                        updateSelectionIndicator();
+                        const indicator = document.getElementById('selectionIndicator');
+                        indicator.classList.remove('reset-glow');
+                    }, 100);
+                } else {
+                    // Reset ke state normal
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '';
+                }
+            });
+        });
+
+        // Event keyboard untuk gamepad testing
+        document.addEventListener('keydown', function(e) {
+            // Escape key untuk keluar dari pause
+            if (e.key === 'Escape' && !selectionActive) {
+                const pauseOverlay = document.getElementById('pauseOverlay');
+                if (pauseOverlay) {
+                    pauseOverlay.remove();
+                    selectionActive = true;
+                }
+                return;
+            }
+            
+            // Escape key untuk cancel input nama
+            if (e.key === 'Escape' && nameInputActive) {
+                cancelPlayerName();
+                return;
+            }
+            
+            if (selectionActive && !nameInputActive) {
+                switch(e.key) {
+                    case 'ArrowUp':
+                        if (canMoveAnalog()) moveSelection('up');
+                        break;
+                    case 'ArrowDown':
+                        if (canMoveAnalog()) moveSelection('down');
+                        break;
+                    case 'ArrowLeft':
+                        if (canMoveAnalog()) moveSelection('left');
+                        break;
+                    case 'ArrowRight':
+                        if (canMoveAnalog()) moveSelection('right');
+                        break;
+                    case 'Enter':
+                    case 'x':
+                    case 'X':
+                        if (canSelect()) selectCurrentItem();
+                        break;
+                    case ' ':
+                        e.preventDefault();
+                        const selectedCharacterId = localStorage.getItem('selectedCharacter');
+                        if (selectedCharacterId) {
+                            const character = characters.find(c => c.id === selectedCharacterId);
+                            if (character) {
+                                playAnimalSound(character.sound);
+                                // Tambahkan efek visual dengan naik dan glow
+                                const charContainer = document.getElementById('characterImageContainer');
+                                charContainer.style.transform = 'translateY(-5px)';
+                                charContainer.style.boxShadow = 
+                                    `0 8px 16px ${character.color}80,
+                                     0 0 40px ${character.color},
+                                     0 0 60px ${character.color}80`;
+                                setTimeout(() => {
+                                    charContainer.style.transform = 'translateY(0)';
+                                    charContainer.style.boxShadow = 
+                                        '0 4px 8px rgba(166, 227, 255, 0.3), inset 0 0 15px rgba(166, 227, 255, 0.2)';
+                                }, 400);
+                            }
+                        }
+                        break;
+                    case 'm':
+                    case 'M':
+                        toggleMute();
+                        break;
+                    case 'n':
+                    case 'N':
+                        // Tombol N untuk edit nama
+                        showNameInput();
+                        break;
+                }
+            }
+        });
+
+        // ========== GAMEPAD EVENT LISTENERS ==========
+        window.addEventListener("gamepadconnected", function(e) {
+            console.log(`🎮 Gamepad terhubung: ${e.gamepad.id} (Index: ${e.gamepad.index})`);
+            
+            gamepadConnected = true;
+            gamepadIndex = e.gamepad.index;
+            currentGamepadType = detectGamepadType(e.gamepad.id);
+            
+            showGamepadConnected(e.gamepad.id);
+            
+            if (!gamepadPollingInterval) {
+                gamepadPollingInterval = setInterval(pollGamepad, 100); // Polling lebih lambat
+            }
+            
+            triggerGamepadVibration([80, 0.2, 0.5]);
+        });
+
+        window.addEventListener("gamepaddisconnected", function(e) {
+            console.log(`🎮 Gamepad terputus: ${e.gamepad.id}`);
+            gamepadConnected = false;
+            gamepadIndex = null;
+            showGamepadDisconnected();
+            
+            // PERBAIKAN: Reset selection visual
+            const indicator = document.getElementById('selectionIndicator');
+            indicator.style.display = 'none';
+            indicator.classList.add('reset-glow');
+            
+            // Reset semua item ke state normal
+            menuItems.forEach((itemId) => {
+                const item = document.getElementById(itemId);
+                if (item) {
+                    item.style.transform = 'translateY(0)';
+                    item.style.boxShadow = '';
+                }
+            });
+            
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+            
+            const pauseOverlay = document.getElementById('pauseOverlay');
+            if (pauseOverlay) {
+                pauseOverlay.remove();
+                selectionActive = true;
+            }
+        });
+
+        // ========== INISIALISASI ==========
+        window.addEventListener('DOMContentLoaded', function() {
+            loadPlayerName();
+            loadSelectedCharacter();
+            checkGameReady();
+            
+            // Buat glow particles
+            createGlowParticles();
+            
+            // Inisialisasi selection
+            moveSelection('none');
+            
+            // Inisialisasi gamepad
+            checkGamepadSupport();
+            
+            // Play background music
+            playBackgroundMusic();
+            
+            // Setup default settings jika belum ada
+            if (!localStorage.getItem('masterVolume')) {
+                localStorage.setItem('masterVolume', '0.7');
+                localStorage.setItem('isMuted', 'false');
+            }
+            
+            if (!localStorage.getItem('highScores')) {
+                localStorage.setItem('highScores', JSON.stringify([]));
+            }
+            
+            // Tampilkan input nama jika belum ada nama
+            if (!localStorage.getItem('playerName')) {
+                setTimeout(showNameInput, 500);
+            }
+            
+            // Update volume setiap detik
+            setInterval(updateAudioVolume, 1000);
+            
+            // Deteksi perubahan di localStorage
+            window.addEventListener('storage', function(e) {
+                if (e.key === 'selectedCharacter') {
+                    loadSelectedCharacter();
+                    checkGameReady();
+                }
+            });
+            
+            // Update selection indicator saat resize
+            window.addEventListener('resize', updateSelectionIndicator);
+            
+            // Auto-animate karakter dengan glow yang lebih smooth
+            setInterval(() => {
+                const characterAsset = document.getElementById('currentCharacter');
+                if (characterAsset && characterAsset.style.backgroundImage !== 'none') {
+                    // Animasi yang lebih pelan
+                    const scale = 1 + Math.sin(Date.now() / 2000) * 0.03;
+                    const translateY = Math.sin(Date.now() / 1500) * -2;
+                    characterAsset.style.transform = `translateY(${translateY}px) scale(${scale})`;
+                    
+                    // Glow effect yang lebih smooth
+                    glowIntensity += glowDirection * glowSpeed;
+                    if (glowIntensity > 0.6 || glowIntensity < 0.3) {
+                        glowDirection *= -1;
+                    }
+                    
+                    characterAsset.style.filter = `drop-shadow(0 ${-translateY/2}px ${5 + glowIntensity * 8}px rgba(0, 0, 0, 0.${Math.floor(10 + glowIntensity * 5)}))`;
+                }
+            }, 50);
+            
+            // Smooth glow animation untuk title
+            setInterval(() => {
+                glowIntensity += glowDirection * glowSpeed;
+                if (glowIntensity > 0.7 || glowIntensity < 0.3) {
+                    glowDirection *= -1;
+                }
+            }, 50);
+        });
+
+        console.log('🎮 Halaman Beranda - Sistem Gamepad Aktif');
+        console.log('🎮 Kontrol: D-PAD/Stick untuk navigasi (lebih teratur), A pilih, B suara, SELECT untuk edit nama');
+        console.log('👤 Sistem nama pemain aktif - Nama akan disimpan di skor tertinggi');
+        console.log('✨ Kontrol gamepad telah diperbaiki - lebih teratur dan tidak terlalu cepat!');
+        console.log('🌈 Glow effect lebih smooth dengan animasi yang lebih lambat!');
+        console.log('🔄 Bug border kuning telah diperbaiki - hanya muncul saat gamepad aktif!');
+    </script>
+</body>
+</html>

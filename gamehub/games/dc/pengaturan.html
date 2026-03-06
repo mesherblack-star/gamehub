@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Critters - Pengaturan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffe6ee 0%, #e6f2ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* GAMEPAD INDICATOR */
+        #gamepadIndicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            border: 2px solid white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: linear-gradient(135deg, #5cc5ff 0%, #0099ff 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 0 #0077cc;
+            transition: all 0.2s;
+            z-index: 100;
+            font-size: 0.9rem;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #0077cc;
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #0077cc;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            color: #ff6b9d;
+            text-shadow: 1px 1px 0 #ffd1dc;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            color: #5cc5ff;
+            font-weight: 600;
+        }
+
+        .settings-panel {
+            background-color: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.1);
+            border: 4px solid #5cc5ff;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #ff6b9d;
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #ffd1dc;
+            font-weight: 700;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: #f8f9ff;
+            border-radius: 15px;
+            border: 2px solid #e6f2ff;
+            transition: all 0.2s;
+        }
+
+        .setting-item:hover {
+            background-color: #f0f7ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(92, 197, 255, 0.1);
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .setting-icon {
+            width: 36px;  /* Diubah dari 50px menjadi 36px */
+            height: 36px; /* Diubah dari 50px menjadi 36px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff9ebb 100%);
+            color: white;
+            border-radius: 50%;
+            font-size: 16px; /* Diubah dari 22px menjadi 16px */
+        }
+
+        .setting-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .setting-name {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .setting-desc {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Volume Control Styles */
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .volume-icon {
+            font-size: 24px;
+            color: #ff6b9d;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .volume-slider {
+            width: 200px;
+            height: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, #5cc5ff, #0099ff);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ff6b9d;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .volume-value {
+            font-weight: 700;
+            color: #ff6b9d;
+            min-width: 50px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        /* Mute Button */
+        .mute-button {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff9ebb 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #d44a7d;
+            border: 2px solid #ff6b9d;
+        }
+
+        .mute-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #d44a7d;
+        }
+
+        .mute-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #d44a7d;
+        }
+
+        .mute-button.muted {
+            background: linear-gradient(135deg, #666 0%, #999 100%);
+            border-color: #666;
+            box-shadow: 0 4px 0 #444;
+        }
+
+        /* Test Sound Button */
+        .test-sound-button {
+            background: linear-gradient(135deg, #5cc5ff 0%, #0099ff 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #0077cc;
+            border: 2px solid #5cc5ff;
+        }
+
+        .test-sound-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #0077cc;
+        }
+
+        .test-sound-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #0077cc;
+        }
+
+        .buttons-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        /* Reset Button */
+        .reset-button {
+            background: linear-gradient(135deg, #ffd166 0%, #ffb900 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #d69900;
+            border: 2px solid #ffb900;
+            margin: 0 auto;
+            margin-top: 20px;
+            width: auto;
+            height: auto;
+        }
+
+        .reset-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #d69900;
+        }
+
+        .reset-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #d69900;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+            font-size: 0.75rem;
+            padding-top: 10px;
+            border-top: 1px dashed #ffb6c1;
+            width: 100%;
+        }
+
+        /* Kontrol dengan Gamepad */
+        .control-hint {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1000;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid #ffd166;
+        }
+
+        .control-hint span {
+            color: #ffd166;
+            font-weight: bold;
+        }
+
+        /* Floating Elements */
+        .floating {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.08;
+            pointer-events: none;
+            font-size: 35px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(8deg); }
+        }
+
+        .float1 { top: 10%; left: 5%; color: #ff6b9d; animation-delay: 0s; }
+        .float2 { top: 20%; right: 10%; color: #5cc5ff; animation-delay: 2s; }
+        .float3 { bottom: 15%; left: 8%; color: #b5ffb0; animation-delay: 4s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .settings-panel {
+                padding: 20px;
+            }
+            
+            .setting-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .volume-control {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .volume-slider {
+                width: 180px;
+            }
+            
+            .buttons-container {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .control-hint {
+                font-size: 0.8rem;
+                padding: 8px 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.6rem;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .volume-slider {
+                width: 150px;
+            }
+            
+            .back-button {
+                position: relative;
+                left: 0;
+                top: 0;
+                margin-bottom: 10px;
+            }
+            
+            .setting-icon {
+                width: 32px;  /* Diubah dari 40px menjadi 32px */
+                height: 32px; /* Diubah dari 40px menjadi 32px */
+                font-size: 14px; /* Diubah dari 18px menjadi 14px */
+            }
+            
+            .control-hint {
+                width: 95%;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio untuk background music -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/backsound/homepage.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Audio untuk test sound -->
+    <audio id="testSound">
+        <source src="assets/backsound/homepage.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- GAMEPAD INDICATOR -->
+    <div id="gamepadIndicator">🎮 GAMEPAD TERHUBUNG</div>
+
+    <!-- CONTROL HINT -->
+    <div class="control-hint" id="controlHint">
+        🎮 Tekan <span>B/CIRCLE</span> untuk kembali • <span>Y/TRIANGLE</span> untuk mute • <span>X/SQUARE</span> untuk test suara • <span>A/CROSS</span> untuk reset
+    </div>
+
+    <!-- Floating Background Elements -->
+    <div class="floating float1">⚙️</div>
+    <div class="floating float2">🎵</div>
+    <div class="floating float3">🎮</div>
+
+    <div class="container">
+        <!-- Back Button -->
+        <button class="back-button" id="backBtn">
+            <i class="fas fa-arrow-left"></i> Kembali
+        </button>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="page-title">PENGATURAN SUARA</h1>
+            <div class="page-subtitle">Atur volume suara untuk semua halaman</div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <!-- Master Volume Control -->
+            <div class="settings-section">
+                <h2 class="section-title">KONTROL SUARA</h2>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <div class="setting-icon">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                        <div class="setting-text">
+                            <div class="setting-name">Volume Suara</div>
+                            <div class="setting-desc">Atur volume untuk semua suara di game</div>
+                        </div>
+                    </div>
+                    <div class="volume-control">
+                        <div class="volume-icon" id="masterVolumeIcon">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                        <input type="range" id="masterVolume" class="volume-slider" min="0" max="1" step="0.1" value="0.7">
+                        <div class="volume-value" id="masterVolumeValue">70%</div>
+                    </div>
+                </div>
+
+                <div class="buttons-container">
+                    <button class="mute-button" id="muteBtn">
+                        <i class="fas fa-volume-mute"></i> MUTE
+                    </button>
+                    <button class="test-sound-button" id="testBtn">
+                        <i class="fas fa-play"></i> TEST SUARA
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Button -->
+        <button class="reset-button" id="resetBtn">
+            <i class="fas fa-redo"></i> RESET PENGATURAN
+        </button>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>© 2026 Doodle Critters | Game Kelompok 4</p>
+        </div>
+    </div>
+
+    <script>
+        // ============= SISTEM GAMEPAD =============
+        let gamepadConnected = false;
+        let gamepadIndex = null;
+        let currentGamepadType = 'standard';
+        let gamepadPollingInterval = null;
+        
+        // GAMEPAD INDICATOR
+        const gamepadIndicator = document.getElementById('gamepadIndicator');
+        const controlHint = document.getElementById('controlHint');
+        
+        // MAPPING untuk Xbox dan PlayStation
+        const gamepadMappings = {
+            'xbox': {
+                A: 0,      // Cross (bawah)
+                B: 1,      // Circle (kanan) - Kembali
+                X: 2,      // Square (kiri) - Test suara
+                Y: 3,      // Triangle (atas) - Mute
+                LB: 4,
+                RB: 5,
+                LT: 6,
+                RT: 7,
+                SELECT: 8,
+                START: 9,
+                LS: 10,
+                RS: 11,
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15
+            },
+            'playstation': {
+                CROSS: 0,      // A (bawah) - Reset
+                CIRCLE: 1,     // B (kanan) - Kembali
+                SQUARE: 2,     // X (kiri) - Test suara
+                TRIANGLE: 3,   // Y (atas) - Mute
+                L1: 4,
+                R1: 5,
+                L2: 6,
+                R2: 7,
+                SHARE: 8,
+                OPTIONS: 9,
+                L3: 10,
+                R3: 11,
+                UP: 12,
+                DOWN: 13,
+                LEFT: 14,
+                RIGHT: 15
+            },
+            'standard': {
+                A: 0,
+                B: 1,
+                X: 2,
+                Y: 3
+            }
+        };
+        
+        // ========== SISTEM AUDIO ==========
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const testSound = document.getElementById('testSound');
+        
+        // Elemen UI
+        const masterVolumeSlider = document.getElementById('masterVolume');
+        const masterVolumeValue = document.getElementById('masterVolumeValue');
+        const masterVolumeIcon = document.getElementById('masterVolumeIcon');
+        const muteBtn = document.getElementById('muteBtn');
+        const testBtn = document.getElementById('testBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // ========== FUNGSI GAMEPAD ==========
+        function detectGamepadType(id) {
+            const idLower = id.toLowerCase();
+            
+            if (idLower.includes('xbox') || idLower.includes('microsoft')) {
+                return 'xbox';
+            } else if (idLower.includes('playstation') || idLower.includes('ps3') || idLower.includes('ps4') || idLower.includes('ps5') || idLower.includes('dualshock') || idLower.includes('dualsense')) {
+                return 'playstation';
+            } else {
+                return 'standard';
+            }
+        }
+
+        function showGamepadConnected(name) {
+            gamepadIndicator.textContent = '🎮 GAMEPAD TERHUBUNG';
+            gamepadIndicator.style.display = 'block';
+            
+            controlHint.style.display = 'block';
+            
+            // Update control hint berdasarkan tipe gamepad
+            if (currentGamepadType === 'playstation') {
+                controlHint.innerHTML = '🎮 Tekan <span>CIRCLE</span> untuk kembali • <span>TRIANGLE</span> untuk mute • <span>SQUARE</span> untuk test suara • <span>CROSS</span> untuk reset';
+            } else if (currentGamepadType === 'xbox') {
+                controlHint.innerHTML = '🎮 Tekan <span>B</span> untuk kembali • <span>Y</span> untuk mute • <span>X</span> untuk test suara • <span>A</span> untuk reset';
+            } else {
+                controlHint.innerHTML = '🎮 Tekan <span>B</span> untuk kembali • <span>Y</span> untuk mute • <span>X</span> untuk test suara • <span>A</span> untuk reset';
+            }
+            
+            console.log(`🎮 Gamepad terhubung: ${name} (${currentGamepadType})`);
+        }
+
+        function showGamepadDisconnected() {
+            gamepadIndicator.style.display = 'none';
+            controlHint.style.display = 'none';
+            console.log('🎮 Gamepad terputus');
+        }
+
+        // FUNGSI: Tombol B/CIRCLE untuk kembali
+        function handleGamepadButtonB() {
+            console.log(`🎮 Tombol ${currentGamepadType === 'playstation' ? 'CIRCLE' : 'B'} ditekan - Kembali`);
+            goBack();
+            return true;
+        }
+
+        // FUNGSI: Tombol Y/TRIANGLE untuk mute
+        function handleGamepadButtonY() {
+            console.log(`🎮 Tombol ${currentGamepadType === 'playstation' ? 'TRIANGLE' : 'Y'} ditekan - Mute`);
+            toggleMute();
+            return true;
+        }
+
+        // FUNGSI: Tombol X/SQUARE untuk test suara
+        function handleGamepadButtonX() {
+            console.log(`🎮 Tombol ${currentGamepadType === 'playstation' ? 'SQUARE' : 'X'} ditekan - Test suara`);
+            playTestSound();
+            return true;
+        }
+
+        // FUNGSI: Tombol A/CROSS untuk reset
+        function handleGamepadButtonA() {
+            console.log(`🎮 Tombol ${currentGamepadType === 'playstation' ? 'CROSS' : 'A'} ditekan - Reset`);
+            resetSettings();
+            return true;
+        }
+
+        // FUNGSI: Polling gamepad
+        function pollGamepad() {
+            if (!gamepadConnected || gamepadIndex === null) return;
+            
+            try {
+                const gamepads = navigator.getGamepads();
+                if (!gamepads || !gamepads[gamepadIndex]) {
+                    gamepadConnected = false;
+                    gamepadIndex = null;
+                    showGamepadDisconnected();
+                    if (gamepadPollingInterval) {
+                        clearInterval(gamepadPollingInterval);
+                        gamepadPollingInterval = null;
+                    }
+                    return;
+                }
+                
+                const gamepad = gamepads[gamepadIndex];
+                const mapping = gamepadMappings[currentGamepadType] || gamepadMappings.standard;
+                
+                // Cek tombol B/CIRCLE (kembali)
+                const buttonB = currentGamepadType === 'playstation' ? mapping.CIRCLE : mapping.B;
+                if (gamepad.buttons[buttonB]?.pressed) {
+                    handleGamepadButtonB();
+                    return;
+                }
+                
+                // Cek tombol Y/TRIANGLE (mute)
+                const buttonY = currentGamepadType === 'playstation' ? mapping.TRIANGLE : mapping.Y;
+                if (gamepad.buttons[buttonY]?.pressed) {
+                    handleGamepadButtonY();
+                    return;
+                }
+                
+                // Cek tombol X/SQUARE (test suara)
+                const buttonX = currentGamepadType === 'playstation' ? mapping.SQUARE : mapping.X;
+                if (gamepad.buttons[buttonX]?.pressed) {
+                    handleGamepadButtonX();
+                    return;
+                }
+                
+                // Cek tombol A/CROSS (reset)
+                const buttonA = currentGamepadType === 'playstation' ? mapping.CROSS : mapping.A;
+                if (gamepad.buttons[buttonA]?.pressed) {
+                    handleGamepadButtonA();
+                    return;
+                }
+                
+                // Kontrol volume dengan D-PAD kiri/kanan
+                if (gamepad.buttons[mapping.LEFT]?.pressed) {
+                    decreaseVolume();
+                } else if (gamepad.buttons[mapping.RIGHT]?.pressed) {
+                    increaseVolume();
+                }
+                
+            } catch (error) {
+                console.error('Error polling gamepad:', error);
+            }
+        }
+
+        // FUNGSI: Cek dukungan gamepad
+        function checkGamepadSupport() {
+            if ('getGamepads' in navigator) {
+                console.log('🎮 Gamepad API didukung');
+                
+                const gamepads = navigator.getGamepads();
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        console.log(`🎮 Gamepad sudah terhubung: ${gamepads[i].id}`);
+                        gamepadConnected = true;
+                        gamepadIndex = i;
+                        currentGamepadType = detectGamepadType(gamepads[i].id);
+                        showGamepadConnected(gamepads[i].id);
+                        
+                        if (!gamepadPollingInterval) {
+                            gamepadPollingInterval = setInterval(pollGamepad, 100);
+                        }
+                        break;
+                    }
+                }
+                
+                return true;
+            } else {
+                console.log('⚠️ Gamepad API tidak didukung');
+                return false;
+            }
+        }
+
+        // ========== FUNGSI UTAMA ==========
+        function goBack() {
+            console.log('🔙 Kembali ke halaman utama');
+            
+            // Delay sebelum navigasi
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
+        }
+        
+        // ========== FUNGSI AUDIO ==========
+        function updateAudioVolume() {
+            const masterVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            if (isMuted) {
+                backgroundMusic.volume = 0;
+            } else {
+                backgroundMusic.volume = masterVolume;
+            }
+            
+            window.currentVolume = isMuted ? 0 : masterVolume;
+        }
+        
+        function playBackgroundMusic() {
+            updateAudioVolume();
+            backgroundMusic.play().catch(e => {
+                console.log("Autoplay prevented:", e);
+                document.addEventListener('click', function initAudio() {
+                    backgroundMusic.play();
+                    document.removeEventListener('click', initAudio);
+                }, { once: true });
+            });
+        }
+        
+        function playTestSound() {
+            const masterVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            // Set volume untuk test sound
+            if (isMuted) {
+                testSound.volume = 0;
+            } else {
+                testSound.volume = masterVolume;
+            }
+            
+            // Reset dan mainkan
+            testSound.currentTime = 0;
+            testSound.play().catch(e => {
+                console.log("Error playing test sound:", e);
+            });
+            
+            // Animasi tombol test
+            testBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                testBtn.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        // ========== FUNGSI PENGATURAN (AUTO SAVE) ==========
+        function loadSettings() {
+            const masterVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            // Update slider dan display
+            masterVolumeSlider.value = masterVolume;
+            updateVolumeDisplay(masterVolume, isMuted);
+        }
+
+        function updateVolumeDisplay(volume, isMuted) {
+            const percentage = Math.round(volume * 100);
+            masterVolumeValue.textContent = `${percentage}%`;
+            
+            // Update icon berdasarkan volume
+            if (isMuted || volume === 0) {
+                masterVolumeIcon.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                muteBtn.classList.add('muted');
+                muteBtn.innerHTML = '<i class="fas fa-volume-up"></i> UNMUTE';
+            } else if (volume < 0.3) {
+                masterVolumeIcon.innerHTML = '<i class="fas fa-volume-off"></i>';
+                muteBtn.classList.remove('muted');
+                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i> MUTE';
+            } else if (volume < 0.7) {
+                masterVolumeIcon.innerHTML = '<i class="fas fa-volume-down"></i>';
+                muteBtn.classList.remove('muted');
+                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i> MUTE';
+            } else {
+                masterVolumeIcon.innerHTML = '<i class="fas fa-volume-up"></i>';
+                muteBtn.classList.remove('muted');
+                muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i> MUTE';
+            }
+            
+            // AUTO SAVE: Langsung simpan ke localStorage tanpa konfirmasi
+            localStorage.setItem('masterVolume', volume);
+            localStorage.setItem('isMuted', isMuted.toString());
+            
+            // Perbarui audio
+            updateAudioVolume();
+            
+            console.log(`💾 Auto save: Volume=${volume}%, Muted=${isMuted}`);
+        }
+
+        function toggleMute() {
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            if (isMuted) {
+                // Unmute
+                const savedVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+                masterVolumeSlider.value = savedVolume;
+                updateVolumeDisplay(savedVolume, false);
+            } else {
+                // Mute
+                masterVolumeSlider.value = 0;
+                updateVolumeDisplay(0, true);
+            }
+            
+            // Animasi tombol mute
+            muteBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                muteBtn.style.transform = 'scale(1)';
+            }, 200);
+            
+            console.log(`🔊 ${isMuted ? 'Unmuted' : 'Muted'} (Auto save)`);
+        }
+
+        function increaseVolume() {
+            let currentVolume = parseFloat(masterVolumeSlider.value);
+            if (currentVolume < 1) {
+                currentVolume = Math.min(1, currentVolume + 0.1);
+                masterVolumeSlider.value = currentVolume;
+                updateVolumeDisplay(currentVolume, false);
+                console.log(`🔊 Volume increased to ${Math.round(currentVolume * 100)}% (Auto save)`);
+            }
+        }
+
+        function decreaseVolume() {
+            let currentVolume = parseFloat(masterVolumeSlider.value);
+            if (currentVolume > 0) {
+                currentVolume = Math.max(0, currentVolume - 0.1);
+                masterVolumeSlider.value = currentVolume;
+                updateVolumeDisplay(currentVolume, currentVolume === 0);
+                console.log(`🔊 Volume decreased to ${Math.round(currentVolume * 100)}% (Auto save)`);
+            }
+        }
+
+        function resetSettings() {
+            localStorage.setItem('masterVolume', '0.7');
+            localStorage.setItem('isMuted', 'false');
+            
+            masterVolumeSlider.value = 0.7;
+            updateVolumeDisplay(0.7, false);
+            
+            // Animasi tombol reset
+            resetBtn.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                resetBtn.style.transform = 'scale(1)';
+            }, 200);
+            
+            console.log('🔄 Pengaturan direset ke default (Auto save)');
+        }
+
+        // ========== EVENT LISTENERS ==========
+        masterVolumeSlider.addEventListener('input', function() {
+            const volume = parseFloat(this.value);
+            const isMuted = volume === 0;
+            updateVolumeDisplay(volume, isMuted);
+        });
+
+        masterVolumeSlider.addEventListener('change', function() {
+            // Auto save ketika slider dilepas
+            const volume = parseFloat(this.value);
+            const isMuted = volume === 0;
+            console.log(`💾 Slider change saved: Volume=${Math.round(volume * 100)}%`);
+        });
+
+        muteBtn.addEventListener('click', toggleMute);
+        testBtn.addEventListener('click', playTestSound);
+        resetBtn.addEventListener('click', resetSettings);
+
+        document.getElementById('backBtn').addEventListener('click', goBack);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'm' || e.key === 'M') {
+                e.preventDefault();
+                toggleMute();
+            }
+            if (e.key === 't' || e.key === 'T') {
+                e.preventDefault();
+                playTestSound();
+            }
+            if (e.key === 'r' || e.key === 'R') {
+                e.preventDefault();
+                resetSettings();
+            }
+            if (e.key === 'Escape' || e.key === 'o' || e.key === 'O' || e.key === 'b' || e.key === 'B') {
+                e.preventDefault();
+                goBack();
+            }
+            // Kontrol volume dengan panah
+            if (e.key === 'ArrowRight') {
+                increaseVolume();
+            }
+            if (e.key === 'ArrowLeft') {
+                decreaseVolume();
+            }
+        });
+
+        // ========== GAMEPAD EVENT LISTENERS ==========
+        window.addEventListener("gamepadconnected", function(e) {
+            console.log(`🎮 Gamepad terhubung: ${e.gamepad.id} (Index: ${e.gamepad.index})`);
+            
+            gamepadConnected = true;
+            gamepadIndex = e.gamepad.index;
+            currentGamepadType = detectGamepadType(e.gamepad.id);
+            showGamepadConnected(e.gamepad.id);
+            
+            if (!gamepadPollingInterval) {
+                gamepadPollingInterval = setInterval(pollGamepad, 100);
+            }
+        });
+
+        window.addEventListener("gamepaddisconnected", function(e) {
+            console.log(`🎮 Gamepad terputus: ${e.gamepad.id}`);
+            gamepadConnected = false;
+            gamepadIndex = null;
+            showGamepadDisconnected();
+            
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+        });
+        
+        // ========== INISIALISASI ==========
+        window.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi default jika belum ada
+            if (localStorage.getItem('masterVolume') === null) {
+                localStorage.setItem('masterVolume', '0.7');
+                localStorage.setItem('isMuted', 'false');
+            }
+            
+            // Load settings
+            loadSettings();
+            
+            // Mulai background music
+            playBackgroundMusic();
+            
+            // Inisialisasi gamepad
+            checkGamepadSupport();
+            
+            // Auto-save volume secara real-time
+            let saveTimeout;
+            masterVolumeSlider.addEventListener('input', function() {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(() => {
+                    const volume = parseFloat(this.value);
+                    const isMuted = volume === 0;
+                    localStorage.setItem('masterVolume', volume);
+                    localStorage.setItem('isMuted', isMuted.toString());
+                    console.log(`💾 Real-time auto save: Volume=${Math.round(volume * 100)}%`);
+                }, 300);
+            });
+            
+            // Auto-save ketika halaman ditutup/tab diubah
+            window.addEventListener('beforeunload', function() {
+                const volume = parseFloat(masterVolumeSlider.value);
+                const isMuted = volume === 0;
+                localStorage.setItem('masterVolume', volume);
+                localStorage.setItem('isMuted', isMuted.toString());
+                console.log(`💾 Auto save sebelum keluar: Volume=${Math.round(volume * 100)}%`);
+            });
+            
+            // Auto-save setiap 5 detik untuk jaga-jaga
+            setInterval(() => {
+                const volume = parseFloat(masterVolumeSlider.value);
+                const isMuted = volume === 0;
+                if (localStorage.getItem('masterVolume') != volume || 
+                    localStorage.getItem('isMuted') != isMuted.toString()) {
+                    localStorage.setItem('masterVolume', volume);
+                    localStorage.setItem('isMuted', isMuted.toString());
+                    console.log(`💾 Periodic auto save: Volume=${Math.round(volume * 100)}%`);
+                }
+            }, 5000);
+            
+            console.log('⚙️ Halaman Pengaturan - Pusat Kontrol Audio (Auto Save)');
+            console.log('🎮 Kontrol Gamepad:');
+            console.log('  • Xbox: B (kembali), Y (mute), X (test), A (reset)');
+            console.log('  • PlayStation: CIRCLE (kembali), TRIANGLE (mute), SQUARE (test), CROSS (reset)');
+            console.log('  • D-PAD Kiri/Kanan: Kontrol volume');
+            console.log('⌨️ Kontrol Keyboard:');
+            console.log('  • M: Mute, T: Test, R: Reset, B/O/Esc: Kembali');
+            console.log('  • Panah Kiri/Kanan: Kontrol volume');
+        });
+    </script>
+</body>
+</html>

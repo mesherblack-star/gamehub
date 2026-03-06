@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fluffy Catcher - Login</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root {
+      --primary-color: #FF6B8B;
+      --secondary-color: #4ECDC4;
+      --accent-color: #FFD166;
+      --dark-color: #2A2D43;
+      --light-color: #F7FFF7;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+      color: white;
+    }
+    
+    .welcome-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .animated-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      animation: float 15s infinite linear;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.3;
+      }
+      90% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    .game-title {
+      text-align: center;
+      margin-bottom: 30px;
+      animation: titleGlow 3s infinite alternate;
+    }
+    
+    @keyframes titleGlow {
+      0% {
+        text-shadow: 0 0 10px rgba(255, 107, 139, 0.7),
+                     0 0 20px rgba(255, 107, 139, 0.5),
+                     0 0 30px rgba(255, 107, 139, 0.3);
+      }
+      100% {
+        text-shadow: 0 0 15px rgba(255, 209, 102, 0.8),
+                     0 0 25px rgba(255, 209, 102, 0.6),
+                     0 0 35px rgba(255, 209, 102, 0.4);
+      }
+    }
+    
+    .game-title h1 {
+      font-size: 3.5rem;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    
+    .game-title p {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+    
+    .login-box {
+      background: rgba(42, 45, 67, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      animation: slideUp 0.8s ease-out;
+      position: relative;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .login-header h2 {
+      font-size: 1.8rem;
+      color: var(--accent-color);
+      margin-bottom: 8px;
+    }
+    
+    .login-header p {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.95rem;
+    }
+    
+    .input-group {
+      position: relative;
+      margin-bottom: 25px;
+    }
+    
+    .input-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--light-color);
+      font-size: 1rem;
+    }
+    
+    .input-wrapper {
+      position: relative;
+    }
+    
+    #usernameInput {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    #usernameInput:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(255, 107, 139, 0.2);
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .input-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent-color);
+      font-size: 1.1rem;
+    }
+    
+    .input-char-count {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    #startBtn {
+      background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      box-shadow: 0 8px 20px rgba(255, 107, 139, 0.3);
+    }
+    
+    #leaderboardBtn {
+      background: linear-gradient(45deg, #6C5CE7, #A29BFE);
+      color: white;
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.3);
+    }
+    
+    .action-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
+    }
+    
+    .action-btn:active {
+      transform: translateY(-1px);
+    }
+    
+    #loginError {
+      margin-top: 12px;
+      padding: 10px;
+      background: rgba(231, 76, 60, 0.2);
+      border: 1px solid rgba(231, 76, 60, 0.5);
+      border-radius: 8px;
+      color: #ff6b6b;
+      text-align: center;
+      font-size: 0.9rem;
+      display: none;
+    }
+    
+    .features {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      gap: 15px;
+    }
+    
+    .feature {
+      text-align: center;
+      padding: 10px;
+      flex: 1;
+    }
+    
+    .feature i {
+      font-size: 2rem;
+      margin-bottom: 8px;
+      color: var(--accent-color);
+    }
+    
+    .feature h3 {
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+      color: white;
+    }
+    
+    .feature p {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    /* Audio Controls Styles */
+    .audio-controls {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+    }
+    
+    .audio-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(42, 45, 67, 0.9);
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .audio-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      background: rgba(255, 107, 139, 0.8);
+    }
+    
+    .audio-btn.muted {
+      background: rgba(231, 76, 60, 0.8);
+    }
+    
+    .audio-btn.muted i {
+      color: #ffcccc;
+    }
+    
+    /* Leaderboard Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(42, 45, 67, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+                  inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      animation: modalSlideUp 0.4s ease;
+    }
+    
+    @keyframes modalSlideUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -40%);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+      }
+    }
+    
+    .leaderboard-content {
+      background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+    }
+    
+    .leaderboard-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    
+    .leaderboard-header h2 {
+      font-size: 2rem;
+      color: var(--accent-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .leaderboard-header .leaderboard-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1rem;
+    }
+    
+    .leaderboard-list {
+      margin-bottom: 30px;
+      max-height: 50vh;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+    
+    /* Scrollbar styling */
+    .leaderboard-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .leaderboard-list::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+    
+    .leaderboard-list::-webkit-scrollbar-thumb {
+      background: var(--primary-color);
+      border-radius: 10px;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .leaderboard-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+    
+    .rank {
+      font-size: 1.5rem;
+      font-weight: 800;
+      min-width: 50px;
+      text-align: center;
+    }
+    
+    .rank-1 {
+      color: #FFD700;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    
+    .rank-2 {
+      color: #C0C0C0;
+      text-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+    }
+    
+    .rank-3 {
+      color: #CD7F32;
+      text-shadow: 0 0 10px rgba(205, 127, 50, 0.5);
+    }
+    
+    .rank-4, .rank-5, .rank-6, .rank-7, .rank-8, .rank-9, .rank-10 {
+      color: var(--accent-color);
+    }
+    
+    .player-info {
+      flex: 1;
+      margin-left: 15px;
+    }
+    
+    .player-name {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .player-stats {
+      display: flex;
+      gap: 15px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .player-score {
+      color: var(--secondary-color);
+      font-weight: 700;
+    }
+    
+    .player-date {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.85rem;
+    }
+    
+    .empty-leaderboard {
+      text-align: center;
+      padding: 40px 20px;
+      color: rgba(255, 255, 255, 0.6);
+      font-style: italic;
+    }
+    
+    .empty-leaderboard i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .leaderboard-actions {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    #closeLeaderboardBtn {
+      background: linear-gradient(45deg, #6C5CE7, #A29BFE);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    #closeLeaderboardBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.4);
+    }
+    
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-btn:hover {
+      background: rgba(255, 107, 139, 0.8);
+      transform: rotate(90deg);
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+    
+    @keyframes expand {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+    }
+
+    /* Buff Selection Modal Styles */
+    .buff-content {
+      border-color: #9B59B6;
+      max-width: 900px;
+      padding: 30px;
+    }
+
+    .buff-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .buff-header h2 {
+      color: #9B59B6;
+      font-size: 2.2rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .buff-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 1.1rem;
+    }
+
+    /* POSISI KARTU TETAP: KIRI, TENGAH, KANAN */
+    .buff-cards-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin: 40px 0;
+      gap: 20px;
+    }
+
+    .buff-card {
+      width: 220px;
+      height: 300px;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 20px;
+      padding: 25px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 4px solid transparent;
+      animation: rgbGlow 3s infinite alternate;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      flex: 1;
+      max-width: 250px;
+    }
+
+    /* Efek RGB berkelap-kelip untuk kartu terbalik */
+    @keyframes rgbGlow {
+      0% {
+        border-color: rgba(255, 0, 0, 0.6);
+        box-shadow: 0 0 25px rgba(255, 0, 0, 0.4), inset 0 0 15px rgba(255, 0, 0, 0.2);
+      }
+      33% {
+        border-color: rgba(0, 255, 0, 0.6);
+        box-shadow: 0 0 25px rgba(0, 255, 0, 0.4), inset 0 0 15px rgba(0, 255, 0, 0.2);
+      }
+      66% {
+        border-color: rgba(0, 0, 255, 0.6);
+        box-shadow: 0 0 25px rgba(0, 0, 255, 0.4), inset 0 0 15px rgba(0, 0, 255, 0.2);
+      }
+      100% {
+        border-color: rgba(255, 255, 0, 0.6);
+        box-shadow: 0 0 25px rgba(255, 255, 0, 0.4), inset 0 0 15px rgba(255, 255, 0, 0.2);
+      }
+    }
+
+    /* Efek saat kartu di-hover */
+    .buff-card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+      z-index: 10;
+    }
+
+    /* Kartu sudah dibuka (terbalik) */
+    .buff-card.revealed {
+      animation: selectedPulse 1.5s infinite alternate !important;
+      border: 4px solid;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+      transform: translateY(-15px) scale(1.1);
+      z-index: 5;
+    }
+
+    @keyframes selectedPulse {
+      0% {
+        box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+      }
+      100% {
+        box-shadow: 0 0 50px rgba(255, 255, 255, 0.6);
+      }
+    }
+
+    /* Warna kartu berdasarkan tipe buff */
+    .buff-card.revealed.bad-luck {
+      border-color: #E74C3C;
+      background: linear-gradient(135deg, rgba(231, 76, 60, 0.15), rgba(0, 0, 0, 0.9));
+    }
+
+    .buff-card.revealed.luck-boost {
+      border-color: #3498DB;
+      background: linear-gradient(135deg, rgba(52, 152, 219, 0.15), rgba(0, 0, 0, 0.9));
+    }
+
+    .buff-card.revealed.extra-attempts {
+      border-color: #F39C12;
+      background: linear-gradient(135deg, rgba(243, 156, 18, 0.15), rgba(0, 0, 0, 0.9));
+    }
+
+    /* Konten kartu terbalik (tanda tanya) */
+    .buff-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+      text-align: center;
+    }
+
+    .buff-card-question {
+      font-size: 6rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      animation: pulseQuestion 2s infinite;
+    }
+
+    @keyframes pulseQuestion {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.9;
+      }
+      50% { 
+        transform: scale(1.2); 
+        opacity: 1;
+      }
+    }
+
+    .buff-card-text {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+      padding: 0 10px;
+      font-weight: 600;
+    }
+
+    /* Konten kartu terbuka */
+    .buff-card.revealed .buff-card-content {
+      justify-content: space-between;
+    }
+
+    .buff-card-icon {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 15px;
+      display: none;
+      filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.7));
+    }
+
+    .buff-card-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      display: none;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+    }
+
+    .buff-card-description {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: center;
+      line-height: 1.4;
+      display: none;
+      padding: 0 5px;
+      margin-top: 10px;
+    }
+
+    /* Saat kartu dibuka */
+    .buff-card.revealed .buff-card-question,
+    .buff-card.revealed .buff-card-text {
+      display: none;
+    }
+
+    .buff-card.revealed .buff-card-icon,
+    .buff-card.revealed .buff-card-title,
+    .buff-card.revealed .buff-card-description {
+      display: block;
+    }
+
+    /* Badge efek kartu */
+    .buff-effect-badge {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      z-index: 10;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .buff-card.revealed .buff-effect-badge {
+      display: block;
+    }
+
+    .buff-card.revealed.bad-luck .buff-effect-badge {
+      background: #E74C3C;
+    }
+
+    .buff-card.revealed.luck-boost .buff-effect-badge {
+      background: #3498DB;
+    }
+
+    .buff-card.revealed.extra-attempts .buff-effect-badge {
+      background: #F39C12;
+    }
+
+    .buff-info {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 25px 0;
+      text-align: center;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Hold Up Popup Styles */
+    .holdup-content {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      text-align: center;
+    }
+
+    .hold-up-image {
+      width: 350px;
+      height: auto;
+      margin-bottom: 25px;
+      animation: pulse 1.5s infinite alternate;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+
+    .hold-up-text {
+      color: #FFD166;
+      font-size: 1.8rem;
+      font-weight: 800;
+      text-shadow: 0 3px 15px rgba(0, 0, 0, 0.7);
+      animation: textGlow 2s infinite alternate;
+    }
+
+    @keyframes textGlow {
+      0% { text-shadow: 0 0 10px rgba(255, 209, 102, 0.5); }
+      100% { text-shadow: 0 0 20px rgba(255, 209, 102, 0.8); }
+    }
+    
+    @media (max-width: 768px) {
+      .game-title h1 {
+        font-size: 2.5rem;
+      }
+      
+      .login-box {
+        padding: 25px 20px;
+        margin: 0 10px;
+      }
+      
+      .features {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .feature {
+        min-width: 100%;
+      }
+      
+      .modal-content {
+        width: 95%;
+        padding: 20px;
+      }
+      
+      .leaderboard-item {
+        padding: 12px 15px;
+      }
+      
+      .player-name {
+        font-size: 1.1rem;
+      }
+      
+      .audio-controls {
+        bottom: 15px;
+        left: 15px;
+      }
+      
+      .audio-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
+      }
+
+      .buff-content {
+        max-width: 95%;
+        padding: 20px;
+      }
+
+      .buff-cards-container {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .buff-card {
+        width: 200px;
+        height: 280px;
+        padding: 20px;
+      }
+
+      .buff-card:hover {
+        transform: translateY(-5px) scale(1.03);
+      }
+
+      .buff-card.revealed {
+        transform: translateY(-5px) scale(1.05);
+      }
+
+      .hold-up-image {
+        width: 280px;
+      }
+
+      .hold-up-text {
+        font-size: 1.4rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .game-title h1 {
+        font-size: 2rem;
+      }
+      
+      .login-header h2 {
+        font-size: 1.5rem;
+      }
+      
+      .action-btn {
+        padding: 14px;
+        font-size: 1rem;
+      }
+      
+      .leaderboard-header h2 {
+        font-size: 1.6rem;
+      }
+      
+      .audio-controls {
+        bottom: 10px;
+        left: 10px;
+        gap: 8px;
+      }
+      
+      .audio-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+
+      .buff-card {
+        width: 180px;
+        height: 260px;
+        padding: 15px;
+      }
+
+      .buff-card-question {
+        font-size: 5rem;
+      }
+
+      .buff-card-icon {
+        width: 80px;
+        height: 80px;
+      }
+
+      .buff-card-title {
+        font-size: 1.3rem;
+      }
+
+      .buff-card-description {
+        font-size: 0.8rem;
+      }
+
+      .hold-up-image {
+        width: 220px;
+      }
+
+      .hold-up-text {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Music -->
+  <audio id="backgroundMusic" loop>
+    <source src="assets/bekson.mp3" type="audio/mpeg">
+    Browser Anda tidak mendukung audio.
+  </audio>
+
+  <!-- Audio Controls -->
+  <div class="audio-controls">
+    <button id="musicToggle" class="audio-btn" title="Toggle Music">
+      <i class="fas fa-volume-up"></i>
+    </button>
+    <button id="sfxToggle" class="audio-btn" title="Toggle SFX">
+      <i class="fas fa-bell"></i>
+    </button>
+  </div>
+
+  <div class="welcome-container">
+    <div class="animated-bg" id="animatedBg"></div>
+    
+    <div class="game-title">
+      <h1>Fluffy Catcher</h1>
+      <p>Dapatkan hewan hewan eksotis yang lucu untukmu!</p>
+    </div>
+    
+    <div class="login-box">
+      <div class="login-header">
+        <h2>Masuk ke Game</h2>
+        <p>Masukkan nama kamu untuk memulai petualangan!</p>
+      </div>
+      
+      <div class="input-group">
+        <label for="usernameInput">
+          <i class="fas fa-user"></i> Nama Pemain
+        </label>
+        <div class="input-wrapper">
+          <i class="fas fa-user-circle input-icon"></i>
+          <input 
+            type="text" 
+            id="usernameInput" 
+            placeholder="Ketik nama kamu..." 
+            maxlength="15"
+            autocomplete="off"
+          />
+          <span class="input-char-count" id="charCount">0/15</span>
+        </div>
+      </div>
+      
+      <div class="button-group">
+        <button id="startBtn" class="action-btn">
+          <i class="fas fa-play-circle"></i> MULAI BERMAIN
+        </button>
+        
+        <button id="leaderboardBtn" class="action-btn">
+          <i class="fas fa-crown"></i> LEADERBOARD
+        </button>
+      </div>
+      
+      <p id="loginError" class="error"></p>
+      
+      
+    </div>
+    
+    <div class="footer">
+      <p>© Kelompok 4 - Fluffy Catcher</p>
+    </div>
+  </div>
+
+  <!-- Buff Selection Modal -->
+  <div id="buffSelectionModal" class="modal">
+    <div class="modal-content buff-content">
+      <div class="buff-header">
+        <h2><i class="fas fa-hand-sparkles"></i> PILIH BUFF AWALAN!</h2>
+        <p class="buff-subtitle">Klik salah satu kartu untuk langsung mendapatkan efeknya!</p>
+      </div>
+      
+      <div class="buff-cards-container" id="buffCardsContainer">
+        <!-- Kartu-kartu akan di-generate via JS -->
+      </div>
+      
+      <div class="buff-info" id="buffInfo">
+        <p>Pilih salah satu kartu dengan mengkliknya. Efek akan langsung aktif!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hold Up Image Popup -->
+  <div id="holdUpPopup" class="modal">
+    <div class="modal-content holdup-content">
+      <img src="assets/holdup.png" alt="Hold Up!" class="hold-up-image">
+      <p class="hold-up-text">Memilih buff untuk meningkatkan peluangmu!</p>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboardModal" class="modal">
+    <div class="modal-content leaderboard-content">
+      <button class="close-btn" id="closeLeaderboardBtnX">
+        <i class="fas fa-times"></i>
+      </button>
+      
+      <div class="leaderboard-header">
+        <h2><i class="fas fa-crown"></i> TOP 10 PEMAIN</h2>
+        <p class="leaderboard-subtitle">Pemain dengan skor tertinggi</p>
+      </div>
+      
+      <div class="leaderboard-list" id="leaderboardList">
+        <!-- Leaderboard akan diisi via JS -->
+        <div class="empty-leaderboard" id="emptyLeaderboard">
+          <i class="fas fa-trophy"></i>
+          <p>Belum ada skor yang tercatat.<br/>Jadilah yang pertama!</p>
+        </div>
+      </div>
+      
+      <div class="leaderboard-actions">
+        <button id="closeLeaderboardBtn" class="action-btn">
+          <i class="fas fa-times"></i> TUTUP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+        // Audio System
+    const backgroundMusic = document.getElementById('backgroundMusic');
+    const musicToggle = document.getElementById('musicToggle');
+    const sfxToggle = document.getElementById('sfxToggle');
+    
+    // Audio preferences
+    let musicMuted = localStorage.getItem('musicMuted') === 'true';
+    let sfxMuted = localStorage.getItem('sfxMuted') === 'true';
+    
+    // SFX sounds (we'll use Web Audio API for simple beeps)
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playSFX(type) {
+      if (sfxMuted) return;
+      
+      try {
+        // Resume audio context jika suspended
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Different frequencies for different rarities
+        let frequency = 440; // Default A4
+        let duration = 0.3;
+        let waveType = 'sine';
+        
+        switch(type) {
+          case 'rare':
+            frequency = 523.25; // C5
+            duration = 0.2;
+            break;
+          case 'epic':
+            frequency = 659.25; // E5
+            duration = 0.4;
+            break;
+          case 'legendary':
+            frequency = 783.99; // G5
+            duration = 0.6;
+            break;
+          case 'mythic':
+            frequency = 1046.50; // C6
+            duration = 0.8;
+            break;
+          case 'click':
+            frequency = 329.63; // E4
+            duration = 0.1;
+            break;
+          case 'success':
+            frequency = 587.33; // D5
+            duration = 0.3;
+            break;
+          case 'error':
+            frequency = 261.63; // C4
+            duration = 0.2;
+            break;
+          case 'reveal':
+            frequency = 698.46; // F5
+            duration = 0.5;
+            break;
+          case 'card-flip':
+            frequency = 523.25; // C5
+            duration = 0.4;
+            break;
+          case 'buff-select':
+            frequency = 659.25; // E5
+            duration = 0.6;
+            break;
+        }
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = waveType;
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + duration);
+        
+      } catch (e) {
+        console.log("SFX error:", e);
+      }
+    }
+    
+    // Initialize audio
+    function initAudio() {
+      console.log("🎵 Initializing audio system...");
+      
+      // Set initial volume
+      backgroundMusic.volume = 0.5;
+      
+      // Apply saved mute states
+      if (musicMuted) {
+        backgroundMusic.pause();
+        musicToggle.classList.add('muted');
+        musicToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        console.log("🎵 Music is muted");
+      } else {
+        // Try to play music with better autoplay handling
+        console.log("🎵 Attempting to play background music...");
+        
+        // Wait a bit then try to play
+        setTimeout(() => {
+          backgroundMusic.play()
+            .then(() => {
+              console.log("🎵 Background music started successfully");
+              musicToggle.classList.remove('muted');
+              musicToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+            })
+            .catch(e => {
+              console.log("🎵 Autoplay prevented, will start on user interaction:", e);
+              // Show visual cue that music is ready
+              musicToggle.innerHTML = '<i class="fas fa-volume-off"></i>';
+              musicToggle.title = "Click to start music";
+            });
+        }, 500);
+      }
+      
+      if (sfxMuted) {
+        sfxToggle.classList.add('muted');
+        sfxToggle.innerHTML = '<i class="fas fa-bell-slash"></i>';
+      }
+      
+      // Play welcome sound
+      setTimeout(() => {
+        playSFX('success');
+      }, 800);
+    }
+    
+    // Toggle music - PERBAIKAN INI
+    musicToggle.addEventListener('click', () => {
+      musicMuted = !musicMuted;
+      
+      if (musicMuted) {
+        backgroundMusic.pause();
+        musicToggle.classList.add('muted');
+        musicToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        console.log("🎵 Music muted");
+      } else {
+        // Resume audio context first
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        // Play music
+        backgroundMusic.play()
+          .then(() => {
+            console.log("🎵 Music resumed");
+            musicToggle.classList.remove('muted');
+            musicToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+          })
+          .catch(e => {
+            console.log("🎵 Failed to play music:", e);
+            // Show error state
+            musicToggle.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+          });
+      }
+      
+      localStorage.setItem('musicMuted', musicMuted);
+      playSFX('click');
+    });
+    
+    // Toggle SFX
+    sfxToggle.addEventListener('click', () => {
+      sfxMuted = !sfxMuted;
+      
+      if (sfxMuted) {
+        sfxToggle.classList.add('muted');
+        sfxToggle.innerHTML = '<i class="fas fa-bell-slash"></i>';
+      } else {
+        // Test SFX
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        sfxToggle.classList.remove('muted');
+        sfxToggle.innerHTML = '<i class="fas fa-bell"></i>';
+        // Play test sound
+        playSFX('click');
+      }
+      
+      localStorage.setItem('sfxMuted', sfxMuted);
+    });
+    
+    // Create animated bubbles
+    const animatedBg = document.getElementById('animatedBg');
+    for (let i = 0; i < 15; i++) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble';
+      const size = Math.random() * 50 + 15;
+      bubble.style.width = `${size}px`;
+      bubble.style.height = `${size}px`;
+      bubble.style.left = `${Math.random() * 100}%`;
+      bubble.style.animationDelay = `${Math.random() * 15}s`;
+      bubble.style.animationDuration = `${15 + Math.random() * 10}s`;
+      animatedBg.appendChild(bubble);
+    }
+    
+    // Char counter
+    const usernameInput = document.getElementById('usernameInput');
+    const charCount = document.getElementById('charCount');
+    
+    usernameInput.addEventListener('input', () => {
+      const count = usernameInput.value.length;
+      charCount.textContent = `${count}/15`;
+      charCount.style.color = count >= 15 ? '#ff6b6b' : 'rgba(255, 255, 255, 0.5)';
+    });
+    
+    // Start button functionality
+    const startBtn = document.getElementById('startBtn');
+    const loginError = document.getElementById('loginError');
+    const leaderboardBtn = document.getElementById('leaderboardBtn');
+    const leaderboardModal = document.getElementById('leaderboardModal');
+    const closeLeaderboardBtn = document.getElementById('closeLeaderboardBtn');
+    const closeLeaderboardBtnX = document.getElementById('closeLeaderboardBtnX');
+    const leaderboardList = document.getElementById('leaderboardList');
+    
+    // Buff Selection System
+    const buffSelectionModal = document.getElementById('buffSelectionModal');
+    const holdUpPopup = document.getElementById('holdUpPopup');
+    const buffCardsContainer = document.getElementById('buffCardsContainer');
+    const buffInfo = document.getElementById('buffInfo');
+    
+    let buffCards = [];
+    
+    // Buff configuration
+    const BUFF_CONFIG = {
+      'bad-luck': {
+        name: 'BAD LUCK',
+        icon: 'assets/unlucky.png',
+        description: 'Tingkat kesulitan meningkat!<br>Rarity: Common 50%, Rare 23%, Epic 17%, Legendary 7%, Mythic 3%',
+        color: '#E74C3C',
+        effect: 'bad-luck',
+        badgeText: 'HARD MODE',
+        rarityProbabilities: {
+          common: 50,
+          rare: 23,
+          epic: 17,
+          legendary: 7,
+          mythic: 3
+        }
+      },
+      'luck-boost': {
+        name: 'LUCK BOOST',
+        icon: 'assets/hoki.png',
+        description: 'Keberuntungan meningkat!<br>Rarity: Common 20%, Rare 30%, Epic 25%, Legendary 15%, Mythic 10%',
+        color: '#3498DB',
+        effect: 'luck-boost',
+        badgeText: 'LUCKY!',
+        rarityProbabilities: {
+          common: 20,
+          rare: 30,
+          epic: 25,
+          legendary: 15,
+          mythic: 10
+        }
+      },
+      'extra-attempts': {
+        name: '+2 KESEMPATAN',
+        icon: 'assets/plus-turn.png',
+        description: 'Mendapatkan 2 kesempatan tambahan<br>untuk mengambil telur!',
+        color: '#F39C12',
+        effect: 'extra-attempts',
+        badgeText: '+2 TURNS',
+        extraAttempts: 2
+      }
+    };
+    
+    // Create buff cards with FIXED positions
+    function createBuffCards() {
+      buffCardsContainer.innerHTML = '';
+      buffCards = [];
+      
+      // POSISI TETAP: Kiri, Tengah, Kanan
+      const positions = [
+        { position: 'kiri', animationDelay: 0 },
+        { position: 'tengah', animationDelay: 0.3 },
+        { position: 'kanan', animationDelay: 0.6 }
+      ];
+      
+      // Create array of buff types
+      const buffTypes = ['bad-luck', 'luck-boost', 'extra-attempts'];
+      
+      // SHUFFLE isi kartu (random mana yang kiri, tengah, kanan)
+      for (let i = buffTypes.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [buffTypes[i], buffTypes[j]] = [buffTypes[j], buffTypes[i]];
+      }
+      
+      // Create cards for each buff type with FIXED positions
+      buffTypes.forEach((buffType, index) => {
+        const pos = positions[index];
+        const card = document.createElement('div');
+        card.className = `buff-card`;
+        card.dataset.buffType = buffType;
+        card.dataset.position = pos.position;
+        
+        // Add RGB animation delay for staggered effect
+        card.style.animationDelay = `${pos.animationDelay}s`;
+        
+        // Card content container
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'buff-card-content';
+        
+        // Question mark (visible when card is face down)
+        const questionMark = document.createElement('div');
+        questionMark.className = 'buff-card-question';
+        questionMark.textContent = '?';
+        
+        // Text under question mark
+        const questionText = document.createElement('div');
+        questionText.className = 'buff-card-text';
+        questionText.textContent = 'KLIK UNTUK MEMILIH';
+        
+        // Icon (hidden when card is face down)
+        const icon = document.createElement('img');
+        icon.className = 'buff-card-icon';
+        icon.src = BUFF_CONFIG[buffType].icon;
+        icon.alt = BUFF_CONFIG[buffType].name;
+        
+        // Title (hidden when card is face down)
+        const title = document.createElement('div');
+        title.className = 'buff-card-title';
+        title.textContent = BUFF_CONFIG[buffType].name;
+        title.style.color = BUFF_CONFIG[buffType].color;
+        
+        // Description (hidden when card is face down)
+        const description = document.createElement('div');
+        description.className = 'buff-card-description';
+        description.innerHTML = BUFF_CONFIG[buffType].description;
+        
+        // Effect badge (hidden when card is face down)
+        const effectBadge = document.createElement('div');
+        effectBadge.className = 'buff-effect-badge';
+        effectBadge.style.background = BUFF_CONFIG[buffType].color;
+        effectBadge.textContent = BUFF_CONFIG[buffType].badgeText;
+        
+        // Assemble card
+        contentDiv.appendChild(questionMark);
+        contentDiv.appendChild(questionText);
+        contentDiv.appendChild(icon);
+        contentDiv.appendChild(title);
+        contentDiv.appendChild(description);
+        
+        card.appendChild(contentDiv);
+        card.appendChild(effectBadge);
+        
+        // Add click event - 1 KLIK LANGSUNG PILIH
+        card.addEventListener('click', () => selectBuffCard(card, buffType));
+        
+        buffCardsContainer.appendChild(card);
+        buffCards.push({
+          element: card,
+          type: buffType,
+          position: pos.position,
+          revealed: false
+        });
+      });
+    }
+    
+    // Select buff card (1 klik langsung pilih dan lanjut)
+    function selectBuffCard(card, buffType) {
+      // Play select sound
+      playSFX('buff-select');
+      
+      // Add revealed class and show card contents
+      card.classList.add('revealed', buffType);
+      
+      // Remove RGB animation
+      card.style.animation = 'selectedPulse 1.5s infinite alternate';
+      
+      // Add flip animation
+      card.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
+      card.style.transform = 'translateY(-15px) scale(1.1)';
+      
+      // Mark as revealed
+      const buffCard = buffCards.find(b => b.element === card);
+      if (buffCard) {
+        buffCard.revealed = true;
+      }
+      
+      // Update buff info
+      const buff = BUFF_CONFIG[buffType];
+      buffInfo.innerHTML = `
+        <p><strong style="color: ${buff.color}">${buff.name}</strong> terpilih!</p>
+        <p>${buff.description}</p>
+        <p style="color: #FFD166; margin-top: 10px; font-weight: bold;">Memulai game...</p>
+      `;
+      
+      // Save buff selection to localStorage
+      localStorage.setItem('selectedBuff', buffType);
+      localStorage.setItem('buffExpires', Date.now() + (60 * 60 * 1000)); // 1 hour expiry
+      
+      // Disable all cards
+      buffCards.forEach(buff => {
+        buff.element.style.pointerEvents = 'none';
+        buff.element.style.opacity = '0.7';
+      });
+      
+      // Enable and highlight selected card
+      card.style.pointerEvents = 'auto';
+      card.style.opacity = '1';
+      
+      // Redirect to game after short delay
+      setTimeout(() => {
+        redirectToGameWithBuff();
+      }, 1500);
+    }
+    
+    // Show buff selection
+    function showBuffSelection() {
+      createBuffCards();
+      buffSelectionModal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+      
+      // Reset info
+      buffInfo.innerHTML = '<p>Pilih salah satu kartu dengan mengkliknya. Efek akan langsung aktif!</p>';
+    }
+    
+    // Show hold up popup
+    function showHoldUpPopup() {
+      holdUpPopup.style.display = 'block';
+      
+      // Hide after 1.5 seconds and show buff selection
+      setTimeout(() => {
+        holdUpPopup.style.display = 'none';
+        showBuffSelection();
+      }, 1500);
+    }
+    
+    // Redirect to game with buff
+    function redirectToGameWithBuff() {
+      // Success effect
+      const successEffect = document.createElement('div');
+      successEffect.style.position = 'fixed';
+      successEffect.style.top = '50%';
+      successEffect.style.left = '50%';
+      successEffect.style.transform = 'translate(-50%, -50%)';
+      successEffect.style.width = '100px';
+      successEffect.style.height = '100px';
+      successEffect.style.background = 'radial-gradient(circle, rgba(46,204,113,0.8) 0%, rgba(46,204,113,0) 70%)';
+      successEffect.style.borderRadius = '50%';
+      successEffect.style.animation = 'expand 0.5s ease-out forwards';
+      successEffect.style.zIndex = '1000';
+      document.body.appendChild(successEffect);
+      
+      // Hide modal
+      buffSelectionModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+      
+      // Redirect to game page
+      setTimeout(() => {
+        window.location.href = 'gacha.html';
+      }, 800);
+    }
+    
+    // Function to load leaderboard data
+    function loadLeaderboard() {
+      console.log('📊 Memuat leaderboard...');
+      
+      // Coba load dari key 'leaderboard' (yang digunakan di script.js)
+      let leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+      
+      // Clear current list
+      leaderboardList.innerHTML = '';
+      
+      if (leaderboard.length === 0) {
+        // Show empty message
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-leaderboard';
+        emptyDiv.innerHTML = `
+          <i class="fas fa-trophy"></i>
+          <p>Belum ada skor yang tercatat.<br/>Jadilah yang pertama!</p>
+        `;
+        leaderboardList.appendChild(emptyDiv);
+      } else {
+        // Sort by score (highest first)
+        leaderboard.sort((a, b) => b.score - a.score);
+        
+        // Show top 10 only
+        const top10 = leaderboard.slice(0, 10);
+        
+        top10.forEach((player, index) => {
+          const leaderboardItem = document.createElement('div');
+          leaderboardItem.className = 'leaderboard-item';
+          
+          // Format date
+          let formattedDate = 'Hari ini';
+          if (player.date) {
+            if (typeof player.date === 'string') {
+              formattedDate = player.date;
+            } else if (player.timestamp) {
+              const date = new Date(player.timestamp);
+              formattedDate = date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+              });
+            }
+          }
+          
+          leaderboardItem.innerHTML = `
+            <div class="rank rank-${index + 1}">#${index + 1}</div>
+            <div class="player-info">
+              <div class="player-name">${player.name || 'Unknown'}</div>
+              <div class="player-stats">
+                <span class="player-score"><i class="fas fa-star"></i> ${player.score || 0} Poin</span>
+                <span class="player-date"><i class="far fa-calendar"></i> ${formattedDate}</span>
+              </div>
+            </div>
+          `;
+          
+          leaderboardList.appendChild(leaderboardItem);
+        });
+      }
+    }
+    
+    // Show leaderboard modal
+    leaderboardBtn.addEventListener('click', () => {
+      console.log('🎯 Tombol leaderboard diklik');
+      playSFX('click');
+      loadLeaderboard();
+      leaderboardModal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    });
+    
+    // Close leaderboard modal
+    closeLeaderboardBtn.addEventListener('click', () => {
+      playSFX('click');
+      leaderboardModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    });
+    
+    closeLeaderboardBtnX.addEventListener('click', () => {
+      playSFX('click');
+      leaderboardModal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+      if (event.target === leaderboardModal) {
+        playSFX('click');
+        leaderboardModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+      
+      if (event.target === buffSelectionModal) {
+        // Don't close buff selection when clicking outside
+        return;
+      }
+    });
+    
+    // Start game button
+    startBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+      
+      // Validation
+      if (!username) {
+        showError('Nama tidak boleh kosong!');
+        shakeInput();
+        playSFX('error');
+        return;
+      }
+      
+      if (username.length < 3) {
+        showError('Nama minimal 3 karakter!');
+        shakeInput();
+        playSFX('error');
+        return;
+      }
+      
+      if (username.length > 15) {
+        showError('Nama maksimal 15 karakter!');
+        shakeInput();
+        playSFX('error');
+        return;
+      }
+      
+      const validRegex = /^[a-zA-Z0-9\s]+$/;
+      if (!validRegex.test(username)) {
+        showError('Nama hanya boleh mengandung huruf, angka, dan spasi!');
+        shakeInput();
+        playSFX('error');
+        return;
+      }
+      
+      // Check if username already used
+      const usedUsernames = JSON.parse(localStorage.getItem('usedUsernames') || '[]');
+      if (usedUsernames.includes(username.toLowerCase())) {
+        showError('Nama ini sudah digunakan! Coba nama lain.');
+        shakeInput();
+        playSFX('error');
+        return;
+      }
+      
+      // Success
+      playSFX('success');
+      localStorage.setItem('currentUsername', username);
+      
+      // Add to used usernames list
+      usedUsernames.push(username.toLowerCase());
+      localStorage.setItem('usedUsernames', JSON.stringify(usedUsernames));
+      
+      // Add visual feedback
+      startBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> MEMUAT...';
+      startBtn.disabled = true;
+      
+      // Show hold up popup first, then buff selection
+      setTimeout(() => {
+        showHoldUpPopup();
+      }, 500);
+    });
+    
+    // Enter key support
+    usernameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        playSFX('click');
+        startBtn.click();
+      }
+    });
+    
+    // Helper functions
+    function showError(message) {
+      loginError.textContent = message;
+      loginError.style.display = 'block';
+      
+      setTimeout(() => {
+        loginError.style.display = 'none';
+      }, 3000);
+    }
+    
+    function shakeInput() {
+      usernameInput.classList.add('shake');
+      setTimeout(() => {
+        usernameInput.classList.remove('shake');
+      }, 500);
+    }
+    
+    // Load leaderboard when page loads
+    window.addEventListener('load', () => {
+      console.log('🔄 Halaman index dimuat');
+      usernameInput.focus();
+      loadLeaderboard();
+      initAudio();
+      
+      // Resume audio context on user interaction
+      document.addEventListener('click', () => {
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+        
+        // Try to play music on first user interaction
+        if (backgroundMusic.paused && !musicMuted) {
+          backgroundMusic.play()
+            .then(() => {
+              console.log("🎵 Music started after user interaction");
+              musicToggle.classList.remove('muted');
+              musicToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+            })
+            .catch(e => {
+              console.log("🎵 Still can't play music:", e);
+            });
+        }
+      }, { once: true });
+      
+      // Check if coming from game over
+      const gameOver = localStorage.getItem('gameOver');
+      if (gameOver) {
+        const finalScore = localStorage.getItem('finalScore');
+        if (finalScore) {
+          const congrats = document.createElement('div');
+          congrats.style.position = 'fixed';
+          congrats.style.top = '20px';
+          congrats.style.left = '50%';
+          congrats.style.transform = 'translateX(-50%)';
+          congrats.style.background = 'linear-gradient(45deg, #FF6B8B, #4ECDC4)';
+          congrats.style.color = 'white';
+          congrats.style.padding = '12px 25px';
+          congrats.style.borderRadius = '10px';
+          congrats.style.zIndex = '1000';
+          congrats.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
+          congrats.textContent = `🎉 Skor Terakhir: ${finalScore}! Main lagi? 🎉`;
+          document.body.appendChild(congrats);
+          
+          setTimeout(() => {
+            congrats.remove();
+          }, 4000);
+          
+          localStorage.removeItem('gameOver');
+          localStorage.removeItem('finalScore');
+        }
+      }
+    });
+    
+    // Add this for better audio handling
+    document.addEventListener('keydown', () => {
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    });
+    
+    // Auto-resume audio context on any user interaction
+    ['click', 'touchstart', 'keydown', 'mousedown'].forEach(event => {
+      document.addEventListener(event, () => {
+        if (audioContext.state === 'suspended') {
+          audioContext.resume().then(() => {
+            console.log('🎵 Audio context resumed');
+          });
+        }
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>

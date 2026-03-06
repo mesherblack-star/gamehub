@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fluffy Claw Gacha - Game</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css"/>
+  <audio id="backgroundMusic" loop preload="auto">
+    <source src="assets/bekson.mp3" type="audio/mpeg">
+    Browser Anda tidak mendukung audio.
+  </audio>
+</head>
+<body>
+  <!-- Game Screen -->
+  <div id="gameScreen" class="screen">
+    <!-- Header Info -->
+    <div class="header-bar">
+      <button id="backToMenuBtn" class="icon-btn" title="Kembali ke Menu">
+        <i class="fas fa-home"></i>
+      </button>
+      <div class="player-info">
+        <i class="fas fa-user"></i>
+        <span id="currentPlayer">Pemain</span>
+      </div>
+      <div class="currency-box">
+        <div><i class="fas fa-smile"></i> <span id="coins">0</span></div>
+        <div><i class="fas fa-gem"></i> <span id="diamonds">0</span></div>
+        <div><i class="fas fa-star"></i> <span id="attempts">3</span>/3</div>
+      </div>
+    </div>
+
+    <!-- Selamat Datang Box -->
+    <div class="welcome-box" id="welcomeBox">
+      <div class="welcome-content">
+        <h2><i class="fas fa-paw"></i> SELAMAT DATANG <span id="welcomePlayer">PEMAIN</span></h2>
+        <p>Gunakan <kbd>A</kbd> <kbd>D</kbd> untuk bergerak, <kbd>SPACE</kbd> untuk menjangkau telur!</p>
+        <button id="closeWelcomeBtn" class="icon-btn-small">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Score Display Box -->
+    <div class="score-display-box" id="scoreDisplayBox">
+      <div class="score-display-content">
+        <div class="score-header">
+          <i class="fas fa-star"></i> SCORE
+        </div>
+        <div class="score-value" id="displayScore">0</div>
+        <div class="score-controls">
+          <span id="displayMessage">READY TO PLAY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claw Machine Area -->
+    <div class="machine-area">
+      <div class="machine-container">
+        <!-- Frame mesin claw -->
+        <div class="machine-frame">
+          <!-- Rope/Line for claw -->
+          <div class="claw-rope-container" id="clawRopeContainer">
+            <div class="claw-rope" id="clawRope"></div>
+          </div>
+          
+          <div class="claw-arm" id="clawArm">
+            <div class="claw-head" id="clawHead">
+              <img src="assets/capit.png" alt="Claw" class="claw-image" id="clawImage">
+              <div class="claw-light"></div>
+            </div>
+          </div>
+          
+          <!-- Glass front -->
+          <div class="machine-glass">
+            <div class="glass-reflection"></div>
+          </div>
+          
+          <!-- Basket area -->
+          <div class="basket-container">
+            <div class="basket" id="basket">
+              <!-- Telur akan di-generate via JS -->
+            </div>
+          </div>
+          
+          <!-- Machine base -->
+          <div class="machine-base">
+            <div class="base-lights">
+              <div class="light red"></div>
+              <div class="light blue"></div>
+              <div class="light green"></div>
+              <div class="light yellow"></div>
+            </div>
+          </div>
+          
+          
+          
+        </div>
+      </div>
+    </div>
+
+    <!-- TOGGLE BUTTON FOR SIDEBAR -->
+    <button id="toggleSidebarBtn" class="toggle-sidebar-btn" title="Toggle Instructions">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- INSTRUCTIONS SIDEBAR -->
+    <div class="instructions-sidebar" id="instructionsSidebar">
+      <div class="sidebar-header">
+        <h3><i class="fas fa-gamepad"></i> CARA BERMAIN</h3>
+        <button id="closeSidebarBtn" class="icon-btn-small">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="sidebar-content">
+        <div class="attempts-info">
+          <span class="attempts-counter">Percobaan: <span id="attemptsLeft">3</span>/3</span>
+          <span class="score-info">Skor: <strong id="collectionScore">0</strong></span>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-icon move">
+            <i class="fas fa-arrows-alt-h"></i>
+          </div>
+          <div class="instruction-text">
+            <span class="instruction-title">GERAKKAN CLAW</span>
+            <span class="instruction-desc">Gunakan <kbd>Joystick</kbd> atau panah kiri/kanan</span>
+          </div>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-icon grab">
+            <i class="fas fa-hand-paper"></i>
+          </div>
+          <div class="instruction-text">
+            <span class="instruction-title">JANGKAU TELUR</span>
+            <span class="instruction-desc">Tekan <kbd>X</kbd> untuk mengambil</span>
+          </div>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-icon open">
+            <i class="fas fa-egg"></i>
+          </div>
+          <div class="instruction-text">
+            <span class="instruction-title">BUKA TELUR</span>
+            <span class="instruction-desc">Klik tombol atau tekan <kbd>O</kbd>/<kbd>B</kbd></span>
+          </div>
+        </div>
+        
+        <div class="instruction-item">
+          <div class="instruction-icon collect">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="instruction-text">
+            <span class="instruction-title">KUMPULKAN POIN</span>
+            <span class="instruction-desc">Dapatkan skor setinggi mungkin!</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-footer">
+        <button id="viewLeaderboardBtnMini" class="sidebar-btn" title="Leaderboard">
+          <i class="fas fa-crown"></i> LEADERBOARD
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Modal -->
+  <div id="resultModal" class="modal hidden">
+    <div class="modal-content result-content">
+      <div class="result-header">
+        <h2><i class="fas fa-trophy"></i> GAME OVER!</h2>
+        <p class="player-greet" id="finalMessage">Pemain, skor akhir Anda: 0</p>
+      </div>
+      
+      <div class="result-stats">
+        <div class="stat-box">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div class="stat-value" id="totalScore">0</div>
+          <div class="stat-label">TOTAL SCORE</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-icon"><i class="fas fa-egg"></i></div>
+          <div class="stat-value" id="eggsCollected">0</div>
+          <div class="stat-label">TELUR DIDAPAT</div>
+        </div>
+      </div>
+      
+      <div class="result-details">
+        <h3><i class="fas fa-list"></i> DETAIL HASIL</h3>
+        <div id="resultDetails" class="details-list">
+          <!-- Hasil akan diisi via JS -->
+        </div>
+      </div>
+      
+      <div class="result-actions">
+        <button id="viewLeaderboardBtn" class="action-btn leaderboard">
+          <i class="fas fa-crown"></i> LEADERBOARD
+        </button>
+        <button id="backToMenuBtn2" class="action-btn menu">
+          <i class="fas fa-home"></i> MENU UTAMA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboardModal" class="modal hidden">
+    <div class="modal-content leaderboard-content">
+      <div class="leaderboard-header">
+        <h2><i class="fas fa-crown"></i> TOP 10 PEMAIN</h2>
+        <p class="leaderboard-subtitle">Pemain dengan skor tertinggi</p>
+      </div>
+      
+      <div class="leaderboard-list" id="leaderboardList">
+        <!-- Leaderboard akan diisi via JS -->
+      </div>
+      
+      <div class="leaderboard-actions">
+        <button id="backToResultBtn" class="action-btn">
+          <i class="fas fa-arrow-left"></i> KEMBALI
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Egg Result Popup -->
+  <div id="eggResultPopup" class="modal hidden">
+    <div class="modal-content egg-content">
+      <div class="egg-header">
+        <h2 id="eggResultTitle"><i class="fas fa-egg"></i> TELUR DIDAPAT!</h2>
+      </div>
+      
+      <div class="egg-reveal-area">
+        <div class="egg-spin-container">
+          <div id="eggResultImage" class="egg-spin"></div>
+        </div>
+        <div class="egg-shine"></div>
+      </div>
+      
+      <div class="egg-info">
+        <div class="egg-rarity" id="eggRarityBadge">
+          <span class="rarity-text">RARE</span>
+        </div>
+        <p id="eggResultText" class="egg-description">
+          Kamu mendapatkan telur rare! Buka untuk melihat isinya.
+        </p>
+      </div>
+      
+      <div class="egg-actions">
+        <button id="hatchEggBtn" class="action-btn hatch">
+          <i class="fas fa-magic"></i> BUKA TELUR
+        </button>
+        <button id="closeEggBtn" class="action-btn close">
+          <i class="fas fa-times"></i> TUTUP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animal Reveal Popup -->
+  <div id="animalRevealPopup" class="modal hidden">
+    <div class="modal-content animal-content">
+      <div class="animal-header">
+        <h2 id="animalRevealTitle"><i class="fas fa-paw"></i> HEWAN DITEMUKAN!</h2>
+      </div>
+      
+      <div class="animal-reveal-area">
+        <div class="animal-glow"></div>
+        <div id="animalRevealImage" class="animal-image"></div>
+        <div class="sparkles"></div>
+      </div>
+      
+      <div class="animal-info">
+        <h3 id="animalName" class="animal-name">Nama Hewan</h3>
+        <div class="animal-stats">
+          <div class="stat">
+            <span class="stat-label">Rarity:</span>
+            <span id="animalRarity" class="rarity-badge">RARE</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Points:</span>
+            <span id="animalPoints" class="points">+10</span>
+          </div>
+        </div>
+        <p id="animalRevealText" class="animal-description">
+          Hewan ini telah ditambahkan ke koleksi Anda!
+        </p>
+      </div>
+      
+      <div class="animal-actions">
+        <button id="closeAnimalBtn" class="action-btn">
+          <i class="fas fa-check"></i> LANJUTKAN
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

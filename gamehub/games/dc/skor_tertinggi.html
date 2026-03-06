@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doodle Critters - Skor Tertinggi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffe6ee 0%, #e6f2ff 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* GAMEPAD INDICATOR SEDERHANA */
+        #gamepadIndicator {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #4dff88 0%, #00cc44 100%);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: none;
+            z-index: 1000;
+            border: 2px solid white;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: linear-gradient(135deg, #5cc5ff 0%, #0099ff 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 0 #0077cc;
+            transition: all 0.2s;
+            z-index: 100;
+            font-size: 0.9rem;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #0077cc;
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 0 #0077cc;
+        }
+
+        .leaderboard-container {
+            width: 100%;
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.15);
+            border: 3px solid #ff9ebb;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            color: #ff6b9d;
+            text-shadow: 1px 1px 0 #ffd1dc;
+            margin-bottom: 5px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            color: #5cc5ff;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-title {
+            font-size: 1.2rem;
+            color: #ff6b9d;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-header {
+            background: linear-gradient(135deg, #ffd166 0%, #ffb900 100%);
+            color: #664400;
+            border-radius: 8px;
+        }
+
+        .leaderboard-header th {
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .leaderboard-header th:first-child {
+            border-radius: 8px 0 0 8px;
+            width: 50px;
+        }
+
+        .leaderboard-header th:nth-child(2) {
+            text-align: left;
+        }
+
+        .leaderboard-header th:last-child {
+            border-radius: 0 8px 8px 0;
+            width: 80px;
+        }
+
+        .leaderboard-row {
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .leaderboard-row:hover {
+            background-color: #f8f9ff;
+        }
+
+        .leaderboard-row td {
+            padding: 12px 10px;
+            vertical-align: middle;
+        }
+
+        .rank-cell {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .rank-1 .rank-cell {
+            color: #FFD700;
+        }
+
+        .rank-2 .rank-cell {
+            color: #C0C0C0;
+        }
+
+        .rank-3 .rank-cell {
+            color: #CD7F32;
+        }
+
+        .player-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff9ebb 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .player-details {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .player-name {
+            font-weight: 700;
+            color: #333;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .player-character {
+            font-size: 0.75rem;
+            color: #5cc5ff;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .score-cell {
+            text-align: center;
+            font-weight: 800;
+            font-size: 1rem;
+            color: #ff6b9d;
+        }
+
+        .current-player {
+            background: rgba(92, 197, 255, 0.1);
+            border-left: 3px solid #5cc5ff;
+        }
+
+        .current-player .player-name {
+            color: #0099ff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 15px;
+        }
+
+        .empty-icon {
+            font-size: 2.5rem;
+            color: #ffd1dc;
+            margin-bottom: 15px;
+        }
+
+        .empty-title {
+            font-size: 1.2rem;
+            color: #ff6b9d;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .empty-description {
+            color: #666;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .game-footer {
+            text-align: center;
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.7rem;
+            padding-top: 10px;
+            border-top: 1px dashed #ffb6c1;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 400px;
+            }
+            
+            .leaderboard-container {
+                padding: 15px;
+            }
+            
+            .back-button {
+                position: relative;
+                left: 0;
+                top: 0;
+                margin-bottom: 15px;
+            }
+            
+            #gamepadIndicator {
+                top: 10px;
+                right: 10px;
+                font-size: 0.7rem;
+                padding: 6px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                max-width: 320px;
+            }
+            
+            .page-title {
+                font-size: 1.5rem;
+            }
+            
+            .leaderboard-header th {
+                padding: 8px 5px;
+                font-size: 0.8rem;
+            }
+            
+            .leaderboard-row td {
+                padding: 10px 5px;
+            }
+            
+            .player-avatar {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+            
+            .player-name {
+                font-size: 0.85rem;
+            }
+            
+            .player-character {
+                font-size: 0.7rem;
+            }
+            
+            .score-cell {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Audio untuk background music -->
+    <audio id="backgroundMusic" loop>
+        <source src="assets/backsound/homepage.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung pemutaran audio.
+    </audio>
+
+    <!-- GAMEPAD INDICATOR -->
+    <div id="gamepadIndicator">🎮 GAMEPAD TERHUBUNG</div>
+
+    <div class="container">
+        <!-- Back Button -->
+        <button class="back-button" id="backBtn">
+            <i class="fas fa-arrow-left"></i> KEMBALI
+        </button>
+
+        <!-- Header -->
+        <div class="header">
+            <h1 class="page-title">5 BESAR</h1>
+            <div class="page-subtitle">Papan peringkat pemain terbaik</div>
+        </div>
+
+        <!-- Leaderboard Container -->
+        <div class="leaderboard-container">
+            <div class="leaderboard-title">
+                <i class="fas fa-trophy"></i> LEADERBOARD
+            </div>
+
+            <!-- Leaderboard Table -->
+            <div class="leaderboard-content">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr class="leaderboard-header">
+                            <th>#</th>
+                            <th>PEMAIN</th>
+                            <th>SKOR</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardBody">
+                        <!-- Data akan diisi oleh JavaScript -->
+                    </tbody>
+                </table>
+                
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="empty-title">Belum Ada Skor</div>
+                    <div class="empty-description">
+                        Mainkan game untuk mendapatkan skor dan muncul di leaderboard!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="game-footer">
+            <p>© 2026 Doodle Critters | Game Kelompok 4</p>
+        </div>
+    </div>
+
+    <script>
+        // ============= SISTEM GAMEPAD SEDERHANA =============
+        let gamepadConnected = false;
+        let gamepadIndex = null;
+        let currentGamepadType = 'standard';
+        let gamepadPollingInterval = null;
+        
+        // GAMEPAD INDICATOR
+        const gamepadIndicator = document.getElementById('gamepadIndicator');
+        
+        // MAPPING untuk Xbox dan PlayStation (hanya tombol B/O yang diperlukan)
+        const gamepadMappings = {
+            'xbox': {
+                B: 1,      // Tombol B di Xbox
+                CIRCLE: 1  // Sama dengan B di Xbox
+            },
+            'playstation': {
+                B: 1,      // Tombol CIRCLE di PlayStation
+                CIRCLE: 1  // Tombol CIRCLE di PlayStation
+            },
+            'standard': {
+                B: 1,
+                CIRCLE: 1
+            }
+        };
+        
+        // ========== SISTEM AUDIO TERPUSAT ==========
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        
+        function updateAudioVolume() {
+            const masterVolume = parseFloat(localStorage.getItem('masterVolume')) || 0.7;
+            const isMuted = localStorage.getItem('isMuted') === 'true';
+            
+            if (isMuted) {
+                backgroundMusic.volume = 0;
+            } else {
+                backgroundMusic.volume = masterVolume;
+            }
+            
+            window.currentVolume = isMuted ? 0 : masterVolume;
+        }
+        
+        function playBackgroundMusic() {
+            updateAudioVolume();
+            backgroundMusic.play().catch(e => {
+                console.log("Autoplay prevented:", e);
+                document.addEventListener('click', function initAudio() {
+                    backgroundMusic.play();
+                    document.removeEventListener('click', initAudio);
+                }, { once: true });
+            });
+        }
+        
+        // ========== FUNGSI GAMEPAD SEDERHANA ==========
+        function detectGamepadType(id) {
+            const idLower = id.toLowerCase();
+            
+            if (idLower.includes('xbox') || idLower.includes('microsoft')) {
+                return 'xbox';
+            } else if (idLower.includes('playstation') || idLower.includes('ps3') || idLower.includes('ps4') || idLower.includes('ps5') || idLower.includes('dualshock') || idLower.includes('dualsense')) {
+                return 'playstation';
+            } else {
+                return 'standard';
+            }
+        }
+
+        function showGamepadConnected(name) {
+            gamepadIndicator.textContent = '🎮 GAMEPAD TERHUBUNG';
+            gamepadIndicator.style.display = 'block';
+            console.log(`🎮 Gamepad terhubung: ${name} (${currentGamepadType})`);
+        }
+
+        function showGamepadDisconnected() {
+            gamepadIndicator.style.display = 'none';
+            console.log('🎮 Gamepad terputus');
+        }
+
+        // FUNGSI: Tombol B/CIRCLE untuk kembali
+        function handleGamepadButtonB() {
+            console.log(`🎮 Tombol ${currentGamepadType === 'playstation' ? 'CIRCLE' : 'B'} ditekan - Kembali`);
+            goBack();
+            return true;
+        }
+
+        // FUNGSI: Polling gamepad sederhana
+        function pollGamepad() {
+            if (!gamepadConnected || gamepadIndex === null) return;
+            
+            try {
+                const gamepads = navigator.getGamepads();
+                if (!gamepads || !gamepads[gamepadIndex]) {
+                    gamepadConnected = false;
+                    gamepadIndex = null;
+                    showGamepadDisconnected();
+                    if (gamepadPollingInterval) {
+                        clearInterval(gamepadPollingInterval);
+                        gamepadPollingInterval = null;
+                    }
+                    return;
+                }
+                
+                const gamepad = gamepads[gamepadIndex];
+                const mapping = gamepadMappings[currentGamepadType] || gamepadMappings.standard;
+                
+                // Cek tombol B/CIRCLE (index 1)
+                if (gamepad.buttons[1]?.pressed) {
+                    handleGamepadButtonB();
+                }
+                
+            } catch (error) {
+                console.error('Error polling gamepad:', error);
+            }
+        }
+
+        // FUNGSI: Cek dukungan gamepad
+        function checkGamepadSupport() {
+            if ('getGamepads' in navigator) {
+                console.log('🎮 Gamepad API didukung');
+                
+                const gamepads = navigator.getGamepads();
+                for (let i = 0; i < gamepads.length; i++) {
+                    if (gamepads[i]) {
+                        console.log(`🎮 Gamepad sudah terhubung: ${gamepads[i].id}`);
+                        gamepadConnected = true;
+                        gamepadIndex = i;
+                        currentGamepadType = detectGamepadType(gamepads[i].id);
+                        showGamepadConnected(gamepads[i].id);
+                        
+                        if (!gamepadPollingInterval) {
+                            gamepadPollingInterval = setInterval(pollGamepad, 100);
+                        }
+                        break;
+                    }
+                }
+                
+                return true;
+            } else {
+                console.log('⚠️ Gamepad API tidak didukung');
+                return false;
+            }
+        }
+
+        // ========== FUNGSI UTAMA ==========
+        function goBack() {
+            console.log('🔙 Kembali ke halaman utama');
+            
+            // Mainkan suara
+            playSelectionSound();
+            
+            // Delay sebelum navigasi
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 200);
+        }
+        
+        // Fungsi: Mainkan suara klik
+        function playSelectionSound() {
+            if (window.currentVolume > 0) {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 659.25; // E5
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.15 * window.currentVolume, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.05);
+                } catch (error) {
+                    console.log('Audio context tidak didukung:', error);
+                }
+            }
+        }
+        
+        // ========== SISTEM SKOR ==========
+        let allScores = [];
+        let currentPlayerName = "Pemain";
+        
+        // Load skor dari localStorage
+        function loadScores() {
+            const savedScores = localStorage.getItem('highScores');
+            allScores = savedScores ? JSON.parse(savedScores) : [];
+            
+            // Sort by score (descending)
+            allScores.sort((a, b) => b.score - a.score);
+            
+            // Load player name
+            currentPlayerName = localStorage.getItem('playerName') || "Pemain";
+            
+            renderLeaderboard();
+        }
+        
+        // Render leaderboard (hanya 5 besar)
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (allScores.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            
+            let html = '';
+            const top5Scores = allScores.slice(0, 5);
+            
+            top5Scores.forEach((score, index) => {
+                const rank = index + 1;
+                const isCurrentPlayer = score.name === currentPlayerName;
+                const rowClass = `leaderboard-row ${isCurrentPlayer ? 'current-player' : ''} rank-${rank <= 3 ? rank : 'other'}`;
+                
+                // Get character icon
+                const characterIcons = {
+                    'Kucing': '🐱',
+                    'Ayam': '🐔',
+                    'Bebek': '🦆',
+                    'Domba': '🐑',
+                    'Kelinci': '🐰'
+                };
+                
+                const charIcon = characterIcons[score.character] || '🐾';
+                
+                html += `
+                    <tr class="${rowClass}" data-index="${index}">
+                        <td class="rank-cell">${rank}</td>
+                        <td>
+                            <div class="player-info-cell">
+                                <div class="player-avatar">
+                                    ${score.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name">
+                                        ${score.name}
+                                    </div>
+                                    <div class="player-character">
+                                        ${charIcon} ${score.character}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="score-cell">${score.score}</td>
+                    </tr>
+                `;
+            });
+            
+            // Jika kurang dari 5, tambahkan baris kosong
+            for (let i = top5Scores.length; i < 5; i++) {
+                html += `
+                    <tr class="leaderboard-row" data-index="${i}">
+                        <td class="rank-cell">${i + 1}</td>
+                        <td>
+                            <div class="player-info-cell">
+                                <div class="player-avatar" style="background:#ddd;color:#999;">
+                                    -
+                                </div>
+                                <div class="player-details">
+                                    <div class="player-name" style="color:#999;">
+                                        -
+                                    </div>
+                                    <div class="player-character" style="color:#ccc;">
+                                        🐾 -
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="score-cell" style="color:#ccc;">0</td>
+                    </tr>
+                `;
+            }
+            
+            tbody.innerHTML = html;
+        }
+        
+        // ========== EVENT LISTENERS ==========
+        document.getElementById('backBtn').addEventListener('click', goBack);
+        
+        // Keyboard shortcuts - HANYA B dan O untuk kembali
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'b' || key === 'o' || key === 'escape' || key === 'backspace') {
+                e.preventDefault();
+                goBack();
+            }
+        });
+        
+        // ========== GAMEPAD EVENT LISTENERS ==========
+        window.addEventListener("gamepadconnected", function(e) {
+            console.log(`🎮 Gamepad terhubung: ${e.gamepad.id} (Index: ${e.gamepad.index})`);
+            
+            gamepadConnected = true;
+            gamepadIndex = e.gamepad.index;
+            currentGamepadType = detectGamepadType(e.gamepad.id);
+            showGamepadConnected(e.gamepad.id);
+            
+            if (!gamepadPollingInterval) {
+                gamepadPollingInterval = setInterval(pollGamepad, 100);
+            }
+        });
+
+        window.addEventListener("gamepaddisconnected", function(e) {
+            console.log(`🎮 Gamepad terputus: ${e.gamepad.id}`);
+            gamepadConnected = false;
+            gamepadIndex = null;
+            showGamepadDisconnected();
+            
+            if (gamepadPollingInterval) {
+                clearInterval(gamepadPollingInterval);
+                gamepadPollingInterval = null;
+            }
+        });
+        
+        // ========== INISIALISASI ==========
+        window.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi audio
+            if (!localStorage.getItem('masterVolume')) {
+                localStorage.setItem('masterVolume', '0.7');
+                localStorage.setItem('isMuted', 'false');
+            }
+            
+            playBackgroundMusic();
+            setInterval(updateAudioVolume, 1000);
+            
+            // Inisialisasi gamepad
+            checkGamepadSupport();
+            
+            // Load scores
+            loadScores();
+            
+            // Auto-refresh setiap 5 detik
+            setInterval(loadScores, 5000);
+            
+            console.log('🏆 Halaman 5 Besar - Leaderboard Active');
+            console.log('🎮 Kontrol Gamepad:');
+            console.log('  • Xbox: Tekan B untuk kembali');
+            console.log('  • PlayStation: Tekan CIRCLE untuk kembali');
+            console.log('⌨️ Kontrol Keyboard:');
+            console.log('  • Tekan B atau O untuk kembali');
+            console.log('  • Tekan ESC atau Backspace untuk kembali');
+        });
+    </script>
+</body>
+</html>
