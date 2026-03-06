@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bookmarks — GameHub</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="icon" href="assets/placeholder.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -69,14 +69,14 @@
       const grid = document.getElementById('bookmarks-grid');
 
       if (!user) {
-        grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('🔖', 'Sign in to view bookmarks', '<a href="login.html" class="btn btn-primary" style="margin-top:12px">Login</a>')}</div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('<img src="assets/placeholder.svg" alt="Bookmarks Icon" style="width: 50px; height: 50px;">', 'Sign in to view bookmarks', '<a href="login.html" class="btn btn-primary" style="margin-top:12px">Login</a>')}</div>`;
         return;
       }
 
       try {
         const games = await Games.fetchUserBookmarks(user.id);
         if (!games.length) {
-          grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('🔖', 'No bookmarks yet', 'Browse games and click the bookmark icon to save them here')}</div>`;
+          grid.innerHTML = `<div style="grid-column:1/-1">${UI.emptyStateHTML('<img src="assets/placeholder.svg" alt="Bookmarks Icon" style="width: 50px; height: 50px;">', 'No bookmarks yet', 'Browse games and click the bookmark icon to save them here')}</div>`;
         } else {
           grid.innerHTML = games.map(g => UI.gameCardHTML(g, { bookmarked: true })).join('');
           UI.observeLazyImages();

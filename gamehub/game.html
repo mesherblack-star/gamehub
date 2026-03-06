@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title id="page-title">Game — GameHub</title>
   <meta name="description" id="page-desc" content="Game details, ratings, and reviews on GameHub.">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+  <link rel="icon" href="assets/placeholder.svg">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -106,7 +106,7 @@
       const gameId = params.get('id');
 
       if (!gameId) {
-        document.getElementById('game-detail-container').innerHTML = UI.emptyStateHTML('🎮', 'Game not found', 'Invalid game ID');
+        document.getElementById('game-detail-container').innerHTML = UI.emptyStateHTML('<img src="assets/placeholder.svg" alt="Game Icon" style="width: 50px; height: 50px;">', 'Game not found', 'Invalid game ID');
         return;
       }
 
@@ -151,7 +151,7 @@
                 <div class="hero-grid-overlay"></div>
               </div>
               <div class="hero-content">
-                <div class="hero-badge">🎮 ${game.genre || 'Game'}</div>
+                <div class="hero-badge"><img src="assets/placeholder.svg" alt="Game Icon" style="width: 16px; height: 16px; margin-right: 4px; display: inline;"> ${game.genre || 'Game'}</div>
                 <h1 style="font-family:'Orbitron',monospace;font-size:clamp(1.5rem,4vw,3rem);font-weight:900;margin-bottom:8px">${game.title}</h1>
                 <div style="color:var(--text-muted);font-size:0.9rem">${game.developer || ''} · ${game.release_date ? new Date(game.release_date).getFullYear() : ''}</div>
               </div>
@@ -354,7 +354,7 @@
           const { data, count, totalPages } = await Comments.fetchComments(gameId, { page, pageSize: 10 });
           if (countEl) countEl.textContent = count || 0;
           if (!data.length && page === 1) {
-            listEl.innerHTML = UI.emptyStateHTML('💬', 'No comments yet', 'Be the first to comment!');
+            listEl.innerHTML = UI.emptyStateHTML('<img src="assets/placeholder.svg" alt="Comments Icon" style="width: 50px; height: 50px;">', 'No comments yet', 'Be the first to comment!');
           } else {
             const uid = user?.id || null;
             listEl.innerHTML = data.map(c => Comments.renderComment(c, uid)).join('');
